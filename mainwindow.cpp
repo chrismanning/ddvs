@@ -15,8 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new QGraphicsScene(0, 0, 600, 600);
     ui->graphicsView->setScene(scene);
     #ifndef QT_NO_OPENGL
-    ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+    //ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     #endif
+
+    types << "int" << "int*";
 }
 
 MainWindow::~MainWindow()
@@ -29,7 +31,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionAdd_Item_triggered()
 {
     qDebug("Adding item...");
-    AddItemDialog *dialog = new AddItemDialog(scene, &items);
+    AddItemDialog *dialog = new AddItemDialog(scene, &items, &types);
+    dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
     dialog->show();
 }
 

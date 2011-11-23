@@ -26,11 +26,11 @@ public:
 
 private slots:
     void on_actionAdd_Item_triggered();
-
     void on_actionRemove_Item_triggered();
 
 private:
     QList<DataType*> items;
+    QStringList types;
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
     ZoomWidget *zoomer;

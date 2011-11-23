@@ -15,7 +15,7 @@ class AddItemDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddItemDialog(QGraphicsScene *scene, QList<DataType*> *items, QWidget *parent = 0);
+    explicit AddItemDialog(QGraphicsScene *scene, QList<DataType*> *items, QStringList *types, QWidget *parent = 0);
     ~AddItemDialog();
 
 private slots:

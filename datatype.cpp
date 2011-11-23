@@ -1,33 +1,44 @@
 #include "datatype.h"
 
-DataType::DataType(const QString &type, int x, int y)
+DataType::DataType(const QString &type, const QString &name, const QString &value)
 {
     setFlags(ItemIsMovable | ItemIsSelectable);
-
     this->type = type;
-
-    qDebug("Inside Datatype constructor");
+    members << new Member(name,value);
+//    this->name = name;
+//    this->value = value;
 }
 
 void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     QPen pen(QColor(0,0,0));
-    //QPen pen(myOutlineColor);
     if (option->state & QStyle::State_Selected) {
         pen.setStyle(Qt::DotLine);
-        pen.setWidth(2);
+        //pen.setWidth(2);
     }
     painter->setPen(pen);
-    painter->setBrush(QColor(100,100,100));
-    //QRectF rect = outlineRect();
-    painter->drawRoundedRect(QRectF(0,0,100,200),20,20);
-    //painter->setPen(myTextColor);
-    //painter->drawText(rect, Qt::AlignCenter, myText);
+    painter->setBrush(QColor(200,200,200));
+    painter->drawRoundedRect(createRect(),5,5);
+    //painter->setPen(textColor);
+    foreach(Member *member, members) {
+        painter->drawText(createRect(5), Qt::AlignHCenter, member->name + " : " + member->value);
+    }
+    //painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignBottom, members[0]->value);
+    painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignBottom, type);
 }
 
 QRectF DataType::boundingRect() const
 {
-    return QRectF(0,0,100,200);
+    return createRect();
+}
+
+QRectF DataType::createRect(qreal padding) const
+{
+    qreal textHeight = 24;
+    qreal width = 100;
+    qreal height = textHeight + textHeight * members.size();
+    QRectF rect(0+padding,0+padding,width-(2*padding),height-(2*padding));
+    return rect;
 }
 
 //QPainterPath DataType::shape() const

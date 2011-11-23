@@ -6,6 +6,16 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
+struct Member {
+    Member(const QString &name, const QString &value) {
+        this->name = name;
+        this->value = value;
+    }
+
+    QString name;
+    QString value;
+};
+
 class DataType : public QGraphicsItem
 {
 public:
@@ -17,14 +27,14 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
 
 protected:
+    QRectF createRect(qreal padding = 0) const;
 //    void mousePressEvent(QGraphicsSceneMouseEvent *event);
 //    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 //    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-    QString name;
-    QString value;
     QString type;
+    QList<Member*> members;
     int x, y;
 };
 
