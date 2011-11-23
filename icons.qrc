@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/16x16">
+        <file>icons/16x16/application-exit.png</file>
+        <file>icons/16x16/document-save-all.png</file>
+        <file>icons/16x16/document-save-as.png</file>
+        <file>icons/16x16/edit-clear.png</file>
+        <file>icons/16x16/edit-clear-list.png</file>
+        <file>icons/16x16/edit-copy.png</file>
+        <file>icons/16x16/edit-delete.png</file>
+        <file>icons/16x16/edit-paste.png</file>
+        <file>icons/16x16/edit-redo.png</file>
+        <file>icons/16x16/edit-undo.png</file>
+        <file>icons/16x16/go-bottom.png</file>
+        <file>icons/16x16/go-down.png</file>
+        <file>icons/16x16/go-next.png</file>
+        <file>icons/16x16/go-previous.png</file>
+        <file>icons/16x16/go-top.png</file>
+        <file>icons/16x16/go-up.png</file>
+        <file>icons/16x16/help-about.png</file>
+        <file>icons/16x16/list-add.png</file>
+        <file>icons/16x16/list-remove.png</file>
+        <file>icons/16x16/zoom-in.png</file>
+        <file>icons/16x16/zoom-out.png</file>
+        <file>icons/16x16/help-contents.png</file>
+        <file>icons/16x16/document-open.png</file>
+    </qresource>
+</RCC>
