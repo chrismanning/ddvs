@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     #endif
 
-    types << "int" << "int*";
+    types << "new type" << "int" << "int*";
 }
 
 MainWindow::~MainWindow()

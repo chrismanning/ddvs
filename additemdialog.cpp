@@ -10,8 +10,11 @@ AddItemDialog::AddItemDialog(QGraphicsScene *scene, QList<DataType*> *items, QSt
     this->scene = scene;
     this->items = items;
 
-    //layout()->setSizeConstraint(QLayout::SetFixedSize);
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
 
+    ui->userTypeGroupBox->hide();
+    ui->simpleTypeGroupBox->hide();
+    ui->newTypeGroupBox->hide();
     ui->typeComboBox->addItems(*types);
     //ui->buttonBox->setEnabled(false);
 }
@@ -24,8 +27,34 @@ AddItemDialog::~AddItemDialog()
 
 void AddItemDialog::on_buttonBox_accepted()
 {
-    DataType *item = new DataType(ui->typeComboBox->currentText(), ui->nameText->displayText(), ui->valueText->displayText());
+    QString typeName = ui->typeComboBox->currentText();
+    if(ui->newTypeNameText->displayText().size() > 0) {
+        typeName = ui->newTypeNameText->text();
+    }
+    DataType *item = new DataType(typeName, ui->nameText->displayText(), ui->valueText->displayText());
     items->append(item);
     scene->addItem(item);
     this->close();
+}
+
+void AddItemDialog::on_typeComboBox_activated(int index)
+{
+    ui->userTypeGroupBox->hide();
+    ui->simpleTypeGroupBox->hide();
+    ui->newTypeGroupBox->hide();
+
+    switch(index)
+    {
+        case 0://none
+            break;
+        case 1:
+            ui->newTypeGroupBox->setVisible(true);
+            break;
+        case 2:
+        case 3:
+            ui->simpleTypeGroupBox->setVisible(true);
+            break;
+        default:
+            ui->userTypeGroupBox->setVisible(true);
+    }
 }

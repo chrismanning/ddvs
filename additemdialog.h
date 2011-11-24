@@ -21,6 +21,8 @@ public:
 private slots:
     void on_buttonBox_accepted();
 
+    void on_typeComboBox_activated(int index);
+
 private:
     Ui::AddItemDialog *ui;
     QGraphicsScene *scene;
