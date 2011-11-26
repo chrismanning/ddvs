@@ -27,6 +27,7 @@ private:
     Ui::AddItemDialog *ui;
     QGraphicsScene *scene;
     QList<DataType*> *items;
+    QStringList *types;
 };
 
 #endif // ADDITEMDIALOG_H

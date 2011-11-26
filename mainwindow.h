@@ -8,7 +8,6 @@
 #include <QSlider>
 #include <QLabel>
 #include <additemdialog.h>
-
 #include <zoomwidget.h>
 #include <datatype.h>
 

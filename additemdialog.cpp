@@ -15,6 +15,7 @@ AddItemDialog::AddItemDialog(QGraphicsScene *scene, QList<DataType*> *items, QSt
     ui->userTypeGroupBox->hide();
     ui->simpleTypeGroupBox->hide();
     ui->newTypeGroupBox->hide();
+    ui->newMembersWidget->setTypes(types);
     ui->typeComboBox->addItems(*types);
     //ui->buttonBox->setEnabled(false);
 }

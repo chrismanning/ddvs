@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("Dynamic Data Structure Visualisation");
+
     zoomer = new ZoomWidget(ui->graphicsView);
     ui->statusBar->addWidget(zoomer);
 
@@ -18,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     #endif
 
-    types << "new type" << "int" << "int*";
+    types << "int" << "int*";
 }
 
 MainWindow::~MainWindow()
