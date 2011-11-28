@@ -1,11 +1,13 @@
 #include "zoomwidget.h"
 #include "ui_zoomwidget.h"
 
-ZoomWidget::ZoomWidget(QWidget *parent) :
+ZoomWidget::ZoomWidget(QGraphicsView * view, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ZoomWidget)
 {
     ui->setupUi(this);
+
+    this->view = view;
 }
 
 ZoomWidget::~ZoomWidget()
@@ -23,4 +25,11 @@ void ZoomWidget::on_toolButton_clicked()
 void ZoomWidget::on_toolButton_2_clicked()
 {
     ui->horizontalSlider->setValue(ui->horizontalSlider->value()+10);
+}
+
+void ZoomWidget::on_horizontalSlider_valueChanged(int value)
+{
+    qreal zoom = value / (qreal) 50;
+    qDebug("scalar: %f", zoom);
+    view->scale(zoom,zoom);
 }
