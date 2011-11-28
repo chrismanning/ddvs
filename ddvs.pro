@@ -31,40 +31,4 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     icons.qrc
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+QMAKE_CXXFLAGS += -std=c++0x

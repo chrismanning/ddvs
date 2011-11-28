@@ -41,8 +41,8 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>605</width>
-         <height>605</height>
+         <width>610</width>
+         <height>610</height>
         </size>
        </property>
        <property name="renderHints">
