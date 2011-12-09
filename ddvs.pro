@@ -15,13 +15,15 @@ SOURCES += main.cpp\
     zoomwidget.cpp \
     datatype.cpp \
     additemdialog.cpp \
-    newmemberswidget.cpp
+    newmemberswidget.cpp \
+    pointer.cpp
 
 HEADERS  += mainwindow.h \
     zoomwidget.h \
     datatype.h \
     additemdialog.h \
-    newmemberswidget.h
+    newmemberswidget.h \
+    pointer.h
 
 FORMS    += mainwindow.ui \
     zoomwidget.ui \
@@ -30,5 +32,3 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     icons.qrc
-
-QMAKE_CXXFLAGS += -std=c++0x

@@ -1,7 +1,7 @@
 #include "additemdialog.h"
 #include "ui_additemdialog.h"
 
-AddItemDialog::AddItemDialog(QGraphicsScene *scene, QList<DataType*> *items, QStringList *types, QWidget *parent) :
+AddItemDialog::AddItemDialog(QGraphicsScene *scene, QHash<QString,DataType*> *items, QStringList *types, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddItemDialog)
 {
@@ -32,8 +32,14 @@ void AddItemDialog::on_buttonBox_accepted()
     if(ui->newTypeNameText->displayText().size() > 0) {
         typeName = ui->newTypeNameText->text();
     }
-    DataType *item = new DataType(typeName, ui->nameText->displayText(), ui->valueText->displayText());
-    items->append(item);
+    DataType *item;
+    if(typeName.startsWith("*")) {
+        item = new Pointer(typeName, ui->nameText->displayText(), items->value(ui->valueText->displayText(),0));
+        scene->addItem(((Pointer*)item)->link);
+    }
+    else
+        item = new DataType(typeName, ui->nameText->displayText(), ui->valueText->displayText());
+    items->insert(item->name, item);
     scene->addItem(item);
     this->close();
 }

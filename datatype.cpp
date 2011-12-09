@@ -1,12 +1,22 @@
 #include "datatype.h"
+#include "pointer.h"
 
 DataType::DataType(const QString &type, const QString &name, const QString &value)
 {
-    setFlags(ItemIsMovable | ItemIsSelectable);
+    setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
     this->type = type;
-    members << new Member(name,value);
+    this->name = name;
+    //members << new Member(name,value);
 //    this->name = name;
 //    this->value = value;
+}
+
+DataType::~DataType()
+{
+    foreach(DataType *p, pointers) {
+        ((Pointer*)p)->link->hide();
+        ((Pointer*)p)->pointsTo = 0;
+    }
 }
 
 void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -39,6 +49,23 @@ QRectF DataType::createRect(qreal padding) const
     qreal height = textHeight + textHeight * members.size();
     QRectF rect(0+padding,0+padding,width-(2*padding),height-(2*padding));
     return rect;
+}
+
+QVariant DataType::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    qDebug("Item changing...");
+    if(change == QGraphicsItem::ItemPositionHasChanged) {
+        qDebug("Item moving...");
+        foreach(DataType* p, pointers) {
+            ((Pointer*)p)->link->setLine(QLineF(p->pos(),this->pos()));
+        }
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
+
+int pointTo(DataType * a)
+{
+    return -1;
 }
 
 //QPainterPath DataType::shape() const

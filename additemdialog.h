@@ -3,8 +3,10 @@
 
 #include <QDialog>
 #include <QGraphicsScene>
+#include <QHash>
 #include <mainwindow.h>
 #include <datatype.h>
+#include <pointer.h>
 
 namespace Ui {
     class AddItemDialog;
@@ -15,7 +17,7 @@ class AddItemDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddItemDialog(QGraphicsScene *scene, QList<DataType*> *items, QStringList *types, QWidget *parent = 0);
+    explicit AddItemDialog(QGraphicsScene *scene, QHash<QString,DataType*> *items, QStringList *types, QWidget *parent = 0);
     ~AddItemDialog();
 
 private slots:
@@ -26,7 +28,7 @@ private slots:
 private:
     Ui::AddItemDialog *ui;
     QGraphicsScene *scene;
-    QList<DataType*> *items;
+    QHash<QString,DataType*> *items;
     QStringList *types;
 };
 

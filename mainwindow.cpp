@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     #endif
 
-    types << "int" << "int*";
+    types << "int" << "*int";
 }
 
 MainWindow::~MainWindow()
@@ -43,7 +43,7 @@ void MainWindow::on_actionRemove_Item_triggered()
     QList<QGraphicsItem*> items = scene->selectedItems();
     foreach(QGraphicsItem *item,items) {
         scene->removeItem(item);
-        this->items.removeAll((DataType*)item);
+        this->items.remove(((DataType*)item)->name);
     }
     qDebug("Removing %d items...",items.size());
     qDeleteAll(items);

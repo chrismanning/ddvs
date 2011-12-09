@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+//#include <pointer.h>
 
 struct Member {
     Member(const QString &name, const QString &value) {
@@ -19,21 +20,25 @@ struct Member {
 class DataType : public QGraphicsItem
 {
 public:
-    DataType(const QString &type = "int", int x=0, int y=0);
-    DataType(const QString &type, const QString &name, const QString &value);
+    //DataType(const QString &type = "int", int x=0, int y=0);
+    DataType(const QString &type, const QString &name, const QString &value = "0");
+    ~DataType();
 
     QRectF boundingRect() const;
 //    QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
 
+    int pointTo(DataType * a);
+    QString name;
+    QString type;
+    QList<DataType*> pointers;
+
 protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
     QRectF createRect(qreal padding = 0) const;
 //    void mousePressEvent(QGraphicsSceneMouseEvent *event);
 //    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 //    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
-private:
-    QString type;
     QList<Member*> members;
     int x, y;
 };

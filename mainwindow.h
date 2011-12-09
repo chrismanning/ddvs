@@ -7,6 +7,7 @@
 #include <QGraphicsItem>
 #include <QSlider>
 #include <QLabel>
+#include <QHash>
 #include <additemdialog.h>
 #include <zoomwidget.h>
 #include <datatype.h>
@@ -28,7 +29,7 @@ private slots:
     void on_actionRemove_Item_triggered();
 
 private:
-    QList<DataType*> items;
+    QHash<QString,DataType*> items;
     QStringList types;
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
