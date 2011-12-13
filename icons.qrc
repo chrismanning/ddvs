@@ -23,5 +23,6 @@
         <file>icons/16x16/zoom-out.png</file>
         <file>icons/16x16/help-contents.png</file>
         <file>icons/16x16/document-open.png</file>
+        <file>icons/16x16/edit-rename.png</file>
     </qresource>
 </RCC>

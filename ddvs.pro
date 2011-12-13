@@ -16,19 +16,24 @@ SOURCES += main.cpp\
     datatype.cpp \
     additemdialog.cpp \
     newmemberswidget.cpp \
-    pointer.cpp
+    pointer.cpp \
+    edititemdialog.cpp
 
 HEADERS  += mainwindow.h \
     zoomwidget.h \
     datatype.h \
     additemdialog.h \
     newmemberswidget.h \
-    pointer.h
+    pointer.h \
+    edititemdialog.h
 
 FORMS    += mainwindow.ui \
     zoomwidget.ui \
     additemdialog.ui \
-    newmemberswidget.ui
+    newmemberswidget.ui \
+    edititemdialog.ui
 
 RESOURCES += \
     icons.qrc
+
+

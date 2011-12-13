@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QHash>
 #include <additemdialog.h>
+#include <edititemdialog.h>
 #include <zoomwidget.h>
 #include <datatype.h>
 
@@ -27,6 +28,7 @@ public:
 private slots:
     void on_actionAdd_Item_triggered();
     void on_actionRemove_Item_triggered();
+    void on_actionEdit_Item_triggered();
 
 private:
     QHash<QString,DataType*> items;

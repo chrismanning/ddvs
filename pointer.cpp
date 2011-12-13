@@ -6,6 +6,7 @@ Pointer::Pointer(const QString &type, const QString &name, DataType *pointsTo) :
     link = new QGraphicsLineItem;
     pointTo(pointsTo);
     this->setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    value = pointsTo->name;
 }
 
 Pointer::~Pointer()

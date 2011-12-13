@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete scene;
+    //delete scene;
     delete zoomer;
     delete ui;
 }
@@ -47,4 +47,13 @@ void MainWindow::on_actionRemove_Item_triggered()
     }
     qDebug("Removing %d items...",items.size());
     qDeleteAll(items);
+}
+
+void MainWindow::on_actionEdit_Item_triggered()
+{
+    if(scene->selectedItems().size() == 0) return;
+    qDebug("Editing item...");
+    EditItemDialog *dialog = new EditItemDialog((DataType*) scene->selectedItems().first());
+    dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
+    dialog->show();
 }

@@ -31,6 +31,7 @@ public:
     int pointTo(DataType * a);
     QString name;
     QString type;
+    QString value;
     QList<DataType*> pointers;
 
 protected:

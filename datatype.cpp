@@ -8,7 +8,7 @@ DataType::DataType(const QString &type, const QString &name, const QString &valu
     this->name = name;
     //members << new Member(name,value);
 //    this->name = name;
-//    this->value = value;
+    this->value = value;
 }
 
 DataType::~DataType()
@@ -19,7 +19,7 @@ DataType::~DataType()
     }
 }
 
-void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0)
 {
     QPen pen(QColor(0,0,0));
     if (option->state & QStyle::State_Selected) {
@@ -30,10 +30,10 @@ void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setBrush(QColor(200,200,200));
     painter->drawRoundedRect(createRect(),5,5);
     //painter->setPen(textColor);
-    foreach(Member *member, members) {
-        painter->drawText(createRect(5), Qt::AlignHCenter, member->name + " : " + member->value);
-    }
-    //painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignBottom, members[0]->value);
+//    foreach(Member *member, members) {
+//        painter->drawText(createRect(5), Qt::AlignHCenter, member->name + " : " + member->value);
+//    }
+    painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignTop, name + " : " + value);
     painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignBottom, type);
 }
 
@@ -46,7 +46,8 @@ QRectF DataType::createRect(qreal padding) const
 {
     qreal textHeight = 24;
     qreal width = 100;
-    qreal height = textHeight + textHeight * members.size();
+    int members = this->members.size() > 0 ? this->members.size() : 1;
+    qreal height = textHeight + textHeight * members;
     QRectF rect(0+padding,0+padding,width-(2*padding),height-(2*padding));
     return rect;
 }
