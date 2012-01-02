@@ -27,6 +27,8 @@ HEADERS  += mainwindow.h \
     pointer.h \
     edititemdialog.h
 
+unix:INCLUDEPATH += /usr/include/boost-1_47/
+
 FORMS    += mainwindow.ui \
     zoomwidget.ui \
     additemdialog.ui \
