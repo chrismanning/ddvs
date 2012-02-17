@@ -17,7 +17,12 @@ SOURCES += main.cpp\
     additemdialog.cpp \
     newmemberswidget.cpp \
     pointer.cpp \
-    edititemdialog.cpp
+    edititemdialog.cpp \
+    expression.cpp \
+    statement.cpp \
+    function.cpp \
+    interpreter.cpp \
+    mainfunction.cpp
 
 HEADERS  += mainwindow.h \
     zoomwidget.h \
@@ -25,11 +30,21 @@ HEADERS  += mainwindow.h \
     additemdialog.h \
     newmemberswidget.h \
     pointer.h \
-    edititemdialog.h
+    edititemdialog.h \
+    statement.h \
+    ast.h \
+    expression.h \
+    skipper.h \
+    function.h \
+    interpreter.h \
+    mainfunction.h \
+    error.h \
+    annotation.h \
+    types.h
 
-unix:INCLUDEPATH += /usr/include/boost-1_47/
+unix:INCLUDEPATH += /usr/include/boost-1_48/
 
-FORMS    += mainwindow.ui \
+FORMS += mainwindow.ui \
     zoomwidget.ui \
     additemdialog.ui \
     newmemberswidget.ui \
