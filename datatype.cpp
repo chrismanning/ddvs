@@ -22,7 +22,7 @@ DataType::~DataType()
 void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0)
 {
     QPen pen(QColor(0,0,0));
-    if (option->state & QStyle::State_Selected) {
+    if(option->state & QStyle::State_Selected) {
         pen.setStyle(Qt::DotLine);
         //pen.setWidth(2);
     }

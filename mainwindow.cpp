@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     #endif
 
+    interpreter = new interpreter::Interpreter;
+
     types << "int" << "*int";
 }
 
@@ -56,4 +58,43 @@ void MainWindow::on_actionEdit_Item_triggered()
     EditItemDialog *dialog = new EditItemDialog((DataType*) scene->selectedItems().first());
     dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
     dialog->show();
+}
+
+void MainWindow::on_interpretButton_clicked()
+{
+    QString tmp_str = ui->interpreterInput->toPlainText();
+    if(interpreter->parse(tmp_str)) {
+        ui->interpreterInput->clear();
+        interpreter->execute();
+    }
+}
+
+void MainWindow::on_printStackButton_clicked()
+{
+    QString tmp;
+    foreach(int const& val, interpreter->getStack()) {
+        tmp += QString::number(val) + ",";
+    }
+    qDebug() << "stack: " << tmp;
+}
+
+void MainWindow::on_printCodeButton_clicked()
+{
+    QString tmp;
+    foreach(int const& val, interpreter->getCode()) {
+        tmp += QString::number(val) + ",";
+    }
+    qDebug() << "code: " << tmp;
+}
+
+void MainWindow::on_printVarsButton_clicked()
+{
+    QString tmp;
+    QMap<std::string,int> map(interpreter->getGlobals());
+    QMapIterator<std::string, int> i(map);
+    while(i.hasNext()) {
+        i.next();
+        tmp += QString(i.key().c_str()) + ": " + QString::number(i.value()) + ", ";
+    }
+    qDebug() << tmp;
 }
