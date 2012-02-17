@@ -9,6 +9,7 @@ QT       += core gui opengl
 TARGET = ddvs
 TEMPLATE = app
 
+QMAKE_CXXFLAGS_WARN_ON = -Wextra
 
 SOURCES += main.cpp\
         mainwindow.cpp \
