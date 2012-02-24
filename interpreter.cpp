@@ -412,9 +412,13 @@ namespace interpreter {
             error(ast.function_name.id, "Duplicate function: " + ast.function_name.name);
             return false;
         }
+        std::size_t offset = this->variables.size();
+        foreach(function_table::value_type const& fun, functions) {
+            offset += fun.second.get()->nvars();
+        }
 
         boost::shared_ptr<function>& p = functions[ast.function_name.name];
-        p.reset(new function(code, ast.args.size(),stack.size()));
+        p.reset(new function(code, ast.args.size(),offset));
         current_function = p.get();
         current_function_name = ast.function_name.name;
 
@@ -435,7 +439,7 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::struct_member_declaration const& ast)
+    bool global::operator()(ast::struct_member_declaration const& /*ast*/)
     {
         return true;
     }
@@ -451,7 +455,7 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::struct_instantiation const& ast)
+    bool global::operator()(ast::struct_instantiation const& /*ast*/)
     {
         return true;
     }
@@ -480,17 +484,20 @@ namespace interpreter {
         start = src.begin();
         end = src.end();
         iterator_type iter = start;
+        parser::main_function parser(error);
 
         bool success = phrase_parse(iter, end, +parser, skip, ast);
 
         if(success) {
-            if(compiler(ast))
+            success = compiler(ast);
+            if(success) {
                 qDebug() << "SUCCESS";
+                ast.clear();
+            }
+            else {
+                qDebug() << "FAIL";
+            }
         }
-        else {
-            qDebug() << "FAIL";
-        }
-        ast.clear();
 
         return success;
     }

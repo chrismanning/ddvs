@@ -110,13 +110,12 @@ namespace interpreter {
 
     struct global : function, public boost::static_visitor<bool> {
         //typedef bool result_type;
-        global(std::vector<int>& stack, std::vector<int>& code, error_handler& error_,
-               iterator_type& start, iterator_type& end) :
+        global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__) :
                 function(code, 0, 0),
                 current_function(this),
                 void_return(true),
                 stack(stack),
-                error_(error_)
+                error_(error__)
         {
             void_return = true;
         }
@@ -165,24 +164,19 @@ namespace interpreter {
         bool void_return;
         std::string current_function_name;
         std::vector<int>& stack;
-        //boost::phoenix::function<error_handler> error;
-        //boost::function<void(int tag, std::string const& what)> error;
     };
 
     class Interpreter
     {
     public:
-        Interpreter(size_t size = 50) : stack(size), start(src.begin()),
-            end(src.end()), error(start,end),
-            compiler(stack,code,error,start,end),
-            parser(error), code_counter(code.begin()) {}
+        Interpreter(size_t size = 50) :
+            stack(size),
+            error(start, end),
+            compiler(stack, code, error)
+        {}
         bool parse(std::string input);
         bool parse(QString input);
         int execute() {
-            //error.first = src.begin();
-            //error.last = src.end();
-            //qDebug() << (code == getCode());
-            //compiler.get_code().push_back(op_void);
             return execute(getCode(), getCode().begin(), stack.begin());
         }
         std::vector<int> const& getStack()
@@ -199,7 +193,6 @@ namespace interpreter {
         }
 
     private:
-        std::vector<int>::const_iterator code_counter;
         iterator_type start;
         iterator_type end;
         std::string src;
@@ -210,7 +203,6 @@ namespace interpreter {
         ast::main_function ast;
 
         parser::skipper skip;
-        parser::main_function parser;//<iterator_type>
 
         QList<ast::struct_declaration> global_structs;
         int execute(
