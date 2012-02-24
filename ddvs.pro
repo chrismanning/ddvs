@@ -9,7 +9,7 @@ QT       += core gui opengl
 TARGET = ddvs
 TEMPLATE = app
 
-QMAKE_CXXFLAGS_WARN_ON = -Wextra
+!win32-msvc*:QMAKE_CXXFLAGS_WARN_ON = -Wextra
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -44,6 +44,7 @@ HEADERS  += mainwindow.h \
     types.h
 
 unix:INCLUDEPATH += /usr/include/boost-1_48/
+win32:INCLUDEPATH += C:\\dev\\include\\boost_1_48_0
 
 FORMS += mainwindow.ui \
     zoomwidget.ui \
