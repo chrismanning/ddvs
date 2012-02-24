@@ -54,9 +54,9 @@ QRectF DataType::createRect(qreal padding) const
 
 QVariant DataType::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    qDebug("Item changing...");
+    //qDebug("Item changing...");
     if(change == QGraphicsItem::ItemPositionHasChanged) {
-        qDebug("Item moving...");
+        //qDebug("Item moving...");
         foreach(DataType* p, pointers) {
             ((Pointer*)p)->link->setLine(QLineF(p->pos(),this->pos()));
         }

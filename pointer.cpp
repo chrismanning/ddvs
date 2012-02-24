@@ -5,7 +5,6 @@ Pointer::Pointer(const QString &type, const QString &name, DataType *pointsTo) :
     this->pointsTo = pointsTo;
     link = new QGraphicsLineItem;
     pointTo(pointsTo);
-    this->setFlag(QGraphicsItem::ItemSendsGeometryChanges);
     value = pointsTo->name;
 }
 
@@ -31,9 +30,9 @@ int Pointer::pointTo(DataType *a)
 
 QVariant Pointer::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    qDebug("Item changing...");
+    //qDebug("Item changing...");
     if(change == QGraphicsItem::ItemPositionHasChanged) {
-        qDebug("Item moving...");
+        //qDebug("Item moving...");
         if(pointsTo != 0 && link != 0)
             link->setLine(QLineF(this->pos(),pointsTo->pos()));
     }
