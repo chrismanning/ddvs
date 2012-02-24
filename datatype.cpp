@@ -19,7 +19,7 @@ DataType::~DataType()
     }
 }
 
-void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0)
+void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget*)
 {
     QPen pen(QColor(0,0,0));
     if(option->state & QStyle::State_Selected) {
@@ -64,7 +64,7 @@ QVariant DataType::itemChange(GraphicsItemChange change, const QVariant &value)
     return QGraphicsItem::itemChange(change, value);
 }
 
-int pointTo(DataType * a)
+int pointTo(DataType * /*a*/)
 {
     return -1;
 }

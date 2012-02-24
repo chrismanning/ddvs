@@ -16,13 +16,11 @@ typedef std::string::const_iterator Iterator;
 //template <typename Iterator>
 struct error_handler
 {
-private:
-    template <typename, typename, typename>
-    struct result { typedef void type; };
-
-public:
     error_handler(Iterator& first, Iterator& last)
       : first(first), last(last) {}
+    
+    template <typename, typename, typename>
+    struct result { typedef void type; };
 
     template <typename Message, typename What>
     void operator()(

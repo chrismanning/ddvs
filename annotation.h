@@ -40,7 +40,7 @@ struct annotation
 
         // This will catch all nodes except those inheriting from ast::tagged
         template <typename T>
-        void dispatch(T& x, boost::mpl::false_) const
+        void dispatch(T& /*x*/, boost::mpl::false_) const
         {
             // (no-op) no need for tags
         }
@@ -65,7 +65,6 @@ struct annotation
         int id = iters.size();
         iters.push_back(pos);
         ast.name.id = id;
-        qDebug() << "id:" << id << ", size:" << iters.size();
     }
 
     void operator()(ast::assignment& ast, Iterator pos) const
@@ -73,7 +72,6 @@ struct annotation
         int id = iters.size();
         iters.push_back(pos);
         ast.lhs.id = id;
-        qDebug() << "id:" << id << ", size:" << iters.size();
     }
 
     void operator()(ast::return_statement& ast, Iterator pos) const
