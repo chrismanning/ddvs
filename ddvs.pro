@@ -9,6 +9,7 @@ QT       += core gui opengl
 TARGET = ddvs
 TEMPLATE = app
 
+QMAKE_CXXFLAGS_WARN_ON = -Wextra
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -17,7 +18,12 @@ SOURCES += main.cpp\
     additemdialog.cpp \
     newmemberswidget.cpp \
     pointer.cpp \
-    edititemdialog.cpp
+    edititemdialog.cpp \
+    expression.cpp \
+    statement.cpp \
+    function.cpp \
+    interpreter.cpp \
+    mainfunction.cpp
 
 HEADERS  += mainwindow.h \
     zoomwidget.h \
@@ -25,9 +31,21 @@ HEADERS  += mainwindow.h \
     additemdialog.h \
     newmemberswidget.h \
     pointer.h \
-    edititemdialog.h
+    edititemdialog.h \
+    statement.h \
+    ast.h \
+    expression.h \
+    skipper.h \
+    function.h \
+    interpreter.h \
+    mainfunction.h \
+    error.h \
+    annotation.h \
+    types.h
 
-FORMS    += mainwindow.ui \
+unix:INCLUDEPATH += /usr/include/boost-1_48/
+
+FORMS += mainwindow.ui \
     zoomwidget.ui \
     additemdialog.ui \
     newmemberswidget.ui \
