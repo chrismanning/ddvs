@@ -66,6 +66,15 @@ void MainWindow::on_interpretButton_clicked()
     if(interpreter->parse(tmp_str)) {
         ui->interpreterInput->clear();
         interpreter->execute();
+        typedef std::map<std::string, int> varstype;
+        varstype vars = interpreter->getGlobals();
+        foreach(varstype::value_type var, vars) {
+            if(!items.contains(QString(var.first.c_str()))) {
+                DataType* tmp = new DataType(QString(var.first.c_str()),QString::number(interpreter->getStack()[var.second]));
+                scene->addItem(tmp);
+                items.insert(QString(var.first.c_str()), tmp);
+            }
+        }
     }
 }
 
