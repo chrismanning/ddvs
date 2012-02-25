@@ -226,8 +226,8 @@ namespace ast
     };
 
     struct function;
-    typedef boost::variant<statement,boost::recursive_wrapper<function> > fs;
-    typedef std::list<fs> function_body;
+    //typedef boost::variant<statement,boost::recursive_wrapper<function> > fs;
+    typedef statement_list function_body;
     struct arg
     {
         int type_code;

@@ -37,8 +37,9 @@ namespace interpreter {
 
     void function::add_var(std::string const& name)
     {
-        std::size_t n = variables.size() + address;
+        std::size_t n = offset;
         variables[name] = n;
+        ++offset;
     }
 
     void function::link_to(std::string const& name, std::size_t address)
@@ -51,6 +52,9 @@ namespace interpreter {
         foreach(ast::func_state const& fos, ast) {
             if(!boost::apply_visitor(*this, fos))
                 return false;
+            if(fos.type() == typeid(ast::function)) {
+                current_function = global_function;
+            }
         }
         return true;
     }
@@ -412,13 +416,13 @@ namespace interpreter {
             error(ast.function_name.id, "Duplicate function: " + ast.function_name.name);
             return false;
         }
-        std::size_t offset = this->variables.size();
-        foreach(function_table::value_type const& fun, functions) {
-            offset += fun.second.get()->nvars();
-        }
+        //offset = this->variables.size();
+//        foreach(function_table::value_type const& fun, functions) {
+//            offset += fun.second.get()->nvars();
+//        }
 
         boost::shared_ptr<function>& p = functions[ast.function_name.name];
-        p.reset(new function(code, ast.args.size(),offset));
+        p.reset(new function(code, ast.args.size(), offset));
         current_function = p.get();
         current_function_name = ast.function_name.name;
 
@@ -430,12 +434,13 @@ namespace interpreter {
             current_function->add_var(arg.name.name);
         }
 
-        foreach(ast::fs const& fs, ast.body) {
-            if(!boost::apply_visitor(*this,fs))
+        foreach(ast::statement const& state, ast.body) {
+            if(!boost::apply_visitor(*this,state))
                 return false;
         }
         (*current_function)[1] = current_function->nvars();   // now store the actual number of variables
                                             // this includes the arguments
+        offset += current_function->nvars();
         return true;
     }
 

@@ -64,8 +64,8 @@ namespace interpreter {
 
     struct function
     {
-        function(std::vector<int>& code, std::size_t nargs, std::size_t offset)
-          : code(code), address(offset), size_(0), nargs_(nargs) {}
+        function(std::vector<int>& code, std::size_t nargs, std::size_t offset_)
+          : code(code), offset(offset_), address(code.size()), size_(0), nargs_(nargs) {}
 
         void op(int a);
         void op(int a, int b);
@@ -81,6 +81,7 @@ namespace interpreter {
         int const* find_var(std::string const& name) const;
         void add_var(std::string const& name);
         void link_to(std::string const& name, std::size_t address);
+        std::size_t offset;
 
     protected:
         std::map<std::string, int> variables;
@@ -113,6 +114,7 @@ namespace interpreter {
         global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__) :
                 function(code, 0, 0),
                 current_function(this),
+                global_function(this),
                 void_return(true),
                 stack(stack),
                 error_(error__)
@@ -149,11 +151,13 @@ namespace interpreter {
         std::vector<int>& get_code() { return code; }
         std::map<std::string, int> const& get_vars() { return variables; }
 
+
     private:
         std::vector<cstruct> structs;
         typedef std::map<std::string, boost::shared_ptr<function> > function_table;
         function_table functions;
         function* current_function;
+        function* global_function;
         error_handler& error_;
 
         bool eval_expression(

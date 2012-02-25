@@ -49,8 +49,7 @@ namespace parser {
                 >   identifier
                 >   '(' > argument_list > ')'
                 >   '{'
-                >   +(body.statement_ | start)
-//                >   body
+                >   body
                 >   '}'
                 ;
 
