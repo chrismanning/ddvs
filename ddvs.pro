@@ -45,7 +45,7 @@ HEADERS  += mainwindow.h \
 
 linux:INCLUDEPATH += /usr/include/boost-1_48/
 macx:INCLUDEPATH += /Users/chris/boost_1_49_0/
-win32:INCLUDEPATH += C:\\dev\\include\\boost_1_48_0
+win32:INCLUDEPATH += C:\\dev\\include\\boost_1_49_0
 
 FORMS += mainwindow.ui \
     zoomwidget.ui \
