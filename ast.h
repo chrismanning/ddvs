@@ -13,6 +13,7 @@
 #include <boost/fusion/include/io.hpp>
 #include <boost/optional.hpp>
 #include <list>
+#include <QDebug>
 
 namespace ast
 {
@@ -41,6 +42,12 @@ namespace ast
     {
         type_id(std::string const& name = "") : name(name) {}
         std::string name;
+    };
+
+    struct var_type
+    {
+        int type_code;
+        boost::optional<char> pointer;
     };
 
     typedef std::list<type_id> type_list;
@@ -160,6 +167,13 @@ namespace ast
     };
 
     struct variable_declaration
+    {
+        var_type type;
+        identifier name;
+        boost::optional<expression> rhs;
+    };
+
+    struct pointer_declaration
     {
         int type_code;
         identifier name;
@@ -284,8 +298,14 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-    ast::variable_declaration,
+    ast::var_type,
     (int, type_code)
+    (boost::optional<char>, pointer)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::variable_declaration,
+    (ast::var_type, type)
     (ast::identifier, name)
     (boost::optional<ast::expression>, rhs)
 )

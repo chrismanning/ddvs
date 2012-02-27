@@ -24,6 +24,7 @@ namespace parser {
             qi::_3_type _3;
             qi::_4_type _4;
 
+            qi::char_type char_;
             qi::_val_type _val;
             qi::raw_type raw;
             qi::lexeme_type lexeme;
@@ -68,9 +69,10 @@ namespace parser {
 
             type_id = identifier;
 
+            var_type = types > -lexeme[char_('*')];
+
             variable_declaration =
-                    types
-                >   -lit('*')
+                    var_type
                 >   identifier
                 >   -('=' > expr)
                 >   ';'
@@ -166,6 +168,7 @@ namespace parser {
         qi::rule<Iterator, ast::statement(), skipper> statement_;
         qi::rule<Iterator, ast::function_call(), skipper> function_call_statement;
         qi::rule<Iterator, ast::variable_declaration(), skipper> variable_declaration;
+        qi::rule<Iterator, ast::var_type(), skipper> var_type;
         qi::rule<Iterator, ast::struct_member_declaration(), skipper> struct_member_declaration;
         qi::rule<Iterator, ast::assignment(), skipper> assignment;
         qi::rule<Iterator, ast::if_statement(), skipper> if_statement;
