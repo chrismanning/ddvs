@@ -37,13 +37,13 @@ namespace ast
         std::string name;
     };
 
-    struct type
+    struct type_id
     {
-        type(std::string const& name = "") : name(name) {}
+        type_id(std::string const& name = "") : name(name) {}
         std::string name;
     };
 
-    typedef std::list<type> type_list;
+    typedef std::list<type_id> type_list;
 
     typedef boost::variant<
             nil
@@ -174,7 +174,7 @@ namespace ast
 
     struct struct_declaration
     {
-        type type_name;
+        type_id type_name;
         std::list<struct_member_declaration> members;
     };
 
@@ -182,7 +182,7 @@ namespace ast
 
     struct struct_instantiation
     {
-        type type_name;
+        type_id type_name;
         identifier name;
     };
 
@@ -298,13 +298,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::struct_declaration,
-    (ast::type, type_name)
+    (ast::type_id, type_name)
     (std::list<ast::struct_member_declaration>, members)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::struct_instantiation,
-    (ast::type, type_name)
+    (ast::type_id, type_name)
     (ast::identifier, name)
 )
 

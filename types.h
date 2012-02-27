@@ -11,14 +11,9 @@ namespace parser {
     struct primitive_types : qi::symbols<char,int> {
         primitive_types() {
             this->add
-                    ("int",1)
-                    ;
-        }
-    };
-    struct return_types : primitive_types {
-        return_types() : primitive_types() {
-            this->add
                     ("void",0)
+                    ("int",1)
+                    ("bool",2)
                     ;
         }
     };

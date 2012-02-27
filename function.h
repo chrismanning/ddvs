@@ -44,8 +44,7 @@ namespace parser {
             argument_list = -((types > identifier) % ',');
 
             start =
-                    lexeme[types] //| lexeme[(string("void") | string("int"))
-                        //>> !(alnum | '_')]  // make sure we have whole words
+                    types
                 >   identifier
                 >   '(' > argument_list > ')'
                 >   '{'
@@ -76,7 +75,7 @@ namespace parser {
         qi::rule<Iterator, std::list<ast::arg>(), skipper> argument_list;
         qi::rule<Iterator, ast::function(), skipper> start;
 
-        return_types types;
+        primitive_types types;
     };
 }
 

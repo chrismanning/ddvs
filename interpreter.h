@@ -64,8 +64,15 @@ namespace interpreter {
 
     struct function
     {
-        function(std::vector<int>& code, std::size_t nargs, std::size_t offset_)
-          : code(code), offset(offset_), address(code.size()), size_(0), nargs_(nargs) {}
+        function(std::map<std::string, int>& global_variables, std::map<std::string, int*>& global_pointers,
+                 std::vector<int>& code, std::size_t nargs, std::size_t offset_) :
+            global_variables(global_variables),
+            global_pointers(global_pointers),
+            code(code),
+            offset(offset_),
+            address(code.size()),
+            size_(0),
+            nargs_(nargs) {}
 
         void op(int a);
         void op(int a, int b);
@@ -85,6 +92,9 @@ namespace interpreter {
 
     protected:
         std::map<std::string, int> variables;
+        std::map<std::string, int>& global_variables;
+        std::map<std::string, int*> pointers;
+        std::map<std::string, int*>& global_pointers;
         std::map<std::size_t, std::string> function_calls;
         std::vector<int>& code;
         std::size_t address;
@@ -112,7 +122,7 @@ namespace interpreter {
     struct global : function, public boost::static_visitor<bool> {
         //typedef bool result_type;
         global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__) :
-                function(code, 0, 0),
+                function(variables, pointers, code, 0, 0),
                 current_function(this),
                 global_function(this),
                 void_return(true),
@@ -151,7 +161,6 @@ namespace interpreter {
         std::vector<int>& get_code() { return code; }
         std::map<std::string, int> const& get_vars() { return variables; }
 
-
     private:
         std::vector<cstruct> structs;
         typedef std::map<std::string, boost::shared_ptr<function> > function_table;
@@ -181,7 +190,7 @@ namespace interpreter {
         bool parse(std::string input);
         bool parse(QString input);
         int execute() {
-            return execute(getCode(), getCode().begin(), stack.begin());
+            return execute(code, code.begin(), stack.begin());
         }
         std::vector<int> const& getStack()
         {

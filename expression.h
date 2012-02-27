@@ -81,7 +81,6 @@ namespace parser
                 ("else")
                 ("while")
                 ("void")
-                ("int")
                 ("struct")
                 ("return")
                 ;

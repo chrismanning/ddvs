@@ -78,8 +78,6 @@ namespace interpreter {
         int const* p = current_function->find_var(ast.name);
         if(p == 0)
         {
-            //qDebug() << ast.id;
-            //qDebug() << "Undeclared variable: " << ast.name.c_str();
             error(ast.id, "Undeclared variable: " + ast.name);
             return false;
         }
@@ -281,7 +279,6 @@ namespace interpreter {
         int const* p = current_function->find_var(ast.lhs.name);
         if(p == 0)
         {
-            //qDebug() << ast.lhs.id;
             error(ast.lhs.id, "Undeclared variable: " + ast.lhs.name);
             return false;
         }
@@ -295,8 +292,6 @@ namespace interpreter {
         int const* p = current_function->find_var(ast.name.name);
         if(p != 0)
         {
-            //qDebug() << ast.name.id;
-            //qDebug() << "Duplicate variable: " << ast.name.name.c_str();
             error(ast.name.id, "Duplicate variable: " + ast.name.name);
             return false;
         }
@@ -422,7 +417,7 @@ namespace interpreter {
 //        }
 
         boost::shared_ptr<function>& p = functions[ast.function_name.name];
-        p.reset(new function(code, ast.args.size(), offset));
+        p.reset(new function(variables, pointers, code, ast.args.size(), offset));
         current_function = p.get();
         current_function_name = ast.function_name.name;
 

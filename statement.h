@@ -39,10 +39,6 @@ namespace parser {
             typedef function<error_handler> error_handler_function;
             typedef function<annotation> annotation_function;
 
-//            primitive_types.add
-//                ("int",ast::type("int",true))
-//                ;
-
             statement_list =
                 +statement_
                 ;
@@ -70,11 +66,10 @@ namespace parser {
                 >   ';'
                 ;
 
-            type = identifier;
+            type_id = identifier;
 
             variable_declaration =
-                    //lexeme["int" >> !(alnum | '_')] // make sure we have whole words
-                    lexeme[types]
+                    types
                 >   -lit('*')
                 >   identifier
                 >   -('=' > expr)
@@ -89,7 +84,7 @@ namespace parser {
 
             struct_declaration =
                     lexeme["struct" >> !(alnum | '_')]
-                >   type //FIXME
+                >   type_id //FIXME
                 >   '{'
                 >   *struct_member_declaration
                 >   '}'
@@ -98,7 +93,7 @@ namespace parser {
 
             struct_instantiation =
                     lexeme["struct" >> !(alnum | '_')]
-                >   type
+                >   type_id
                 >   identifier
                 >   ';'
                 ;
@@ -167,7 +162,7 @@ namespace parser {
         expression expr;//<Iterator>
 
         qi::rule<Iterator, ast::statement_list(), skipper> statement_list, compound_statement;
-        qi::rule<Iterator, ast::type(), skipper> type;
+        qi::rule<Iterator, ast::type_id(), skipper> type_id;
         qi::rule<Iterator, ast::statement(), skipper> statement_;
         qi::rule<Iterator, ast::function_call(), skipper> function_call_statement;
         qi::rule<Iterator, ast::variable_declaration(), skipper> variable_declaration;
