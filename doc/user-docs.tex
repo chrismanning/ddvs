@@ -1,0 +1,194 @@
+\documentclass{article}
+\usepackage[a4paper]{geometry}
+\usepackage{hyperref}
+\usepackage{syntax}
+\input{ebnf.sty}
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\author{Christian Manning -- p0928544x\\
+De Montfort University}
+\title{IMAT3451 -- Final Year Project\\
+    Dynamic Data Structure Visualisation\\
+    User Documentation
+}
+\date{February 2012}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\pagebreak
+
+\section{Introduction}
+
+The Dynamic Data Structure Visualisation (DDSV) application aims to provide help to students who are learning to program. The focus of this application is on the concept of pointers; specifically, how they are used to build data structures.
+
+It does this by utilising a graphical user interface (GUI) to provide a visualisation containing graphical representations of abstract data types and pointers to them. This facilitates the visual construction of a data structure, which can then be manipulated to simulate algorithmic operations.
+
+Another interface to this application utilises the expressiveness of a programming language from the GUI in the form of an interpreter. The language accepted by this interpreter is a subset of the C programming language, defined later in this document, which uses quite a low level model and so pointers are exposed to the user more readily.
+
+\section{User Interface}
+
+\section{Interpreted Language}
+
+\subsection{Specification}
+
+\begin{EBNF}
+\item[\textit{binary\_op}]
+    '||'
+    | '\&\&'
+    | '=='
+    | '!='
+    | '$<$'
+    | '$\leq$'
+    | '$>$'
+    | '$\geq$'
+    | '+'
+    | '-'
+    | '*'
+    | '/'
+    ;
+\item[\textit{unary\_op}]
+    '+'
+    | '-'
+    | '!'
+    | '*'
+    | '$\rightarrow$'
+    | '.'
+    | '\&'
+    ;
+\item[\textit{keywords}]
+    'true' | 'false' | 'if' | 'else' | 'while' | 'struct' | 'return'
+    ;
+\item[\textit{types}]
+    'void' | 'int' | 'bool'
+\end{EBNF}
+\begin{grammar}
+<expr> ::=
+    <unary\_expr> (<binary\_op> <unary\_expr>)*
+    ;
+
+<unary\_expr> ::=
+	<primary\_expr>
+    \alt (<unary\_op> <primary\_expr>)
+    ;
+
+<primary\_expr> ::=
+	integer
+    \alt   <function\_call>
+    \alt   <identifier>
+    \alt   boolean
+    \alt   '(' <expr> ')'
+;
+
+<function\_call> ::=
+<identifier> '(' [<argument\_list>] ')'
+;
+
+<argument\_list> ::= [<expr> | <expr> ',' <argument\_list>] ;
+
+<identifier> ::=
+	-(keywords | types),
+	alphabetic character, \{ alphabetic character | digit | '\_' \} ;
+
+<statement_list> ::=
+    \{statement_\}
+    ;
+
+<statement_> ::=
+	<variable_declaration>
+    \alt   <struct_member_declaration>
+    \alt   <struct_declaration>
+    \alt   <struct_instantiation>
+    \alt   <assignment>
+    \alt   <compound_statement>
+    \alt   <function_call_statement>
+    \alt   <if_statement>
+    \alt   <while_statement>
+    \alt   <return_statement>
+    ;
+
+<type_id> ::= <identifier> ;
+
+<var_type> ::= <types> ['*'] ;
+
+<variable_declaration> ::=
+	<var_type> <identifier> [('=' <expr>)] ';' ;
+
+<struct_member_declaration> ::=
+	<var_type> <identifier> ';' ;
+
+<struct_declaration> ::=
+	'struct' <type_id>
+    '\{'
+    \{<struct_member_declaration>\}
+    '\}'
+    ';'
+    ;
+
+<struct_instantiation> ::=
+	'struct'
+    <type_id>
+    <identifier>
+    ';'
+    ;
+
+<assignment> ::=
+	<identifier>
+       '='
+       <expr>
+       ';'
+    ;
+
+<if_statement> ::=
+	'if'
+       '('
+       <expr>
+       ')'
+       <statement_>
+	[
+	    'else'
+	   <statement_>
+	]
+    ;
+
+<while_statement> ::=
+	'while'
+       '('
+       <expr>
+       ')'
+       <statement_>
+    ;
+
+<compound_statement> ::=
+    '\{' [<statement_list>] '\}'
+    ;
+
+<return_statement> ::=
+	'return'
+    [expr]
+       ';'
+    ;
+<argument_list> ::= [{<var_type> <identifier>)}] ;
+
+<function_declaration> ::=
+	<var_type>
+       <identifier>
+       '(' <argument_list> ')'
+       <compound_statement>
+    ;
+
+<translation_unit> ::=
+    \{ <statement_list> | <function> \} ;
+\end{grammar}
+
+
+\end{document}
