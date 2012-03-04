@@ -9,6 +9,8 @@
 #include <QSlider>
 #include <QLabel>
 #include <QHash>
+#include <QSplitter>
+#include <QVBoxLayout>
 #include <additemdialog.h>
 #include <edititemdialog.h>
 #include <zoomwidget.h>
@@ -34,22 +36,29 @@ private slots:
     void on_actionEdit_Item_triggered();
 
     void on_interpretButton_clicked();
-
+    //debugging buttons
+#ifdef QT_DEBUG
     void on_printStackButton_clicked();
-
     void on_printCodeButton_clicked();
-
     void on_printVarsButton_clicked();
+#endif
 
 private:
     QHash<QString,DataType*> items;
-    QStringList types;
-    Ui::MainWindow *ui;
-    QGraphicsScene *scene;
-    ZoomWidget *zoomer;
-    QSlider *zoomSlider;
-    QLabel *zoomLabel;
-    interpreter::Interpreter *interpreter;
+    Ui::MainWindow* ui;
+    QGraphicsScene* scene;
+    QGraphicsView* graphicsView;
+    ZoomWidget* zoomer;
+    QPlainTextEdit* interpreterInput;
+    QPushButton* interpretButton;
+#ifdef QT_DEBUG
+    QPushButton* printStackButton;
+    QPushButton* printCodeButton;
+    QPushButton* printVarsButton;
+#endif
+    QSplitter* mainSplitter;
+    QSplitter* rightSplitter;
+    interpreter::Interpreter* interpreter;
 };
 
 #endif // MAINWINDOW_H

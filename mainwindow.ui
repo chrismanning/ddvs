@@ -2,120 +2,35 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>837</width>
-    <height>725</height>
-   </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>837</width>
-    <height>725</height>
-   </size>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>1</horstretch>
+    <verstretch>1</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QSplitter" name="splitter">
-    <property name="geometry">
-     <rect>
-      <x>4</x>
-      <y>4</y>
-      <width>831</width>
-      <height>631</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <widget class="QGraphicsView" name="graphicsView">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>1</horstretch>
-       <verstretch>1</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>614</width>
-       <height>610</height>
-      </size>
-     </property>
-     <property name="renderHints">
-      <set>QPainter::Antialiasing|QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
-     </property>
-    </widget>
-    <widget class="QWidget" name="">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="QueueTab">
-         <attribute name="title">
-          <string>Queue</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="StructsTab">
-         <attribute name="title">
-          <string>Structs</string>
-         </attribute>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPlainTextEdit" name="interpreterInput"/>
-      </item>
-      <item>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QPushButton" name="interpretButton">
-          <property name="text">
-           <string>Interpret</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="printStackButton">
-          <property name="text">
-           <string>Print Stack</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="printCodeButton">
-          <property name="text">
-           <string>Print Code</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="printVarsButton">
-          <property name="text">
-           <string>Print Global Variables</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </widget>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="sizeIncrement">
+    <size>
+     <width>1</width>
+     <height>1</height>
+    </size>
+   </property>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>837</width>
+     <width>98</width>
      <height>22</height>
     </rect>
    </property>

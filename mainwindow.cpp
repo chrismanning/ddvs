@@ -9,20 +9,58 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("Dynamic Data Structure Visualisation");
+    this->setWindowTitle(tr("Dynamic Data Structure Visualisation"));
 
-    zoomer = new ZoomWidget(ui->graphicsView);
+    zoomer = new ZoomWidget(graphicsView);
     ui->statusBar->addWidget(zoomer);
 
-    scene = new QGraphicsScene(0, 0, 600, 600);
-    ui->graphicsView->setScene(scene);
-    #ifndef QT_NO_OPENGL
+    QSize minSize(600, 600);
+    scene = new QGraphicsScene(0, 0, minSize.width(), minSize.height());
+    graphicsView = new QGraphicsView(scene, this);
+    graphicsView->setMinimumSize(minSize + QSize(10,10));
+
+    //UI Layout
+    mainSplitter = new QSplitter(Qt::Horizontal, this);
+    mainSplitter->addWidget(graphicsView);
+    mainSplitter->setStretchFactor(0,1);
+    setCentralWidget(mainSplitter);
+
+    //buttons
+    interpretButton = new QPushButton(tr("Interpret"));
+#ifdef QT_DEBUG
+    printStackButton = new QPushButton(tr("Print Stack"));
+    printCodeButton = new QPushButton(tr("Print Code"));
+    printVarsButton = new QPushButton(tr("Print Globals"));
+#endif
+    rightSplitter = new QSplitter(Qt::Vertical, this);
+    rightSplitter->setMinimumWidth(200);
+
+    //text input
+    interpreterInput = new QPlainTextEdit(tr("Enter code here"), this);
+    rightSplitter->addWidget(interpreterInput);
+    rightSplitter->addWidget(interpretButton);
+#ifdef QT_DEBUG
+    rightSplitter->addWidget(printStackButton);
+    rightSplitter->addWidget(printCodeButton);
+    rightSplitter->addWidget(printVarsButton);
+#endif
+    mainSplitter->addWidget(rightSplitter);
+
+#ifndef QT_NO_OPENGL
     //ui->graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
-    #endif
+#endif
+
+    this->setMinimumWidth(graphicsView->minimumWidth() + rightSplitter->minimumWidth() + 5);
+    this->setMinimumHeight(graphicsView->minimumHeight() + ui->menuBar->height() + ui->mainToolBar->height()
+                           + zoomer->height() + ui->statusBar->height() + 5);
 
     interpreter = new interpreter::Interpreter;
-
-    types << "int" << "*int";
+    connect(interpretButton, SIGNAL(clicked()), this, SLOT(on_interpretButton_clicked()));
+#ifdef QT_DEBUG
+    connect(printStackButton, SIGNAL(clicked()), this, SLOT(on_printStackButton_clicked()));
+    connect(printCodeButton, SIGNAL(clicked()), this, SLOT(on_printCodeButton_clicked()));
+    connect(printVarsButton, SIGNAL(clicked()), this, SLOT(on_printVarsButton_clicked()));
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -62,9 +100,9 @@ void MainWindow::on_actionEdit_Item_triggered()
 
 void MainWindow::on_interpretButton_clicked()
 {
-    QString tmp_str = ui->interpreterInput->toPlainText();
+    QString tmp_str = interpreterInput->toPlainText();
     if(interpreter->parse(tmp_str)) {
-        ui->interpreterInput->clear();
+        interpreterInput->clear();
         interpreter->execute();
         typedef std::map<std::string, int> varstype;
         varstype vars = interpreter->getGlobals();
@@ -77,6 +115,8 @@ void MainWindow::on_interpretButton_clicked()
         }
     }
 }
+
+#ifdef QT_DEBUG
 
 void MainWindow::on_printStackButton_clicked()
 {
@@ -107,3 +147,4 @@ void MainWindow::on_printVarsButton_clicked()
     }
     qDebug() << tmp;
 }
+#endif
