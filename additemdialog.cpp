@@ -1,7 +1,7 @@
 #include "additemdialog.h"
 #include "ui_additemdialog.h"
 
-AddItemDialog::AddItemDialog(QGraphicsScene *scene, QHash<QString,DataType*> *items, QStringList *types, QWidget *parent) :
+AddItemDialog::AddItemDialog(QGraphicsScene *scene, QHash<QString,DataType*> *items, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddItemDialog)
 {
@@ -15,8 +15,6 @@ AddItemDialog::AddItemDialog(QGraphicsScene *scene, QHash<QString,DataType*> *it
     ui->userTypeGroupBox->hide();
     ui->simpleTypeGroupBox->hide();
     ui->newTypeGroupBox->hide();
-    ui->newMembersWidget->setTypes(types);
-    ui->typeComboBox->addItems(*types);
     //ui->buttonBox->setEnabled(false);
 }
 

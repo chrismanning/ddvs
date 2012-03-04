@@ -35,7 +35,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionAdd_Item_triggered()
 {
     qDebug("Adding item...");
-    AddItemDialog *dialog = new AddItemDialog(scene, &items, &types);
+    AddItemDialog *dialog = new AddItemDialog(scene, &items);
     dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
     dialog->show();
 }
