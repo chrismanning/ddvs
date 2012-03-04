@@ -151,9 +151,16 @@ namespace ast
         boost::optional<expression> rhs;
     };
 
+    struct struct_instantiation
+    {
+        type_id type_name;
+        identifier name;
+    };
+
+    typedef boost::variant<var_type, struct_instantiation> struct_member_type;
     struct struct_member_declaration
     {
-        int type_code;
+        struct_member_type type;
         identifier name;
     };
 
@@ -164,12 +171,6 @@ namespace ast
     };
 
     typedef std::list<struct_declaration> struct_list;
-
-    struct struct_instantiation
-    {
-        type_id type_name;
-        identifier name;
-    };
 
     struct if_statement;
     struct while_statement;
@@ -283,7 +284,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::struct_member_declaration,
-    (int, type_code)
+    (ast::struct_member_type, type)
     (ast::identifier, name)
 )
 

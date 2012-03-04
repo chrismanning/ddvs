@@ -79,7 +79,7 @@ namespace parser {
                 ;
 
             struct_member_declaration =
-                    lexeme[types]
+                    (var_type | struct_instantiation)
                 >   identifier
                 >   ';'
                 ;
