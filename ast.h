@@ -70,16 +70,6 @@ namespace ast
 
         // precedence 2
         op_assign,
-        op_plus_assign,
-        op_minus_assign,
-        op_times_assign,
-        op_divide_assign,
-        op_mod_assign,
-        op_bit_and_assign,
-        op_bit_xor_assign,
-        op_bitor_assign,
-        op_shift_left_assign,
-        op_shift_right_assign,
 
         // precedence 3
         op_logical_or,
@@ -88,50 +78,31 @@ namespace ast
         op_logical_and,
 
         // precedence 5
-        op_bit_or,
-
-        // precedence 6
-        op_bit_xor,
-
-        // precedence 7
-        op_bit_and,
-
-        // precedence 8
         op_equal,
         op_not_equal,
 
-        // precedence 9
+        // precedence 6
         op_less,
         op_less_equal,
         op_greater,
         op_greater_equal,
 
-        // precedence 10
-        op_shift_left,
-        op_shift_right,
-
-        // precedence 11
+        // precedence 7
         op_plus,
         op_minus,
 
-        // precedence 12
+        // precedence 8
         op_times,
         op_divide,
-        op_mod,
 
-        // precedence 13
+        // precedence 9
         op_positive,
         op_negative,
-        op_pre_incr,
-        op_pre_decr,
-        op_compl,
         op_not,
         op_address,
         op_indirection,
 
-        // precedence 14
-        op_post_incr,
-        op_post_decr,
+        // precedence 10
         op_select_point,
         op_select_ref
     };

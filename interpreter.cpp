@@ -119,6 +119,8 @@ namespace interpreter {
             case ast::op_negative: current_function->op(op_neg); break;
             case ast::op_not: current_function->op(op_not); break;
             case ast::op_positive: break;
+            case ast::op_indirection: break;
+            case ast::op_address: break;
             default: BOOST_ASSERT(0); return false;
         }
         return true;
@@ -174,16 +176,6 @@ namespace interpreter {
 
             // precedence 2
             2, // op_assign
-            2, // op_plus_assign
-            2, // op_minus_assign
-            2, // op_times_assign
-            2, // op_divide_assign
-            2, // op_mod_assign
-            2, // op_bit_and_assign
-            2, // op_bit_xor_assign
-            2, // op_bitor_assign
-            2, // op_shift_left_assign
-            2, // op_shift_right_assign
 
             // precedence 3
             3, // op_logical_or
@@ -191,49 +183,34 @@ namespace interpreter {
             // precedence 4
             4, // op_logical_and
 
-            // precedence 5
-            5, // op_bit_or
-
-            // precedence 6
-            6, // op_bit_xor
-
-            // precedence 7
-            7, // op_bit_and
-
             // precedence 8
-            8, // op_equal
-            8, // op_not_equal
+            5, // op_equal
+            5, // op_not_equal
 
             // precedence 9
-            9, // op_less
-            9, // op_less_equal
-            9, // op_greater
-            9, // op_greater_equal
-
-            // precedence 10
-            10, // op_shift_left
-            10, // op_shift_right
+            6, // op_less
+            6, // op_less_equal
+            6, // op_greater
+            6, // op_greater_equal
 
             // precedence 11
-            11, // op_plus
-            11, // op_minus
+            7, // op_plus
+            7, // op_minus
 
             // precedence 12
-            12, // op_times
-            12, // op_divide
-            12, // op_mod
+            8, // op_times
+            8, // op_divide
 
             // precedence 13
-            13, // op_positive
-            13, // op_negative
-            13, // op_pre_incr
-            13, // op_pre_decr
-            13, // op_compl
-            13, // op_not
+            9, // op_positive
+            9, // op_negative
+            9, // op_not
+            9, // op_address
+            9, // op_indirection
 
             // precedence 14
-            14, // op_post_incr
-            14  // op_post_decr
+            10, // op_select_point
+            10  // op_select_ref
         };
     }
 
@@ -289,6 +266,7 @@ namespace interpreter {
     bool global::operator()(ast::variable_declaration const& ast)
     {
         BOOST_ASSERT(current_function != 0);
+        qDebug() << "type_code:" << ast.type.type_code << "pointer:" << ast.type.pointer;
         int const* p = current_function->find_var(ast.name.name);
         if(p != 0)
         {

@@ -80,7 +80,6 @@ namespace parser
                 ("if")
                 ("else")
                 ("while")
-                ("void")
                 ("struct")
                 ("return")
                 ;

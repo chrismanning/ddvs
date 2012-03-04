@@ -62,6 +62,21 @@ namespace interpreter {
         type_struct
     };
 
+    struct cstruct
+    {
+        cstruct(std::string name, std::map<std::string, int> members)
+            : name(name), members(members)
+        {
+
+        }
+        std::string name;
+        std::map<std::string, int> members;
+        std::size_t size()
+        {
+            return members.size();
+        }
+    };
+
     struct function
     {
         function(std::map<std::string, int>& global_variables, std::map<std::string, int*>& global_pointers,
@@ -102,21 +117,6 @@ namespace interpreter {
         std::size_t nargs_;
     private:
         std::size_t return_type;
-    };
-
-    struct cstruct
-    {
-        cstruct(std::string name, std::map<std::string, int> members)
-            : name(name), members(members)
-        {
-
-        }
-        std::string name;
-        std::map<std::string, int> members;
-        std::size_t size()
-        {
-            return members.size();
-        }
     };
 
     struct global : function, public boost::static_visitor<bool> {
