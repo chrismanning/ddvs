@@ -2,6 +2,9 @@
 \usepackage[a4paper]{geometry}
 \usepackage{hyperref}
 \usepackage{syntax}
+\usepackage{listings}
+\lstset{language=C}
+\usepackage{parskip}
 \input{ebnf.sty}
 
 \hypersetup{
@@ -41,46 +44,68 @@ Another interface to this application utilises the expressiveness of a programmi
 
 \subsection{Specification}
 
-\begin{EBNF}
-\item[\textit{binary\_op}]
-    '||'
-    | '\&\&'
-    | '=='
-    | '!='
-    | '$<$'
-    | '$\leq$'
-    | '$>$'
-    | '$\geq$'
-    | '+'
-    | '-'
-    | '*'
-    | '/'
-    ;
-\item[\textit{unary\_op}]
-    '+'
-    | '-'
-    | '!'
-    | '*'
-    | '$\rightarrow$'
-    | '.'
-    | '\&'
-    ;
-\item[\textit{keywords}]
-    'true' | 'false' | 'if' | 'else' | 'while' | 'struct' | 'return'
-    ;
-\item[\textit{types}]
-    'void' | 'int' | 'bool'
-\end{EBNF}
-\begin{grammar}
-<expr> ::=
-    <unary\_expr> (<binary\_op> <unary\_expr>)*
+This is the formal grammar specification of the interpreted language using an Extended Backus-Naur Form (EBNF)-like notation, with some brief descriptions.
+
+\noindent\textit{binary\_op} ::=
+    '$||$'
+    $|$ '$\&\&$'
+    $|$ '$==$'
+    $|$ '$!=$'
+    $|$ '$<$'
+    $|$ '$\leq$'
+    $|$ '$>$'
+    $|$ '$\geq$'
+    $|$ '$+$'
+    $|$ '$-$'
+    $|$ '$*$'
+    $|$ '$/$'
     ;
 
+\noindent These are \textit{binary operators}, meaning they require two \textit{operands}.
+
+\noindent\textit{unary\_op} ::=
+    '$+$'
+    $|$ '$-$'
+    $|$ '$!$'
+    $|$ '$*$'
+    $|$ '$\rightarrow$'
+    $|$ '$.$'
+    $|$ '$\&$'
+    ;
+
+\noindent\textit{Unary operators} require only one \textit{operand}.
+
+\noindent\textit{keywords} ::=
+    'true' $|$ 'false' $|$ 'if' $|$ 'else' $|$ 'while' $|$ 'struct' $|$ 'return'
+    ;
+
+\noindent These are the \textit{keywords} which are reserved words and cannot be used outside of their required context.
+
+\noindent\textit{types} ::=
+    'void' $|$ 'int' $|$ 'bool' ;
+    
+\noindent These are the predefined primitive \textit{types} that are used for declaring variables, etc.
+
+\begin{grammar}
+<expr> ::=
+    <unary\_expr> {<binary\_op> <unary\_expr>}
+    ;
+\end{grammar}
+An \textit{expression} must contain at least one \textit{unary expression}, with an option for any number of \textit{binary} operations paired with another \textit{unary expression} appended.
+\begin{grammar}
 <unary\_expr> ::=
 	<primary\_expr>
     \alt (<unary\_op> <primary\_expr>)
     ;
-
+\end{grammar}
+A \textit{unary expression} consists of either a \textit{primary expression} or a \textit{unary operator} followed by a \textit{primary expression}.
+\begin{grammar}
+<identifier> ::=
+	-(keywords | types) ,
+	alpha | '\_' , \{ alpha | digit | '\_' \} ;
+\end{grammar}
+An \textit{identifier} must not be a \textit{keyword}, a primitive type or begin with a digit. It must start with an alphabetic character or an underscore (\_) to be optionally followed by zero or more alphabetic characters, digits or underscores. 
+\begin{grammar}
 <primary\_expr> ::=
 	integer
     \alt   <function\_call>
@@ -88,21 +113,23 @@ Another interface to this application utilises the expressiveness of a programmi
     \alt   boolean
     \alt   '(' <expr> ')'
 ;
-
+\end{grammar}
+Apart from the other specified \textit{expressions}, a \textit{primary expression} can also be an integer literal, a boolean literal (\textit{true} \& \textit{false}), or an expression enclosed in parentheses ('(' \& ')').
+\begin{grammar}
 <function\_call> ::=
-<identifier> '(' [<argument\_list>] ')'
+<identifier> '(' [<call_argument_list>] ')'
 ;
-
-<argument\_list> ::= [<expr> | <expr> ',' <argument\_list>] ;
-
-<identifier> ::=
-	-(keywords | types),
-	alphabetic character, \{ alphabetic character | digit | '\_' \} ;
-
+\end{grammar}
+\begin{grammar}
+<call_argument\_list> ::= [<expr> | <expr> ',' <call_argument_list>] ;
+\end{grammar}
+A \textit{call argument list} can contain zero, one or many expressions.
+\begin{grammar}
 <statement_list> ::=
     \{statement_\}
     ;
-
+\end{grammar}
+\begin{grammar}
 <statement_> ::=
 	<variable_declaration>
     \alt   <struct_member_declaration>
@@ -115,17 +142,24 @@ Another interface to this application utilises the expressiveness of a programmi
     \alt   <while_statement>
     \alt   <return_statement>
     ;
-
+\end{grammar}
+Any of the above listed \textit{statements} can take the place of a $\langle statement\_\rangle$ instance.
+\begin{grammar}
 <type_id> ::= <identifier> ;
-
+\end{grammar}
+\begin{grammar}
 <var_type> ::= <types> ['*'] ;
-
+\end{grammar}
+The optional '*' denotes a pointer type.
+\begin{grammar}
 <variable_declaration> ::=
 	<var_type> <identifier> [('=' <expr>)] ';' ;
-
+\end{grammar}
+\begin{grammar}
 <struct_member_declaration> ::=
-	<var_type> <identifier> ';' ;
-
+	(<var_type> | <struct_instantiation>) <identifier> ';' ;
+\end{grammar}
+\begin{grammar}
 <struct_declaration> ::=
 	'struct' <type_id>
     '\{'
@@ -133,21 +167,24 @@ Another interface to this application utilises the expressiveness of a programmi
     '\}'
     ';'
     ;
-
+\end{grammar}
+\begin{grammar}
 <struct_instantiation> ::=
 	'struct'
     <type_id>
     <identifier>
     ';'
     ;
-
+\end{grammar}
+\begin{grammar}
 <assignment> ::=
 	<identifier>
        '='
        <expr>
        ';'
     ;
-
+\end{grammar}
+\begin{grammar}
 <if_statement> ::=
 	'if'
        '('
@@ -159,7 +196,8 @@ Another interface to this application utilises the expressiveness of a programmi
 	   <statement_>
 	]
     ;
-
+\end{grammar}
+\begin{grammar}
 <while_statement> ::=
 	'while'
        '('
@@ -167,28 +205,89 @@ Another interface to this application utilises the expressiveness of a programmi
        ')'
        <statement_>
     ;
-
+\end{grammar}
+\begin{grammar}
 <compound_statement> ::=
     '\{' [<statement_list>] '\}'
     ;
-
+\end{grammar}
+A \textit{compound statement} is an optional list of \textit{statements} enclosed in braces ('\{' \& '\}').
+\begin{grammar}
 <return_statement> ::=
 	'return'
     [expr]
        ';'
     ;
-<argument_list> ::= [{<var_type> <identifier>)}] ;
-
+\end{grammar}
+\begin{grammar}
+<argument_list> ::= \{<var_type> <identifier>\} ;
+\end{grammar}
+\begin{grammar}
 <function_declaration> ::=
 	<var_type>
        <identifier>
        '(' <argument_list> ')'
        <compound_statement>
     ;
-
+\end{grammar}
+\begin{grammar}
 <translation_unit> ::=
     \{ <statement_list> | <function> \} ;
 \end{grammar}
+The \textit{translation unit} consists of a list of both \textit{function} declarations and \textit{statement lists}. This is root of all that can be passed to the interpreter, i.e.\ everything must be entered in this form.
+
+\subsection{Operator Precedence}
+The following table shows the operator precedence of the interpreted language, from lowest to highest.
+\begin{tabular}{| c | l | l |}
+\hline
+Precedence & Operator & Description \\ \hline
+1 & , & Comma \\ \hline
+2 & = & Assignment \\ \hline
+3 & $\parallel$ & Logical OR \\ \hline
+4 & \&\& & Logical AND \\ \hline
+5 & == & Equal \\
+  & != & Not Equal \\ \hline
+6 & $<$ & Less than \\
+  & $\leq$ & Less than or equal to \\
+  & $>$ & More than \\
+  & $\geq$ & More than or equal to \\ \hline
+7 & + (binary) & Addition \\
+  & $-$ (binary) & Subtraction \\ \hline
+8 & * & Multiplication \\
+  & / & Division \\ \hline
+9 & + (unary) & Plus \\
+  & -- (unary) & Minus \\
+  & ! & Not \\
+  & $\&$ & Address of \\
+  & * (unary) & Dereference \\ \hline
+10 & $-$$>$ & Select element through pointer \\
+   & . & Select element \\ \hline
+
+\end{tabular}
+
+\subsection{Examples}
+
+\subsubsection{Variable Declaration}
+
+\begin{lstlisting}
+int a; //declare an integer variable named "a"
+int b = 3; //assignment on declaration
+int c = b + 2; //assignment & binary operation
+
+int * p = &a;
+*p = 51; // a == 51
+\end{lstlisting}
+
+\subsubsection{Function Definition}
+
+\begin{lstlisting}
+int factorial(int n) {
+  if(n < 1)
+    return 1;
+  else
+    return n * factorial(n-1);
+}
+\end{lstlisting}
 
 
 \end{document}
