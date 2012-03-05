@@ -5,7 +5,6 @@
 \usepackage{listings}
 \lstset{language=C}
 \usepackage{parskip}
-\input{ebnf.sty}
 
 \hypersetup{
     colorlinks,
@@ -238,6 +237,7 @@ The \textit{translation unit} consists of a list of both \textit{function} decla
 
 \subsection{Operator Precedence}
 The following table shows the operator precedence of the interpreted language, from lowest to highest.
+
 \begin{tabular}{| c | l | l |}
 \hline
 Precedence & Operator & Description \\ \hline
@@ -278,7 +278,7 @@ int * p = &a;
 *p = 51; // a == 51
 \end{lstlisting}
 
-\subsubsection{Function Definition}
+\subsubsection{Function Declaration}
 
 \begin{lstlisting}
 int factorial(int n) {
@@ -287,6 +287,23 @@ int factorial(int n) {
   else
     return n * factorial(n-1);
 }
+\end{lstlisting}
+
+\subsubsection{Struct Declaration}
+
+\begin{lstlisting}
+struct point {
+  int x;
+  int y;
+};
+\end{lstlisting}
+
+\subsubsection{Struct Instantiation}
+
+\begin{lstlisting}
+struct point p1;
+p1.x = 4;
+p1.y = 6;
 \end{lstlisting}
 
 
