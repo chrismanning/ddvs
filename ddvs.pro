@@ -41,7 +41,11 @@ HEADERS  += mainwindow.h \
     mainfunction.h \
     error.h \
     annotation.h \
-    types.h
+    types.h \
+    statement_def.h \
+    function_def.h \
+    expression_def.h \
+    mainfunction_def.h
 
 linux:INCLUDEPATH += /usr/include/boost-1_48/
 macx:INCLUDEPATH += /Users/chris/boost_1_49_0/

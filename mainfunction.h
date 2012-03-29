@@ -7,12 +7,7 @@ namespace parser {
     //template <typename Iterator>
     struct main_function : qi::grammar<Iterator, ast::main_function(), skipper >
     {
-        main_function(error_handler& error) : main_function::base_type(all), function_i(error), statement_i(error), types(statement_i.types)
-        {
-            all =
-                    +(statement_i | function_i)
-                ;
-        }
+        main_function(error_handler& error);
 
         primitive_types& types;
 

@@ -216,13 +216,13 @@ namespace ast
     typedef statement_list function_body;
     struct arg
     {
-        int type_code;
+        var_type type_code;
         identifier name;
     };
 
     struct function
     {
-        int return_type_code;
+        var_type return_type_code;
         identifier function_name;
         std::list<arg> args;
         function_body body;
@@ -326,13 +326,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::arg,
-    (int, type_code)
+    (ast::var_type, type_code)
     (ast::identifier,name)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::function,
-    (int, return_type_code)
+    (ast::var_type, return_type_code)
     (ast::identifier, function_name)
     (std::list<ast::arg>, args)
     (ast::function_body, body)
