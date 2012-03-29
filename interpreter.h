@@ -184,7 +184,7 @@ namespace interpreter {
     public:
         Interpreter(size_t size = 50) :
             stack(size),
-            error(start, end),
+            error(start, end, &error_buf),
             compiler(stack, code, error)
         {}
         bool parse(std::string input);
@@ -214,6 +214,7 @@ namespace interpreter {
         error_handler error;
         global compiler;
         ast::main_function ast;
+        QString* error_buf;
 
         parser::skipper skip;
 

@@ -474,7 +474,12 @@ namespace interpreter {
             }
             else {
                 qDebug() << "FAIL";
+                qDebug() << *error_buf;
             }
+        }
+        else {
+            qDebug() << "FAIL";
+            qDebug() << *error_buf;
         }
 
         return success;

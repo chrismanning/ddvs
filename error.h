@@ -16,8 +16,8 @@ typedef std::string::const_iterator Iterator;
 //template <typename Iterator>
 struct error_handler
 {
-    error_handler(Iterator& first, Iterator& last)
-      : first(first), last(last) {}
+    error_handler(Iterator& first, Iterator& last, QString** error_buf)
+      : first(first), last(last), error_buf(error_buf) {}
     
     template <typename, typename, typename>
     struct result { typedef void type; };
@@ -32,11 +32,13 @@ struct error_handler
         Iterator line_start = get_pos(err_pos, line);
         if(err_pos != last)
         {
-            std::cout << message << what << " line " << line << ':' << std::endl;
-            std::cout << get_line(line_start) << std::endl;
+            std::stringstream ss;
+            ss << message << what << " line " << line << ':' << '\n';
+            ss << get_line(line_start) << '\n';
             for(; line_start != err_pos; ++line_start)
-                std::cout << ' ';
-            std::cout << '^' << std::endl;
+                ss << ' ';
+            ss << '^' << '\n';
+            *error_buf = new QString(ss.str().c_str());
         }
         else
         {
@@ -85,5 +87,6 @@ struct error_handler
     Iterator& first;
     Iterator& last;
     std::vector<Iterator> iters;
+    QString** error_buf;
 };
 #endif // ERROR_H
