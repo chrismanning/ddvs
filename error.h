@@ -30,21 +30,21 @@ struct error_handler
     {
         int line;
         Iterator line_start = get_pos(err_pos, line);
+        std::stringstream ss;
         if(err_pos != last)
         {
-            std::stringstream ss;
             ss << message << what << " line " << line << ':' << '\n';
             ss << get_line(line_start) << '\n';
             for(; line_start != err_pos; ++line_start)
                 ss << ' ';
             ss << '^' << '\n';
-            *error_buf = new QString(ss.str().c_str());
         }
         else
         {
-            std::cout << "Unexpected end of input. ";
-            std::cout << message << what << " line " << line << std::endl;
+            ss << "Unexpected end of input. ";
+            ss << message << what << " line " << line << '\n';
         }
+        *error_buf = new QString(ss.str().c_str());
     }
 
     Iterator get_pos(Iterator err_pos, int& line) const

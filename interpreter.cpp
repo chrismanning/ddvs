@@ -475,11 +475,13 @@ namespace interpreter {
             else {
                 qDebug() << "FAIL";
                 qDebug() << *error_buf;
+                error_buf->clear();
             }
         }
         else {
-            qDebug() << "FAIL";
+            qDebug() << "PARSE FAIL";
             qDebug() << *error_buf;
+            error_buf->clear();
         }
 
         return success;

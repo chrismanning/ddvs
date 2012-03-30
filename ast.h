@@ -38,7 +38,7 @@ namespace ast
         std::string name;
     };
 
-    struct type_id
+    struct type_id : tagged
     {
         type_id(std::string const& name = "") : name(name) {}
         std::string name;

@@ -130,6 +130,8 @@ namespace parser {
             (identifier)
             (variable_declaration)
             (assignment)
+            (struct_declaration)
+            (struct_instantiation)
         );
 
         // Error handling: on error in statement_list, call error_handler.
@@ -144,6 +146,10 @@ namespace parser {
         on_success(assignment,
             annotation_function(error.iters)(_val, _1));
         on_success(return_statement,
+            annotation_function(error.iters)(_val, _1));
+        on_success(struct_declaration,
+            annotation_function(error.iters)(_val, _1));
+        on_success(struct_instantiation,
             annotation_function(error.iters)(_val, _1));
     }
 }
