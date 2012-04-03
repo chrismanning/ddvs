@@ -90,6 +90,7 @@ namespace interpreter {
         BOOST_ASSERT(current_function != 0);
         switch(ast)
         {
+            case ast::op_assign: current_function->op(op_store); break;
             case ast::op_plus: current_function->op(op_add); break;
             case ast::op_minus: current_function->op(op_sub); break;
             case ast::op_times: current_function->op(op_mul); break;
@@ -248,15 +249,15 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::assignment const& ast)
+    bool global::operator()(ast::assignment_expression const& ast)
     {
         BOOST_ASSERT(current_function != 0);
         if(!(*this)(ast.rhs))
             return false;
-        int const* p = current_function->find_var(ast.lhs.name);
+        int const* p = 0;//current_function->find_var(ast.lhs.name);
         if(p == 0)
         {
-            error(ast.lhs.id, "Undeclared variable: " + ast.lhs.name);
+            //error(ast.lhs.id, "Undeclared variable: " + ast.lhs.name);
             return false;
         }
         current_function->op(op_store, *p);
@@ -266,28 +267,38 @@ namespace interpreter {
     bool global::operator()(ast::declaration const& ast)
     {
         BOOST_ASSERT(current_function != 0);
-        qDebug() << /*"type_code:" << ast.typ <<*/ "pointer:" << ast.dec.pointer;
-        boost::apply_visitor(th, ast.typ);
-        int const* p = current_function->find_var(ast.dec.name.name);
+        //qDebug() << /*"type_code:" << ast.typ <<*/ "pointer:" << ast.dec.pointer;
+        if(boost::apply_visitor(th, ast.type) == "basic")
+        {
+            if(!ast.declarator) {
+                error(ast.id, "Expected <identifier> with basic type");
+                return false;
+            }
+        }
+        ast::init_declarator const& dec = *ast.declarator;
+        int const* p = current_function->find_var(dec.dec.name.name);
+
         if(p != 0)
         {
-            error(ast.dec.name.id, "Duplicate variable: " + ast.dec.name.name);
+            error(ast.id, "Duplicate variable: " + dec.dec.name.name);
             return false;
         }
-//        if(ast.rhs) // if there's an RHS initializer
-//        {
-//            bool r = (*this)(*ast.rhs);
-//            if(r) // don't add the variable if the RHS fails
-//            {
-//                current_function->add_var(ast.name.name);
-//                current_function->op(op_store, *current_function->find_var(ast.name.name));
-//            }
-//            return r;
-//        }
-//        else
-//        {
-            current_function->add_var(ast.dec.name.name);
-//        }
+
+        if(dec.assign)
+        {
+            bool r = (*this)(*dec.assign);
+            if(r) // don't add the variable if the RHS fails
+            {
+                current_function->add_var(dec.dec.name.name);
+                current_function->op(op_store, *current_function->find_var(dec.dec.name.name));
+            }
+            return r;
+        }
+        else
+        {
+            current_function->add_var(dec.dec.name.name);
+        }
+
         return true;
     }
 
@@ -350,7 +361,7 @@ namespace interpreter {
 
     bool global::operator()(ast::return_statement const& ast)
     {
-        if(void_return)
+        if(current_function->void_return)
         {
             if(ast.expr)
             {
@@ -439,20 +450,14 @@ namespace interpreter {
     bool global::operator()(ast::struct_specifier const& ast)
     {
         std::map<std::string, int> members;
-        foreach(boost::recursive_wrapper<ast::declaration> const& mem, ast.members) {
-            members[mem.get().dec.name.name] = members.size();
+        foreach(boost::recursive_wrapper<ast::struct_member_declaration> const& mem, ast.members) {
+            //members[mem.get().dec.name.name] = members.size();
         }
         structs.push_back(cstruct(ast.type_name.name,members));
 //        int num = count_symbols(structs_table);
 //        structs_table.add(ast.type_name.name,num);
 //        structs_table.for_each(&print);
 
-        return true;
-    }
-
-    bool global::operator()(ast::struct_instantiation const& ast)
-    {
-        qDebug() << QString::fromStdString(ast.name.name);
         return true;
     }
 

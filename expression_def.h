@@ -17,6 +17,7 @@ namespace parser {
         qi::_val_type _val;
         qi::raw_type raw;
         qi::lexeme_type lexeme;
+        qi::matches_type matches;
         qi::alpha_type alpha;
         qi::alnum_type alnum;
         qi::bool_type bool_;
@@ -39,10 +40,13 @@ namespace parser {
             ("<=", ast::op_less_equal)
             (">", ast::op_greater)
             (">=", ast::op_greater_equal)
+            ("=", ast::op_assign)
             ("+", ast::op_plus)
             ("-", ast::op_minus)
             ("*", ast::op_times)
             ("/", ast::op_divide)
+            ("->", ast::op_select_point)
+            (".", ast::op_select_ref)
             ;
 
         unary_op.add
@@ -50,8 +54,6 @@ namespace parser {
             ("-", ast::op_negative)
             ("!", ast::op_not)
             ("*", ast::op_indirection)
-            ("->", ast::op_select_point)
-            (".", ast::op_select_ref)
             ("&", ast::op_address)
             ;
 
@@ -84,8 +86,11 @@ namespace parser {
             |   '(' > expr > ')'
             ;
 
-        assignment_expression =
-                unary_expr > '=' > assignment_expression;
+        assignment_expression = unary_expr > '=' > expr;
+
+        declarator = matches['*'] > identifier;
+
+        init_declarator = declarator > -("="  > expr);
 
         function_call =
                 (identifier >> '(')

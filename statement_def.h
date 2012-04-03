@@ -49,22 +49,20 @@ namespace parser {
 
         var_type = types > -lexeme[char_('*')];
 
-        //declaration = declaration_specifier > ';';
-
-        declaration = type_specifier > declarator > ';';
+        declaration = type_specifier > -expr.init_declarator > ';';
 
         type_specifier =
                 types
             |   struct_specifier
             ;
 
+        struct_member_declaration = type_specifier > expr.declarator > ';';
+
         struct_specifier =
-                lexeme["struct"] > type_id > -('{' > +declaration > '}')
+                lexeme["struct"] > type_id > -('{' > +struct_member_declaration > '}')
             //|   (lexeme["struct"] > type_id > '{' > *declaration > '}')
             //|   (lexeme["struct"] > '{' > *declaration > '}')
             ;
-
-        declarator = matches['*'] > identifier;
 
 //        struct_member_declaration =
 //                (var_type | struct_instantiation)
@@ -133,9 +131,9 @@ namespace parser {
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
 
-        // Annotation: on success in variable_declaration,
+        // Annotation: on success in declaration,
         // assignment and return_statement, call annotation.
-        on_success(variable_declaration,
+        on_success(declaration,
             annotation_function(error.iters)(_val, _1));
         on_success(return_statement,
             annotation_function(error.iters)(_val, _1));

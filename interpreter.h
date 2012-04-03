@@ -88,7 +88,9 @@ namespace interpreter {
             offset(offset_),
             address(code.size()),
             size_(0),
-            nargs_(nargs) {}
+            nargs_(nargs),
+            void_return(false)
+        {}
 
         void op(int a);
         void op(int a, int b);
@@ -105,6 +107,7 @@ namespace interpreter {
         void add_var(std::string const& name);
         void link_to(std::string const& name, std::size_t address);
         std::size_t offset;
+        bool void_return;
 
     protected:
         std::map<std::string, int> variables;
@@ -121,31 +124,29 @@ namespace interpreter {
     };
 
 
-    struct type_handler
+    struct type_handler : public boost::static_visitor<std::string>
     {
         type_handler(std::vector<cstruct>& structs) :
             structs(structs) {}
 
-        void operator()(ast::struct_specifier ss) {
-            return;
+        std::string operator()(ast::struct_specifier ss) {
+            return ss.type_name.name;
         }
         std::string operator()(int type_code) {
-            return "";
+            return "basic";
         }
         std::vector<cstruct>& structs;
     };
 
     struct global : function, public boost::static_visitor<bool> {
         //typedef bool result_type;
-        global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__, parser::struct_types& structs) :
+        global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__) :
                 function(variables, pointers, code, 0, 0),
                 current_function(this),
                 global_function(this),
-                void_return(true),
                 stack(stack),
                 error_(error__),
-                th(structs),
-                structs_table(structs)
+                th(structs)
         {
             void_return = true;
         }
@@ -162,7 +163,7 @@ namespace interpreter {
         bool operator()(ast::unary const& ast);
         bool operator()(ast::function_call const& ast);
         bool operator()(ast::expression const& ast);
-        bool operator()(ast::assignment const& ast);
+        bool operator()(ast::assignment_expression const& ast);
         bool operator()(ast::declaration const& ast);
         bool operator()(ast::statement_list const& ast);
         bool operator()(ast::statement const& ast);
@@ -171,9 +172,8 @@ namespace interpreter {
         bool operator()(ast::return_statement const& ast);
         bool operator()(ast::function const& ast);
         bool operator()(ast::function_list const& ast);
-//        bool operator()(ast::struct_member_declaration const& ast);
+        bool operator()(ast::struct_member_declaration const& ast);
         bool operator()(ast::struct_specifier const& ast);
-        bool operator()(ast::struct_instantiation const& ast);
         bool operator()(ast::main_function const& ast);
 
         std::vector<int>& get_code() { return code; }
@@ -186,14 +186,13 @@ namespace interpreter {
         function* current_function;
         function* global_function;
         error_handler& error_;
-        parser::struct_types& structs_table;
+        //parser::struct_types& structs_table;
 
         bool eval_expression(
             int min_precedence,
             std::list<ast::operation>::const_iterator& rbegin,
             std::list<ast::operation>::const_iterator rend);
 
-        bool void_return;
         std::string current_function_name;
         std::vector<int>& stack;
         type_handler th;
@@ -205,7 +204,7 @@ namespace interpreter {
         Interpreter(size_t size = 50) :
             stack(size),
             error(start, end, &error_buf),
-            compiler(stack, code, error, structs)
+            compiler(stack, code, error)
         {}
         bool parse(std::string input);
         bool parse(QString input);

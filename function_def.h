@@ -31,7 +31,7 @@ namespace parser {
         argument_list = (body.var_type > identifier) % ',';
 
         start =
-                body.var_type
+                body.type_specifier
             >   identifier
             >   '(' > -argument_list > ')'
             >   '{'

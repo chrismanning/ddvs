@@ -31,6 +31,8 @@ namespace parser
         qi::rule<Iterator, ast::function_call(), skipper> function_call;
         qi::rule<Iterator, std::list<ast::expression>(), skipper> argument_list;
         qi::rule<Iterator, ast::assignment_expression(), skipper> assignment_expression;
+        qi::rule<Iterator, ast::declarator(), skipper> declarator;
+        qi::rule<Iterator, ast::init_declarator(), skipper> init_declarator;
         qi::rule<Iterator, std::string(), skipper> identifier;
         qi::symbols<char, ast::optoken> unary_op, binary_op;
         qi::symbols<char> keywords;

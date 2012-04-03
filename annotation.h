@@ -60,18 +60,11 @@ struct annotation
         boost::apply_visitor(set_id(id), ast);
     }
 
-    void operator()(ast::variable_declaration& ast, Iterator pos) const
+    void operator()(ast::declaration& ast, Iterator pos) const
     {
         int id = iters.size();
         iters.push_back(pos);
-        ast.name.id = id;
-    }
-
-    void operator()(ast::assignment& ast, Iterator pos) const
-    {
-        int id = iters.size();
-        iters.push_back(pos);
-        ast.lhs.id = id;
+        ast.id = id;
     }
 
     void operator()(ast::return_statement& ast, Iterator pos) const
