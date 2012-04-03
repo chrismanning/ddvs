@@ -137,6 +137,52 @@ namespace ast
         expression rhs;
     };
 
+    struct assignment_expression
+    {
+        operand var;
+        boost::recursive_wrapper<assignment_expression> rest;
+    };
+
+    struct declarator
+    {
+        bool pointer;
+        identifier name;
+    };
+
+//    typedef boost::variant<var_type, struct_instantiation> struct_member_type;
+//    struct struct_member_declaration
+//    {
+//        struct_member_type type;
+//        identifier name;
+//    };
+
+    struct declaration;
+//    struct struct_declaration
+//    {
+//        type_id type_name;
+//        std::list<boost::recursive_wrapper<declaration> > members;
+//    };
+
+    struct anonymous_struct
+    {
+        std::list<boost::recursive_wrapper<declaration> > members;
+    };
+
+    //typedef boost::variant<type_id, struct_declaration> struct_specifier;
+    struct struct_specifier
+    {
+        type_id type_name;
+        std::list<boost::recursive_wrapper<declaration> > members;
+    };
+
+    typedef boost::variant<int, struct_specifier> type_specifier;
+
+    struct declaration
+    {
+        type_specifier typ;
+        declarator dec;
+    };
+
     struct variable_declaration
     {
         var_type type;
@@ -157,20 +203,7 @@ namespace ast
         identifier name;
     };
 
-    typedef boost::variant<var_type, struct_instantiation> struct_member_type;
-    struct struct_member_declaration
-    {
-        struct_member_type type;
-        identifier name;
-    };
-
-    struct struct_declaration
-    {
-        type_id type_name;
-        std::list<struct_member_declaration> members;
-    };
-
-    typedef std::list<struct_declaration> struct_list;
+    //typedef std::list<struct_declaration> struct_list;
 
     struct if_statement;
     struct while_statement;
@@ -178,12 +211,8 @@ namespace ast
     struct return_statement;
 
     typedef boost::variant<
-            variable_declaration
-          , struct_member_declaration
-          , struct_declaration
-          , struct_instantiation
-          , assignment
-          , function_call
+            declaration
+          , expression
           , boost::recursive_wrapper<if_statement>
           , boost::recursive_wrapper<while_statement>
           , boost::recursive_wrapper<return_statement>
@@ -282,16 +311,34 @@ BOOST_FUSION_ADAPT_STRUCT(
     (boost::optional<ast::expression>, rhs)
 )
 
+//BOOST_FUSION_ADAPT_STRUCT(
+//    ast::struct_member_declaration,
+//    (ast::struct_member_type, type)
+//    (ast::identifier, name)
+//)
+
 BOOST_FUSION_ADAPT_STRUCT(
-    ast::struct_member_declaration,
-    (ast::struct_member_type, type)
-    (ast::identifier, name)
+    ast::declaration,
+    (ast::type_specifier, typ)
+    (ast::declarator, dec)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-    ast::struct_declaration,
+    ast::declarator,
+    (bool, pointer)
+    (ast::identifier, name)
+)
+
+//BOOST_FUSION_ADAPT_STRUCT(
+//    ast::struct_declaration,
+//    (ast::type_id, type_name)
+//    (std::list<boost::recursive_wrapper<ast::declaration> >, members)
+//)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::struct_specifier,
     (ast::type_id, type_name)
-    (std::list<ast::struct_member_declaration>, members)
+    (std::list<boost::recursive_wrapper<ast::declaration> >, members)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -301,9 +348,20 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+    ast::anonymous_struct,
+    (std::list<boost::recursive_wrapper<ast::declaration> >, members)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
     ast::assignment,
     (ast::identifier, lhs)
     (ast::expression, rhs)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::assignment_expression,
+    (ast::operand, var)
+    (boost::recursive_wrapper<ast::assignment_expression>, rest)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

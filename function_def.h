@@ -4,7 +4,8 @@
 #include <function.h>
 
 namespace parser {
-    function::function(error_handler& error) : function::base_type(start), body(error)
+    function::function(error_handler& error)
+        : function::base_type(start), body(error)
     {
         qi::_1_type _1;
         qi::_2_type _2;

@@ -263,30 +263,31 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::variable_declaration const& ast)
+    bool global::operator()(ast::declaration const& ast)
     {
         BOOST_ASSERT(current_function != 0);
-        qDebug() << "type_code:" << ast.type.type_code << "pointer:" << ast.type.pointer;
-        int const* p = current_function->find_var(ast.name.name);
+        qDebug() << /*"type_code:" << ast.typ <<*/ "pointer:" << ast.dec.pointer;
+        boost::apply_visitor(th, ast.typ);
+        int const* p = current_function->find_var(ast.dec.name.name);
         if(p != 0)
         {
-            error(ast.name.id, "Duplicate variable: " + ast.name.name);
+            error(ast.dec.name.id, "Duplicate variable: " + ast.dec.name.name);
             return false;
         }
-        if(ast.rhs) // if there's an RHS initializer
-        {
-            bool r = (*this)(*ast.rhs);
-            if(r) // don't add the variable if the RHS fails
-            {
-                current_function->add_var(ast.name.name);
-                current_function->op(op_store, *current_function->find_var(ast.name.name));
-            }
-            return r;
-        }
-        else
-        {
-            current_function->add_var(ast.name.name);
-        }
+//        if(ast.rhs) // if there's an RHS initializer
+//        {
+//            bool r = (*this)(*ast.rhs);
+//            if(r) // don't add the variable if the RHS fails
+//            {
+//                current_function->add_var(ast.name.name);
+//                current_function->op(op_store, *current_function->find_var(ast.name.name));
+//            }
+//            return r;
+//        }
+//        else
+//        {
+            current_function->add_var(ast.dec.name.name);
+//        }
         return true;
     }
 
@@ -417,24 +418,41 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::struct_member_declaration const& /*ast*/)
-    {
-        return true;
+//    bool global::operator()(ast::struct_member_declaration const& /*ast*/)
+//    {
+//        return true;
+//    }
+
+    int sym_size;
+    void incr(std::string s, int d) {
+        sym_size++;
+    }
+    int count_symbols(parser::struct_types sym) {
+        sym_size = 0;
+        sym.for_each(&incr);
+        return sym_size;
+    }
+    void print(std::string s, int d) {
+        qDebug() << QString::fromStdString(s) << d;
     }
 
-    bool global::operator()(ast::struct_declaration const& ast)
+    bool global::operator()(ast::struct_specifier const& ast)
     {
         std::map<std::string, int> members;
-        foreach(ast::struct_member_declaration const& mem, ast.members) {
-            members[mem.name.name] = members.size();
+        foreach(boost::recursive_wrapper<ast::declaration> const& mem, ast.members) {
+            members[mem.get().dec.name.name] = members.size();
         }
         structs.push_back(cstruct(ast.type_name.name,members));
+//        int num = count_symbols(structs_table);
+//        structs_table.add(ast.type_name.name,num);
+//        structs_table.for_each(&print);
 
         return true;
     }
 
-    bool global::operator()(ast::struct_instantiation const& /*ast*/)
+    bool global::operator()(ast::struct_instantiation const& ast)
     {
+        qDebug() << QString::fromStdString(ast.name.name);
         return true;
     }
 
@@ -463,6 +481,7 @@ namespace interpreter {
         end = src.end();
         iterator_type iter = start;
         parser::main_function parser(error);
+        structs.for_each(&print);
 
         bool success = phrase_parse(iter, end, +parser, skip, ast);
 

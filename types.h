@@ -17,6 +17,7 @@ namespace parser {
                     ;
         }
     };
+    typedef qi::symbols<char, int> struct_types;
 }
 
 #endif // TYPES_H

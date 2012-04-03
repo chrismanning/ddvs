@@ -23,16 +23,19 @@ namespace parser {
         qi::rule<Iterator, ast::statement_list(), skipper> statement_list, compound_statement;
         qi::rule<Iterator, ast::type_id(), skipper> type_id;
         qi::rule<Iterator, ast::statement(), skipper> statement_;
-        qi::rule<Iterator, ast::function_call(), skipper> function_call_statement;
         qi::rule<Iterator, ast::variable_declaration(), skipper> variable_declaration;
         qi::rule<Iterator, ast::var_type(), skipper> var_type;
-        qi::rule<Iterator, ast::struct_member_declaration(), skipper> struct_member_declaration;
-        qi::rule<Iterator, ast::assignment(), skipper> assignment;
         qi::rule<Iterator, ast::if_statement(), skipper> if_statement;
         qi::rule<Iterator, ast::while_statement(), skipper> while_statement;
         qi::rule<Iterator, ast::return_statement(), skipper> return_statement;
-        qi::rule<Iterator, ast::struct_declaration(), skipper> struct_declaration;
+        //qi::rule<Iterator, ast::struct_declaration(), skipper> struct_declaration;
         qi::rule<Iterator, ast::struct_instantiation(), skipper> struct_instantiation;
+        qi::rule<Iterator, ast::type_specifier(), skipper> type_specifier;
+        qi::rule<Iterator, ast::declaration(), skipper> declaration;
+        qi::rule<Iterator, ast::declarator(), skipper> declarator;
+        qi::rule<Iterator, ast::struct_specifier(), skipper> struct_specifier;
+        qi::rule<Iterator, ast::expression(), skipper> expression_statement;
+
         qi::rule<Iterator, std::string(), skipper> identifier;
         //        qi::rule<Iterator, std::string(), skipper > type_spec;
         //        qi::rule<Iterator, std::string(), skipper > pointer;

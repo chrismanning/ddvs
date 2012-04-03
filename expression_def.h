@@ -4,7 +4,8 @@
 #include <expression.h>
 
 namespace parser {
-    expression::expression(error_handler& error) : expression::base_type(expr)
+    expression::expression(error_handler& error)
+        : expression::base_type(expr)
     {
         qi::_1_type _1;
         qi::_2_type _2;
@@ -82,6 +83,9 @@ namespace parser {
             |   bool_
             |   '(' > expr > ')'
             ;
+
+        assignment_expression =
+                unary_expr > '=' > assignment_expression;
 
         function_call =
                 (identifier >> '(')

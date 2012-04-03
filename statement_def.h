@@ -4,8 +4,8 @@
 #include <statement.h>
 
 namespace parser {
-    statement::statement(error_handler& error) : statement::base_type(statement_list), expr(error),
-        types(expr.types)
+    statement::statement(error_handler& error)
+        : statement::base_type(statement_list), expr(error), types(expr.types)
     {
         qi::_1_type _1;
         qi::_2_type _2;
@@ -14,6 +14,7 @@ namespace parser {
 
         qi::char_type char_;
         qi::_val_type _val;
+        qi::matches_type matches;
         qi::raw_type raw;
         qi::lexeme_type lexeme;
         qi::alpha_type alpha;
@@ -33,65 +34,61 @@ namespace parser {
             ;
 
         statement_ =
-                variable_declaration
-            |   struct_member_declaration
-            |   struct_declaration
-            |   struct_instantiation
-            |   assignment
-            |   compound_statement
-            |   function_call_statement
+                declaration
+            |   expression_statement
             |   if_statement
             |   while_statement
             |   return_statement
+            |   compound_statement
             ;
 
         identifier = expr.identifier
-            ;
-
-        function_call_statement =
-                expr.function_call
-            >   ';'
             ;
 
         type_id = identifier.alias();
 
         var_type = types > -lexeme[char_('*')];
 
-        variable_declaration =
-                var_type
-            >   identifier
-            >   -('=' > expr)
-            >   ';'
+        //declaration = declaration_specifier > ';';
+
+        declaration = type_specifier > declarator > ';';
+
+        type_specifier =
+                types
+            |   struct_specifier
             ;
 
-        struct_member_declaration =
-                (var_type | struct_instantiation)
-            >   identifier
-            >   ';'
+        struct_specifier =
+                lexeme["struct"] > type_id > -('{' > +declaration > '}')
+            //|   (lexeme["struct"] > type_id > '{' > *declaration > '}')
+            //|   (lexeme["struct"] > '{' > *declaration > '}')
             ;
 
-        struct_declaration =
-                lexeme["struct" >> !(alnum | '_')]
-            >   type_id //FIXME
-            >   '{'
-            >   *struct_member_declaration
-            >   '}'
-            >   ';'
-            ;
+        declarator = matches['*'] > identifier;
 
-        struct_instantiation =
-                lexeme["struct" >> !(alnum | '_')]
-            >   type_id
-            >   identifier
-            >   ';'
-            ;
+//        struct_member_declaration =
+//                (var_type | struct_instantiation)
+//            >   identifier
+//            >   ';'
+//            ;
 
-        assignment =
-                identifier
-            >   '='
-            >   expr
-            >   ';'
-            ;
+//        struct_declaration =
+//                lexeme["struct" >> !(alnum | '_')]
+//            >   type_id //FIXME
+//            >   '{'
+//            >   *struct_member_declaration
+//            >   '}'
+//            >   ';'
+//            ;
+
+//        struct_instantiation =
+//                lexeme["struct"]
+//            >   type_id
+//            >   identifier
+//            >   ';'
+//            ;
+
+        expression_statement = expr > ';';
 
         if_statement =
                 lit("if")
@@ -128,10 +125,7 @@ namespace parser {
         BOOST_SPIRIT_DEBUG_NODES(
             (statement_list)
             (identifier)
-            (variable_declaration)
-            (assignment)
-            (struct_declaration)
-            (struct_instantiation)
+            (declaration)
         );
 
         // Error handling: on error in statement_list, call error_handler.
@@ -143,14 +137,12 @@ namespace parser {
         // assignment and return_statement, call annotation.
         on_success(variable_declaration,
             annotation_function(error.iters)(_val, _1));
-        on_success(assignment,
-            annotation_function(error.iters)(_val, _1));
         on_success(return_statement,
             annotation_function(error.iters)(_val, _1));
-        on_success(struct_declaration,
-            annotation_function(error.iters)(_val, _1));
-        on_success(struct_instantiation,
-            annotation_function(error.iters)(_val, _1));
+//        on_success(struct_declaration,
+//            annotation_function(error.iters)(_val, _1));
+//        on_success(struct_instantiation,
+//            annotation_function(error.iters)(_val, _1));
     }
 }
 
