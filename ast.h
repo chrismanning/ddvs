@@ -17,14 +17,16 @@
 #include <list>
 #include <QDebug>
 
-#define DEFINE_EXPRESSION(a,b) \
+#define DEFINE_EXPRESSION_STRUCTS(a,b) \
     struct BOOST_PP_CAT(a,_op) {\
         optoken operator_;\
         b operand_;\
+        Type type;\
     };\
     struct BOOST_PP_CAT(a,_expression) {\
         b operand_;\
         std::list<BOOST_PP_CAT(a,_op)> rest;\
+        Type type;\
     };
 #define DEFINE_EXPRESSION_TUPLE(a,b) \
     BOOST_FUSION_ADAPT_STRUCT(\
@@ -75,9 +77,6 @@ namespace ast
     static Type Error("error", false);
 
     struct nil {};
-    //struct unary_expression;
-    struct function_call;
-    struct expression;
     struct assignment_expression;
 
     struct identifier : tagged
@@ -98,11 +97,7 @@ namespace ast
           , bool
           , unsigned int
           , identifier
-          , boost::recursive_wrapper<assignment_expression>/*
-          , boost::recursive_wrapper<unary>
-          , boost::recursive_wrapper<function_call>
-          , boost::recursive_wrapper<expression>
-          , boost::recursive_wrapper<postfix>*/
+          , boost::recursive_wrapper<assignment_expression>
         >
     operand;
     typedef operand primary_expression;
@@ -114,6 +109,10 @@ namespace ast
 
         // precedence 2
         op_assign,
+        op_assign_add,
+        op_assign_sub,
+        op_assign_mul,
+        op_assign_div,
 
         // precedence 3
         op_logical_or,
@@ -175,12 +174,12 @@ namespace ast
 
     typedef boost::variant<unary_op, postfix_expression> unary_expression;
 
-    DEFINE_EXPRESSION(multiplicative, unary_expression)
-    DEFINE_EXPRESSION(additive, multiplicative_expression)
-    DEFINE_EXPRESSION(relational, additive_expression)
-    DEFINE_EXPRESSION(equality, relational_expression)
-    DEFINE_EXPRESSION(logical_AND, equality_expression)
-    DEFINE_EXPRESSION(logical_OR, logical_AND_expression)
+    DEFINE_EXPRESSION_STRUCTS(multiplicative, unary_expression)
+    DEFINE_EXPRESSION_STRUCTS(additive, multiplicative_expression)
+    DEFINE_EXPRESSION_STRUCTS(relational, additive_expression)
+    DEFINE_EXPRESSION_STRUCTS(equality, relational_expression)
+    DEFINE_EXPRESSION_STRUCTS(logical_AND, equality_expression)
+    DEFINE_EXPRESSION_STRUCTS(logical_OR, logical_AND_expression)
 
     struct operation
     {
@@ -194,29 +193,16 @@ namespace ast
         std::list<assignment_expression> args;
     };
 
-    struct expression
-    {
-        operand first;
-        std::list<operation> rest;
-        Type type;
-    };
-
-//    struct assignment_expression
-//    {
-//        operand lhs;
-//        expression rhs;
-//    };
-
     struct unary_assign
     {
-        unary_expression operand_;
         optoken operator_;
+        logical_OR_expression operand_;
     };
 
     struct assignment_expression
     {
-        boost::optional<unary_assign> lhs;
-        logical_OR_expression rhs;
+        logical_OR_expression lhs;
+        boost::optional<unary_assign> rhs;
     };
 
     struct declarator
@@ -272,6 +258,8 @@ namespace ast
 
     struct statement_list : std::list<statement> {};
 
+    typedef statement_list compound_statement;
+
     struct if_statement
     {
         assignment_expression condition;
@@ -290,27 +278,15 @@ namespace ast
         boost::optional<assignment_expression> expr;
     };
 
-    struct function;
-    //typedef boost::variant<statement,boost::recursive_wrapper<function> > fs;
-    typedef statement_list function_body;
-    struct arg
-    {
-        type_specifier type_spec;
-        declarator dec;
-    };
-
-    struct function
+    struct function_definition
     {
         type_specifier return_type;
-        identifier function_name;
-        std::list<arg> args;
-        function_body body;
+        declarator declarator_;
+        std::list<declaration> args;
+        compound_statement body;
     };
 
-    typedef std::list<function> function_list;
-
-    typedef boost::variant<statement_list,function> func_state;
-    typedef std::list<func_state> main_function;
+    typedef std::list<boost::variant<statement, function_definition> > translation_unit;
 
     // print functions for debugging
     inline std::ostream& operator<<(std::ostream& out, nil)
@@ -331,11 +307,13 @@ DEFINE_EXPRESSION_TUPLE(equality, relational_expression)
 DEFINE_EXPRESSION_TUPLE(logical_AND, equality_expression)
 DEFINE_EXPRESSION_TUPLE(logical_OR, logical_AND_expression)
 
-//BOOST_FUSION_ADAPT_STRUCT(
-//    ast::unary,
-//    (ast::optoken, operator_)
-//    (ast::operand, operand_)
-//)
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::function_definition,
+    (ast::type_specifier, return_type)
+    (ast::declarator, declarator_)
+    (std::list<ast::declaration>, args)
+    (ast::compound_statement, body)
+)
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::unary_op,
@@ -368,12 +346,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-    ast::expression,
-    (ast::operand, first)
-    (std::list<ast::operation>, rest)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
     ast::declaration,
     (ast::type_specifier, type)
     (boost::optional<ast::init_declarator>, declarator)
@@ -403,21 +375,16 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::list<boost::recursive_wrapper<ast::struct_member_declaration> >, members)
 )
 
-//BOOST_FUSION_ADAPT_STRUCT(
-//    ast::assignment_expression,
-//    (ast::operand, lhs)
-//    (ast::expression, rhs)
-//)
 BOOST_FUSION_ADAPT_STRUCT(
     ast::assignment_expression,
-    (boost::optional<ast::unary_assign>, lhs)
-    (ast::logical_OR_expression, rhs)
+    (ast::logical_OR_expression, lhs)
+    (boost::optional<ast::unary_assign>, rhs)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::unary_assign,
-    (ast::unary_expression, operand_)
     (ast::optoken, operator_)
+    (ast::logical_OR_expression, operand_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -436,20 +403,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::return_statement,
     (boost::optional<ast::assignment_expression>, expr)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    ast::arg,
-    (ast::type_specifier, type_spec)
-    (ast::declarator, dec)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    ast::function,
-    (ast::type_specifier, return_type)
-    (ast::identifier, function_name)
-    (std::list<ast::arg>, args)
-    (ast::function_body, body)
 )
 
 #endif // AST_H

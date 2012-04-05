@@ -10,15 +10,16 @@
 #include <QDebug>
 #include <string>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 typedef std::string::const_iterator Iterator;
 
 //template <typename Iterator>
 struct error_handler
 {
-    error_handler(Iterator& first, Iterator& last, QString** error_buf)
+    error_handler(Iterator& first, Iterator& last, boost::shared_ptr<QString>& error_buf)
       : first(first), last(last), error_buf(error_buf) {}
-    
+
     template <typename, typename, typename>
     struct result { typedef void type; };
 
@@ -37,14 +38,14 @@ struct error_handler
             ss << get_line(line_start) << '\n';
             for(; line_start != err_pos; ++line_start)
                 ss << ' ';
-            ss << '^' << '\n';
+            ss << '^';
         }
         else
         {
             ss << "Unexpected end of input. ";
-            ss << message << what << " line " << line << '\n';
+            ss << message << what << " line " << line;
         }
-        *error_buf = new QString(ss.str().c_str());
+        error_buf.reset(new QString(ss.str().c_str()));
     }
 
     Iterator get_pos(Iterator err_pos, int& line) const
@@ -87,6 +88,6 @@ struct error_handler
     Iterator& first;
     Iterator& last;
     std::vector<Iterator> iters;
-    QString** error_buf;
+    boost::shared_ptr<QString>& error_buf;
 };
 #endif // ERROR_H

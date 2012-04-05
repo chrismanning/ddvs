@@ -12,7 +12,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <mainfunction.h>
+#include <function.h>
 #include <types.h>
 #include <QStringList>
 #include <QDebug>
@@ -128,7 +128,6 @@ namespace interpreter {
     };
 
     struct global : function, public boost::static_visitor<bool> {
-        //typedef bool result_type;
         global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__) :
                 function(variables, pointers, code, 0, 0),
                 current_function(this),
@@ -148,22 +147,25 @@ namespace interpreter {
         bool operator()(bool ast);
         bool operator()(ast::identifier const& ast);
         bool operator()(ast::optoken const& ast);
+        bool operator()(ast::function_call const& ast);
+        bool operator()(ast::assignment_expression const& ast);
+        bool operator()(ast::logical_OR_expression const& ast);
+        bool operator()(ast::logical_AND_expression const& ast);
+        bool operator()(ast::equality_expression const& ast);
+        bool operator()(ast::relational_expression const& ast);
+        bool operator()(ast::additive_expression const& ast);
+        bool operator()(ast::multiplicative_expression const& ast);
         bool operator()(ast::unary_expression const& ast);
         bool operator()(ast::postfix_expression const& ast);
-        bool operator()(ast::function_call const& ast);
-        bool operator()(ast::expression const& ast);
-        bool operator()(ast::assignment_expression const& ast);
         bool operator()(ast::declaration const& ast);
-        bool operator()(ast::statement_list const& ast);
+        bool operator()(ast::compound_statement const& ast);
         bool operator()(ast::statement const& ast);
         bool operator()(ast::if_statement const& ast);
         bool operator()(ast::while_statement const& ast);
         bool operator()(ast::return_statement const& ast);
-        bool operator()(ast::function const& ast);
-        bool operator()(ast::function_list const& ast);
         bool operator()(ast::struct_member_declaration const& ast);
         bool operator()(ast::struct_specifier const& ast);
-        bool operator()(ast::main_function const& ast);
+        bool operator()(ast::translation_unit const& ast);
 
         std::vector<int>& get_code() { return code; }
         std::map<std::string, int> const& get_vars() { return variables; }
@@ -246,7 +248,7 @@ namespace interpreter {
     public:
         Interpreter(size_t size = 50) :
             stack(size),
-            error(start, end, &error_buf),
+            error(start, end, error_buf),
             compiler(stack, code, error)
         {}
         bool parse(std::string input);
@@ -275,13 +277,12 @@ namespace interpreter {
         std::vector<int> code;
         error_handler error;
         global compiler;
-        ast::main_function ast;
+        ast::translation_unit ast;
         parser::struct_types structs;
-        QString* error_buf;
+        boost::shared_ptr<QString> error_buf;
 
         parser::skipper skip;
 
-//        QList<ast::struct_declaration> global_structs;
         int execute(
             std::vector<int> const& code            // the program code
           , std::vector<int>::const_iterator pc     // program counter

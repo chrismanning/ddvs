@@ -14,29 +14,24 @@
 #include <QDebug>
 
 namespace parser {
-//    template <typename Iterator>
     struct statement : qi::grammar<Iterator, ast::statement_list(), skipper > {
         statement(error_handler& error);
 
-        expression expr;//<Iterator>
+        expression expr;
 
         qi::rule<Iterator, ast::statement_list(), skipper> statement_list, compound_statement;
-        qi::rule<Iterator, ast::type_id(), skipper> type_id;
+        DECLARE_SPIRIT_RULES(
+            (type_id)
+            (if_statement)
+            (while_statement)
+            (return_statement)
+            (type_specifier)
+            (declaration)
+            (struct_specifier)
+            (struct_member_declaration)
+        )//
         qi::rule<Iterator, ast::statement(), skipper> statement_;
-        qi::rule<Iterator, ast::if_statement(), skipper> if_statement;
-        qi::rule<Iterator, ast::while_statement(), skipper> while_statement;
-        qi::rule<Iterator, ast::return_statement(), skipper> return_statement;
-        qi::rule<Iterator, ast::type_specifier(), skipper> type_specifier;
-        qi::rule<Iterator, ast::declaration(), skipper> declaration;
-        qi::rule<Iterator, ast::struct_specifier(), skipper> struct_specifier;
-        qi::rule<Iterator, ast::expression(), skipper> expression_statement;
-        qi::rule<Iterator, ast::struct_member_declaration(), skipper> struct_member_declaration;
-
         qi::rule<Iterator, std::string(), skipper> identifier;
-        //        qi::rule<Iterator, std::string(), skipper > type_spec;
-        //        qi::rule<Iterator, std::string(), skipper > pointer;
-
-        //qi::symbols<char,ast::type> primitive_types;
 
         primitive_types& types;
     };

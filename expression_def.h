@@ -25,6 +25,7 @@ namespace parser {
         using qi::on_error;
         using qi::on_success;
         using qi::fail;
+        using qi::debug;
         using boost::phoenix::function;
 
         typedef function<error_handler> error_handler_function;
@@ -32,7 +33,11 @@ namespace parser {
 
         // operators from lowest to highest precedence
         assign_op.add
-            ("=", ast::op_assign)
+            ("=" , ast::op_assign)
+            ("+=", ast::op_assign_add)
+            ("-=", ast::op_assign_sub)
+            ("*=", ast::op_assign_mul)
+            ("/=", ast::op_assign_mul)
             ;
 
         logical_or_op.add
@@ -48,9 +53,9 @@ namespace parser {
             ;
 
         relational_op.add
-            ("<", ast::op_less)
+            ("<" , ast::op_less)
             ("<=", ast::op_less_equal)
-            (">", ast::op_greater)
+            (">" , ast::op_greater)
             (">=", ast::op_greater_equal)
             ;
 
@@ -76,7 +81,7 @@ namespace parser {
 
         struct_op.add
             ("->", ast::op_select_point)
-            (".", ast::op_select_ref)
+            ("." , ast::op_select_ref)
             ;
 
         postfix_op.add
@@ -96,14 +101,10 @@ namespace parser {
             ("delete")
             ;
 
-        // grammar
-//        expr =
-//                unary_expr
-//            >> *(binary_op > unary_expr)
-//            ;
-
         //expressions in reverse precedence
-        assignment_expression = -(unary_expression > assign_op) > logical_OR_expression;
+        assignment_expression = logical_OR_expression > -unary_assign;
+
+        unary_assign = assign_op > logical_OR_expression;
 
         logical_OR_expression = logical_AND_expression > *(logical_or_op > logical_AND_expression);
 
@@ -122,12 +123,12 @@ namespace parser {
             |   postfix_expression
             ;
 
+        struct_expr = struct_op > identifier;
+
         postfix_expression =
                 primary_expression
             >   *(struct_expr | postfix_op)
             ;
-
-        struct_expr = struct_op > identifier;
 
         primary_expression =
                 uint_
@@ -141,14 +142,6 @@ namespace parser {
 
         init_declarator = declarator > -("="  > assignment_expression);
 
-        function_call =
-                (identifier >> '(')
-            >   argument_list
-            >   ')'
-            ;
-
-        argument_list = -(assignment_expression % ',');
-
         identifier =
                 !(keywords | types)
             >>  raw[lexeme[(alpha | '_') >> *(alnum | '_')]]
@@ -158,21 +151,33 @@ namespace parser {
         // Debugging and error handling and reporting support.
         BOOST_SPIRIT_DEBUG_NODES(
             (assignment_expression)
+            (logical_OR_expression)
+            (logical_AND_expression)
+            (equality_expression)
+            (relational_expression)
+            (additive_expression)
+            (multiplicative_expression)
             (unary_expression)
             (primary_expression)
-            (function_call)
-            (argument_list)
+            (declarator)
+            (init_declarator)
             (identifier)
         );
 
         ///////////////////////////////////////////////////////////////////////
-        // Error handling: on error in expr, call error_handler.
-        on_error<qi::fail>(assignment_expression,
+        // Error handling
+        on_error<fail>(assignment_expression,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
+        on_error<fail>(identifier,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
+        on_error<fail>(declarator,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
 
         ///////////////////////////////////////////////////////////////////////
-        // Annotation: on success in primary_expr, call annotation.
+        // Annotation: on success in primary_expression, call annotation.
         on_success(primary_expression,
             annotation_function(error.iters)(_val, _1));
     }

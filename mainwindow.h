@@ -35,12 +35,12 @@ private slots:
     void on_actionRemove_Item_triggered();
     void on_actionEdit_Item_triggered();
 
-    void on_interpretButton_clicked();
-    //debugging buttons
+    void interpretButton_clicked();
 #ifdef QT_DEBUG
-    void on_printStackButton_clicked();
-    void on_printCodeButton_clicked();
-    void on_printVarsButton_clicked();
+    //debugging buttons
+    void printStackButton_clicked();
+    void printCodeButton_clicked();
+    void printVarsButton_clicked();
 #endif
 
 private:
@@ -58,7 +58,7 @@ private:
 #endif
     QSplitter* mainSplitter;
     QSplitter* rightSplitter;
-    interpreter::Interpreter* interpreter;
+    boost::shared_ptr<interpreter::Interpreter> interpreter;
 };
 
 #endif // MAINWINDOW_H

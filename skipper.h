@@ -12,7 +12,7 @@
 namespace parser
 {
     namespace qi = boost::spirit::qi;
-    namespace ascii = boost::spirit::ascii;
+    namespace encoding = boost::spirit::standard;
     typedef std::string::const_iterator Iterator;
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace parser
         skipper() : skipper::base_type(start)
         {
             qi::char_type char_;
-            ascii::space_type space;
+            encoding::space_type space;
 
             start =
                     space                               // tab/space/cr/lf

@@ -10,16 +10,15 @@
 #include <statement.h>
 
 namespace parser {
-    //template <typename Iterator>
-    struct function : qi::grammar<Iterator, ast::function(), skipper >
+    struct function : qi::grammar<Iterator, ast::translation_unit(), skipper >
     {
         function(error_handler& error);
 
-        statement body;//<Iterator>
-        //qi::rule<Iterator, std::string(), skipper> name;
-        qi::rule<Iterator, ast::identifier(), skipper> identifier;
-        qi::rule<Iterator, std::list<ast::arg>(), skipper> argument_list;
-        qi::rule<Iterator, ast::function(), skipper> start;
+        statement body;
+        DECLARE_SPIRIT_RULES(
+            (translation_unit)
+            (function_definition)
+        )//
 
         primitive_types types;
     };

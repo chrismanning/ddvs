@@ -47,17 +47,17 @@ namespace interpreter {
         function_calls[address] = name;
     }
 
-    bool global::operator()(ast::main_function const& ast)
-    {
-        foreach(ast::func_state const& fos, ast) {
-            if(!boost::apply_visitor(*this, fos))
-                return false;
-            if(fos.type() == typeid(ast::function)) {
-                current_function = global_function;
-            }
-        }
-        return true;
-    }
+//    bool global::operator()(ast::main_function const& ast)
+//    {
+//        foreach(ast::func_state const& fos, ast) {
+//            if(!boost::apply_visitor(*this, fos))
+//                return false;
+//            if(fos.type() == typeid(ast::function)) {
+//                current_function = global_function;
+//            }
+//        }
+//        return true;
+//    }
     bool global::operator()(unsigned int ast)
     {
         BOOST_ASSERT(current_function != 0);
@@ -108,37 +108,6 @@ namespace interpreter {
             default: BOOST_ASSERT(0); return false;
         }
         return true;
-    }
-
-    bool global::operator()(ast::unary_expression const& ast)
-    {
-//        BOOST_ASSERT(current_function != 0);
-//        if(!boost::apply_visitor(*this, ast.operand_))
-//            return false;
-//        switch(ast.operator_)
-//        {
-//            case ast::op_negative: current_function->op(op_neg); break;
-//            case ast::op_not: current_function->op(op_not); break;
-//            case ast::op_select_point:
-//                current_function->op(op_select_point);
-//                if(ast.operand_.type() == typeid(ast::identifier)) {
-
-//                }
-//                break;
-//            case ast::op_select_ref:
-//                current_function->op(op_select_ref);
-//                break;
-//            case ast::op_positive: break;
-//            case ast::op_indirection: break;
-//            case ast::op_address: break;
-//            default: BOOST_ASSERT(0); return false;
-//        }
-        return true;
-    }
-
-    bool global::operator()(ast::postfix_expression const& ast)
-    {
-        return false;
     }
 
     bool global::operator()(ast::function_call const& ast)
@@ -252,30 +221,97 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::expression const& ast)
+//    bool global::operator()(ast::expression const& ast)
+//    {
+//        BOOST_ASSERT(current_function != 0);
+//        if(!boost::apply_visitor(*this, ast.first))
+//            return false;
+//        std::list<ast::operation>::const_iterator rbegin = ast.rest.begin();
+//        if(!eval_expression(0, rbegin, ast.rest.end()))
+//            return false;
+//        return true;
+//    }
+
+    bool global::operator()(ast::postfix_expression const& ast)
     {
-        BOOST_ASSERT(current_function != 0);
-        if(!boost::apply_visitor(*this, ast.first))
-            return false;
-        std::list<ast::operation>::const_iterator rbegin = ast.rest.begin();
-        if(!eval_expression(0, rbegin, ast.rest.end()))
-            return false;
-        return true;
+        return false;
+    }
+
+    bool global::operator()(ast::unary_expression const& ast)
+    {
+//        BOOST_ASSERT(current_function != 0);
+//        if(!boost::apply_visitor(*this, ast.operand_))
+//            return false;
+//        switch(ast.operator_)
+//        {
+//            case ast::op_negative: current_function->op(op_neg); break;
+//            case ast::op_not: current_function->op(op_not); break;
+//            case ast::op_select_point:
+//                current_function->op(op_select_point);
+//                if(ast.operand_.type() == typeid(ast::identifier)) {
+
+//                }
+//                break;
+//            case ast::op_select_ref:
+//                current_function->op(op_select_ref);
+//                break;
+//            case ast::op_positive: break;
+//            case ast::op_indirection: break;
+//            case ast::op_address: break;
+//            default: BOOST_ASSERT(0); return false;
+//        }
+        return false;
     }
 
     bool global::operator()(ast::assignment_expression const& ast)
     {
         BOOST_ASSERT(current_function != 0);
-        if(!(*this)(ast.rhs))
-            return false;
-        int const* p = 0;//current_function->find_var(ast.lhs.name);
-        if(p == 0)
-        {
-            //error(ast.lhs.id, "Undeclared variable: " + ast.lhs.name);
-            return false;
-        }
-        current_function->op(op_store, *p);
+//        if(!(*this)(ast.rhs)) {
+//            return false;
+//        }
+//        if(ast.lhs) {
+//            if(!(*this)(ast.lhs->operand_)) {
+//                return false;
+//            }
+//        }
+//        int const* p = 0;//current_function->find_var(ast.lhs.name);
+//        if(p == 0)
+//        {
+//            //error(ast.lhs.id, "Undeclared variable: " + ast.lhs.name);
+//            return false;
+//        }
+//        current_function->op(op_store, *p);
         return true;
+    }
+
+    bool global::operator()(ast::logical_OR_expression const& ast)
+    {
+        return false;
+    }
+
+    bool global::operator()(ast::logical_AND_expression const& ast)
+    {
+        return false;
+    }
+
+    bool global::operator()(ast::equality_expression const& ast)
+    {
+        return false;
+    }
+
+    bool global::operator()(ast::relational_expression const& ast)
+    {
+        return false;
+    }
+
+    bool global::operator()(ast::additive_expression const& ast)
+    {
+        return false;
+    }
+
+    bool global::operator()(ast::multiplicative_expression const& ast)
+    {
+        return false;
     }
 
     bool global::operator()(ast::declaration const& ast)
@@ -321,7 +357,7 @@ namespace interpreter {
         return boost::apply_visitor(*this, ast);
     }
 
-    bool global::operator()(ast::statement_list const& ast)
+    bool global::operator()(ast::compound_statement const& ast)
     {
         BOOST_ASSERT(current_function != 0);
         foreach(ast::statement const& s, ast)
@@ -402,45 +438,45 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::function const& ast)
-    {
-        //void_return = ast.return_type == "void";
-//        if(ast.return_type_code) {
-//            return_type = 1;
+//    bool global::operator()(ast::function_definition const& ast)
+//    {
+//        //void_return = ast.return_type == "void";
+////        if(ast.return_type_code) {
+////            return_type = 1;
+////        }
+//        if(functions.find(ast.function_name.name) != functions.end())
+//        {
+//            //qDebug() << ast.function_name.id;
+//            error(ast.function_name.id, "Duplicate function: " + ast.function_name.name);
+//            return false;
 //        }
-        if(functions.find(ast.function_name.name) != functions.end())
-        {
-            //qDebug() << ast.function_name.id;
-            error(ast.function_name.id, "Duplicate function: " + ast.function_name.name);
-            return false;
-        }
-        //offset = this->variables.size();
-//        foreach(function_table::value_type const& fun, functions) {
-//            offset += fun.second.get()->nvars();
+//        //offset = this->variables.size();
+////        foreach(function_table::value_type const& fun, functions) {
+////            offset += fun.second.get()->nvars();
+////        }
+
+//        boost::shared_ptr<function>& p = functions[ast.function_name.name];
+//        p.reset(new function(variables, pointers, code, ast.args.size(), offset));
+//        current_function = p.get();
+//        current_function_name = ast.function_name.name;
+
+//        // op_stk_adj 0 for now. we'll know how many variables
+//        // we'll have later and add them
+//        current_function->op(op_stk_adj, 0);
+//        foreach(ast::arg const& arg, ast.args)
+//        {
+//            current_function->add_var(arg.dec.name.name);
 //        }
 
-        boost::shared_ptr<function>& p = functions[ast.function_name.name];
-        p.reset(new function(variables, pointers, code, ast.args.size(), offset));
-        current_function = p.get();
-        current_function_name = ast.function_name.name;
-
-        // op_stk_adj 0 for now. we'll know how many variables
-        // we'll have later and add them
-        current_function->op(op_stk_adj, 0);
-        foreach(ast::arg const& arg, ast.args)
-        {
-            current_function->add_var(arg.dec.name.name);
-        }
-
-        foreach(ast::statement const& state, ast.body) {
-            if(!boost::apply_visitor(*this,state))
-                return false;
-        }
-        (*current_function)[1] = current_function->nvars();   // now store the actual number of variables
-                                            // this includes the arguments
-        offset += current_function->nvars();
-        return true;
-    }
+//        foreach(ast::statement const& state, ast.body) {
+//            if(!boost::apply_visitor(*this,state))
+//                return false;
+//        }
+//        (*current_function)[1] = current_function->nvars();   // now store the actual number of variables
+//                                            // this includes the arguments
+//        offset += current_function->nvars();
+//        return true;
+//    }
 
 //    bool global::operator()(ast::struct_member_declaration const& /*ast*/)
 //    {
@@ -474,23 +510,27 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::function_list const& ast)
-    {
-        // Jump to the main function
-        code.push_back(op_jump);
-        code.push_back(0); // we will fill this in later when we finish compiling
-                           // and we know where the main function is
+//    bool global::operator()(ast::function_list const& ast)
+//    {
+//        // Jump to the main function
+//        code.push_back(op_jump);
+//        code.push_back(0); // we will fill this in later when we finish compiling
+//                           // and we know where the main function is
 
-        foreach(ast::function const& f, ast)
-        {
-            if(!(*this)(f))
-            {
-                code.clear();
-                return false;
-            }
-        }
+//        foreach(ast::function const& f, ast)
+//        {
+//            if(!(*this)(f))
+//            {
+//                code.clear();
+//                return false;
+//            }
+//        }
 
-        return true;
+//        return true;
+//    }
+
+    bool global::operator()(ast::translation_unit const& ast) {
+        return false;
     }
 
     bool Interpreter::parse(std::string input) {
@@ -498,8 +538,8 @@ namespace interpreter {
         start = src.begin();
         end = src.end();
         iterator_type iter = start;
-        parser::main_function parser(error);
-        structs.for_each(&print);
+        parser::function parser(error);
+//        structs.for_each(&print);
 
         bool success = phrase_parse(iter, end, +parser, skip, ast);
 

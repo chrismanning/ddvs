@@ -7,6 +7,10 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#define BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
+//enable/disable grammar debugging
+#define BOOST_SPIRIT_QI_DEBUG
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <annotation.h>
@@ -22,15 +26,10 @@
 
 namespace parser
 {
-    namespace qi = boost::spirit::qi;
-    namespace ascii = boost::spirit::ascii;
-
-//    template <typename Iterator>
     struct expression : qi::grammar<Iterator, ast::assignment_expression(), skipper>
     {
         expression(error_handler& error);
 
-//        qi::rule<Iterator, ast::expression(), skipper> assignment_expression;
         DECLARE_SPIRIT_RULES(
             (primary_expression)
             (postfix_expression)
@@ -45,10 +44,8 @@ namespace parser
             (init_declarator)
             (declarator)
             (struct_expr)
-        )
-        //qi::rule<Iterator, ast::unary(), skipper> unary_expression;
-        qi::rule<Iterator, ast::function_call(), skipper> function_call;
-        qi::rule<Iterator, std::list<ast::assignment_expression>(), skipper> argument_list;
+            (unary_assign)
+        )//
         qi::rule<Iterator, std::string(), skipper> identifier;
         qi::symbols<char, ast::optoken> unary_op, binary_op, struct_op, postfix_op,
                 assign_op, relational_op, multiplicative_op, additive_op, equality_op,

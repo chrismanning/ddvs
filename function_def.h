@@ -5,19 +5,12 @@
 
 namespace parser {
     function::function(error_handler& error)
-        : function::base_type(start), body(error)
+        : function::base_type(translation_unit), body(error)
     {
         qi::_1_type _1;
         qi::_2_type _2;
         qi::_3_type _3;
         qi::_4_type _4;
-
-        qi::_val_type _val;
-        qi::raw_type raw;
-        qi::lexeme_type lexeme;
-        qi::alpha_type alpha;
-        qi::alnum_type alnum;
-        qi::string_type string;
 
         using qi::on_error;
         using qi::on_success;
@@ -27,33 +20,33 @@ namespace parser {
         typedef function<error_handler> error_handler_function;
         typedef function<annotation> annotation_function;
 
-        identifier = body.expr.identifier;
-        argument_list = (body.type_specifier > body.expr.declarator) % ',';
+        translation_unit =
+            +(  body
+            |   function_definition
+            )
+            ;
 
-        start =
+        function_definition =
                 body.type_specifier
-            >   identifier
-            >   '(' > -argument_list > ')'
-            >   '{'
-            >   body
-            >   '}'
+            >   body.expr.declarator
+            >   '(' > *body.declaration > ')'
+            >   body.compound_statement
             ;
 
         // Debugging and error handling and reporting support.
         BOOST_SPIRIT_DEBUG_NODES(
-            (identifier)
-            (argument_list)
-            (start)
+            (translation_unit)
+            (function_definition)
         );
 
-        // Error handling: on error in start, call error_handler.
-        on_error<qi::fail>(start,
+        // Error handling
+        on_error<qi::fail>(function_definition,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
 
         // Annotation: on success in start, call annotation.
-        on_success(identifier,
-            annotation_function(error.iters)(_val, _1));
+//        on_success(identifier,
+//            annotation_function(error.iters)(_val, _1));
     }
 }
 

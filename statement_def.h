@@ -12,12 +12,8 @@ namespace parser {
         qi::_3_type _3;
         qi::_4_type _4;
 
-        qi::char_type char_;
         qi::_val_type _val;
-        qi::matches_type matches;
-        qi::raw_type raw;
         qi::lexeme_type lexeme;
-        qi::alpha_type alpha;
         qi::alnum_type alnum;
         qi::lit_type lit;
 
@@ -30,12 +26,11 @@ namespace parser {
         typedef function<annotation> annotation_function;
 
         statement_list =
-            +statement_
-            ;
+            +statement_;
 
         statement_ =
                 declaration
-            |   expression_statement
+            |   expr > ';'
             |   if_statement
             |   while_statement
             |   return_statement
@@ -57,34 +52,7 @@ namespace parser {
         struct_member_declaration = type_specifier > expr.declarator > ';';
 
         struct_specifier =
-                lexeme["struct"] > type_id > -('{' > +struct_member_declaration > '}')
-            //|   (lexeme["struct"] > type_id > '{' > *declaration > '}')
-            //|   (lexeme["struct"] > '{' > *declaration > '}')
-            ;
-
-//        struct_member_declaration =
-//                (var_type | struct_instantiation)
-//            >   identifier
-//            >   ';'
-//            ;
-
-//        struct_declaration =
-//                lexeme["struct" >> !(alnum | '_')]
-//            >   type_id //FIXME
-//            >   '{'
-//            >   *struct_member_declaration
-//            >   '}'
-//            >   ';'
-//            ;
-
-//        struct_instantiation =
-//                lexeme["struct"]
-//            >   type_id
-//            >   identifier
-//            >   ';'
-//            ;
-
-        expression_statement = expr > ';';
+                lexeme["struct"] > type_id > -('{' > +struct_member_declaration > '}');
 
         if_statement =
                 lit("if")
@@ -121,10 +89,12 @@ namespace parser {
         BOOST_SPIRIT_DEBUG_NODES(
             (statement_list)
             (identifier)
+            (type_specifier)
+            (type_id)
             (declaration)
         );
 
-        // Error handling: on error in statement_list, call error_handler.
+        // Error handling
         on_error<qi::fail>(statement_list,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
@@ -135,10 +105,6 @@ namespace parser {
             annotation_function(error.iters)(_val, _1));
         on_success(return_statement,
             annotation_function(error.iters)(_val, _1));
-//        on_success(struct_declaration,
-//            annotation_function(error.iters)(_val, _1));
-//        on_success(struct_instantiation,
-//            annotation_function(error.iters)(_val, _1));
     }
 }
 

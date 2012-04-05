@@ -22,8 +22,7 @@ SOURCES += main.cpp\
     expression.cpp \
     statement.cpp \
     function.cpp \
-    interpreter.cpp \
-    mainfunction.cpp
+    interpreter.cpp
 
 HEADERS  += mainwindow.h \
     zoomwidget.h \
@@ -38,14 +37,12 @@ HEADERS  += mainwindow.h \
     skipper.h \
     function.h \
     interpreter.h \
-    mainfunction.h \
     error.h \
     annotation.h \
     types.h \
     statement_def.h \
     function_def.h \
-    expression_def.h \
-    mainfunction_def.h
+    expression_def.h
 
 linux:INCLUDEPATH += /usr/include/boost-1_48/
 macx:INCLUDEPATH += /Users/chris/boost_1_49_0/
