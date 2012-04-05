@@ -28,6 +28,11 @@ namespace interpreter {
         op_mul,         //  multiply top two stack entries
         op_div,         //  divide top two stack entries
 
+        op_select_point,// ->
+        op_select_ref,  // .
+        op_increment,   // ++
+        op_decrement,   // --
+
         op_not,         //  boolean negate the top stack entry
         op_eq,          //  compare the top two stack entries for ==
         op_neq,         //  compare the top two stack entries for !=
@@ -108,6 +113,7 @@ namespace interpreter {
         void link_to(std::string const& name, std::size_t address);
         std::size_t offset;
         bool void_return;
+        ast::Type return_type;
 
     protected:
         std::map<std::string, int> variables;
@@ -119,23 +125,6 @@ namespace interpreter {
         std::size_t address;
         std::size_t size_;
         std::size_t nargs_;
-    private:
-        std::size_t return_type;
-    };
-
-
-    struct type_handler : public boost::static_visitor<std::string>
-    {
-        type_handler(std::vector<cstruct>& structs) :
-            structs(structs) {}
-
-        std::string operator()(ast::struct_specifier ss) {
-            return ss.type_name.name;
-        }
-        std::string operator()(int type_code) {
-            return "basic";
-        }
-        std::vector<cstruct>& structs;
     };
 
     struct global : function, public boost::static_visitor<bool> {
@@ -145,8 +134,7 @@ namespace interpreter {
                 current_function(this),
                 global_function(this),
                 stack(stack),
-                error_(error__),
-                th(structs)
+                error_(error__)
         {
             void_return = true;
         }
@@ -160,7 +148,8 @@ namespace interpreter {
         bool operator()(bool ast);
         bool operator()(ast::identifier const& ast);
         bool operator()(ast::optoken const& ast);
-        bool operator()(ast::unary const& ast);
+        bool operator()(ast::unary_expression const& ast);
+        bool operator()(ast::postfix_expression const& ast);
         bool operator()(ast::function_call const& ast);
         bool operator()(ast::expression const& ast);
         bool operator()(ast::assignment_expression const& ast);
@@ -179,6 +168,61 @@ namespace interpreter {
         std::vector<int>& get_code() { return code; }
         std::map<std::string, int> const& get_vars() { return variables; }
 
+//        struct TypeHandler : public boost::static_visitor<ast::Type> {
+//            ast::Type operator()(ast::nil /*a*/) { return ast::Void;}
+//            ast::Type operator()(unsigned int /*a*/) { return ast::Int;}
+//            ast::Type operator()(bool /*a*/) { return ast::Bool;}
+//            ast::Type operator()(ast::identifier a) {
+//                if(a.type.is_set) {
+//                    return a.type;
+//                }
+//                else {
+//                    return ast::Type("", false);
+//                }
+//            }
+//            ast::Type operator()(ast::operand a) {
+//                return a.apply_visitor(*this);
+//            }
+//            ast::Type operator()(ast::type_specifier a) {
+//                return a.apply_visitor(*this);
+//            }
+//            ast::Type operator()(ast::Type a) {
+//                return a;
+//            }
+//            ast::Type operator()(ast::struct_specifier a) {
+//                return ast::Struct;
+//            }
+//            ast::Type operator()(ast::unary_expression a) {
+//                //FIXME handle * and & operators
+//                //return a.operand_.apply_visitor(*this);
+//                return ast::Type("", false);
+//            }
+//            ast::Type operator()(ast::postfix_expression a) {
+//                //FIXME handle * and & operators
+//                return ast::Void;
+//            }
+//            ast::Type operator()(ast::operation a) {
+//                //FIXME handle * and & operators
+//                return a.operand_.apply_visitor(*this);
+//            }
+//            ast::Type operator()(ast::function_call a) {
+////                boost::shared_ptr<function> p = functions[a.function_name.name];
+////                return p->return_type;
+//                return ast::Type("", false);
+//            }
+//            ast::Type operator()(ast::expression a) {
+//                ast::Type first = a.first.apply_visitor(*this);
+//                foreach(ast::operation const& op, a.rest) {
+//                    if((*this)(op) != first) {
+//                        return ast::Error;
+//                    }
+//                }
+//                return first;
+//            }
+//        };
+
+//        TypeHandler th;
+
     private:
         std::vector<cstruct> structs;
         typedef std::map<std::string, boost::shared_ptr<function> > function_table;
@@ -195,7 +239,6 @@ namespace interpreter {
 
         std::string current_function_name;
         std::vector<int>& stack;
-        type_handler th;
     };
 
     class Interpreter

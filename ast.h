@@ -13,8 +13,30 @@
 #include <boost/fusion/include/io.hpp>
 #include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/preprocessor/cat.hpp>
 #include <list>
 #include <QDebug>
+
+#define DEFINE_EXPRESSION(a,b) \
+    struct BOOST_PP_CAT(a,_op) {\
+        optoken operator_;\
+        b operand_;\
+    };\
+    struct BOOST_PP_CAT(a,_expression) {\
+        b operand_;\
+        std::list<BOOST_PP_CAT(a,_op)> rest;\
+    };
+#define DEFINE_EXPRESSION_TUPLE(a,b) \
+    BOOST_FUSION_ADAPT_STRUCT(\
+        ast::BOOST_PP_CAT(a,_op),\
+        (ast::optoken, operator_)\
+        (ast::b, operand_)\
+    )\
+    BOOST_FUSION_ADAPT_STRUCT(\
+        ast::BOOST_PP_CAT(a,_expression),\
+        (ast::b, operand_)\
+        (std::list<ast::BOOST_PP_CAT(a,_op)>, rest)\
+    )
 
 namespace ast
 {
@@ -28,15 +50,41 @@ namespace ast
                 // (not really part of the AST.)
     };
 
+    struct Type {
+        Type() : is_set(false) {}
+        Type(std::string const& type_str, bool const& pointer)
+            : type_str(type_str), pointer(pointer), is_set(true)
+        {}
+        std::string type_str;
+        bool pointer;
+        bool lvalue;
+        bool is_set;
+
+        bool operator==(Type const& b) {
+            return (type_str == b.type_str) && (pointer == b.pointer);
+        }
+        bool operator!=(Type const& b) {
+            return !((*this) == b);
+        }
+    };
+
+    static Type Void("void", false);
+    static Type Int("int", false);
+    static Type Bool("bool", false);
+    static Type Struct("struct", false);
+    static Type Error("error", false);
+
     struct nil {};
-    struct unary;
+    //struct unary_expression;
     struct function_call;
     struct expression;
+    struct assignment_expression;
 
     struct identifier : tagged
     {
-        identifier(std::string const& name = "") : name(name) {}
+        identifier(std::string const& name = "") : name(name){}
         std::string name;
+        Type type;
     };
 
     struct type_id : tagged
@@ -45,24 +93,19 @@ namespace ast
         std::string name;
     };
 
-    struct var_type
-    {
-        int type_code;
-        boost::optional<char> pointer;
-    };
-
-    typedef std::list<type_id> type_list;
-
     typedef boost::variant<
             nil
           , bool
           , unsigned int
           , identifier
+          , boost::recursive_wrapper<assignment_expression>/*
           , boost::recursive_wrapper<unary>
           , boost::recursive_wrapper<function_call>
           , boost::recursive_wrapper<expression>
+          , boost::recursive_wrapper<postfix>*/
         >
     operand;
+    typedef operand primary_expression;
 
     enum optoken
     {
@@ -102,17 +145,42 @@ namespace ast
         op_not,
         op_address,
         op_indirection,
+        op_new,
+        op_delete,
 
         // precedence 10
         op_select_point,
-        op_select_ref
+        op_select_ref,
+        op_post_inc,
+        op_post_dec
     };
 
-    struct unary
+    struct struct_expr {
+        optoken operator_;
+        identifier member;
+    };
+
+    typedef boost::variant<struct_expr, optoken> postfix_op;
+    struct postfix_expression
+    {
+        primary_expression first;
+        std::list<postfix_op> rest;
+    };
+
+    struct unary_op
     {
         optoken operator_;
-        operand operand_;
+        primary_expression operand_;
     };
+
+    typedef boost::variant<unary_op, postfix_expression> unary_expression;
+
+    DEFINE_EXPRESSION(multiplicative, unary_expression)
+    DEFINE_EXPRESSION(additive, multiplicative_expression)
+    DEFINE_EXPRESSION(relational, additive_expression)
+    DEFINE_EXPRESSION(equality, relational_expression)
+    DEFINE_EXPRESSION(logical_AND, equality_expression)
+    DEFINE_EXPRESSION(logical_OR, logical_AND_expression)
 
     struct operation
     {
@@ -123,19 +191,32 @@ namespace ast
     struct function_call
     {
         identifier function_name;
-        std::list<expression> args;
+        std::list<assignment_expression> args;
     };
 
     struct expression
     {
         operand first;
         std::list<operation> rest;
+        Type type;
+    };
+
+//    struct assignment_expression
+//    {
+//        operand lhs;
+//        expression rhs;
+//    };
+
+    struct unary_assign
+    {
+        unary_expression operand_;
+        optoken operator_;
     };
 
     struct assignment_expression
     {
-        operand lhs;
-        expression rhs;
+        boost::optional<unary_assign> lhs;
+        logical_OR_expression rhs;
     };
 
     struct declarator
@@ -147,7 +228,7 @@ namespace ast
     struct init_declarator
     {
         declarator dec;
-        boost::optional<expression> assign;
+        boost::optional<assignment_expression> assign;
     };
 
     struct declaration;
@@ -160,7 +241,7 @@ namespace ast
         std::list<boost::recursive_wrapper<struct_member_declaration> > members;
     };
 
-    typedef boost::variant<int, struct_specifier> type_specifier;
+    typedef boost::variant<Type, struct_specifier> type_specifier;
 
     struct struct_member_declaration
     {
@@ -181,7 +262,7 @@ namespace ast
 
     typedef boost::variant<
             declaration
-          , expression
+          , assignment_expression
           , boost::recursive_wrapper<if_statement>
           , boost::recursive_wrapper<while_statement>
           , boost::recursive_wrapper<return_statement>
@@ -193,20 +274,20 @@ namespace ast
 
     struct if_statement
     {
-        expression condition;
+        assignment_expression condition;
         statement then;
         boost::optional<statement> else_;
     };
 
     struct while_statement
     {
-        expression condition;
+        assignment_expression condition;
         statement body;
     };
 
     struct return_statement : tagged
     {
-        boost::optional<expression> expr;
+        boost::optional<assignment_expression> expr;
     };
 
     struct function;
@@ -214,8 +295,8 @@ namespace ast
     typedef statement_list function_body;
     struct arg
     {
-        var_type type_code;
-        identifier name;
+        type_specifier type_spec;
+        declarator dec;
     };
 
     struct function
@@ -243,10 +324,23 @@ namespace ast
     }
 }
 
+DEFINE_EXPRESSION_TUPLE(multiplicative, unary_expression)
+DEFINE_EXPRESSION_TUPLE(additive, multiplicative_expression)
+DEFINE_EXPRESSION_TUPLE(relational, additive_expression)
+DEFINE_EXPRESSION_TUPLE(equality, relational_expression)
+DEFINE_EXPRESSION_TUPLE(logical_AND, equality_expression)
+DEFINE_EXPRESSION_TUPLE(logical_OR, logical_AND_expression)
+
+//BOOST_FUSION_ADAPT_STRUCT(
+//    ast::unary,
+//    (ast::optoken, operator_)
+//    (ast::operand, operand_)
+//)
+
 BOOST_FUSION_ADAPT_STRUCT(
-    ast::unary,
+    ast::unary_op,
     (ast::optoken, operator_)
-    (ast::operand, operand_)
+    (ast::primary_expression, operand_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -258,19 +352,25 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::function_call,
     (ast::identifier, function_name)
-    (std::list<ast::expression>, args)
+    (std::list<ast::assignment_expression>, args)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::struct_expr,
+    (ast::optoken, operator_)
+    (ast::identifier, member)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::postfix_expression,
+    (ast::primary_expression, first)
+    (std::list<ast::postfix_op>, rest)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::expression,
     (ast::operand, first)
     (std::list<ast::operation>, rest)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    ast::var_type,
-    (int, type_code)
-    (boost::optional<char>, pointer)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -288,7 +388,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::init_declarator,
     (ast::declarator, dec)
-    (boost::optional<ast::expression>, assign)
+    (boost::optional<ast::assignment_expression>, assign)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -303,34 +403,45 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::list<boost::recursive_wrapper<ast::struct_member_declaration> >, members)
 )
 
+//BOOST_FUSION_ADAPT_STRUCT(
+//    ast::assignment_expression,
+//    (ast::operand, lhs)
+//    (ast::expression, rhs)
+//)
 BOOST_FUSION_ADAPT_STRUCT(
     ast::assignment_expression,
-    (ast::operand, lhs)
-    (ast::expression, rhs)
+    (boost::optional<ast::unary_assign>, lhs)
+    (ast::logical_OR_expression, rhs)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::unary_assign,
+    (ast::unary_expression, operand_)
+    (ast::optoken, operator_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::if_statement,
-    (ast::expression, condition)
+    (ast::assignment_expression, condition)
     (ast::statement, then)
     (boost::optional<ast::statement>, else_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::while_statement,
-    (ast::expression, condition)
+    (ast::assignment_expression, condition)
     (ast::statement, body)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::return_statement,
-    (boost::optional<ast::expression>, expr)
+    (boost::optional<ast::assignment_expression>, expr)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::arg,
-    (ast::var_type, type_code)
-    (ast::identifier,name)
+    (ast::type_specifier, type_spec)
+    (ast::declarator, dec)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

@@ -23,7 +23,6 @@ namespace parser {
         qi::rule<Iterator, ast::statement_list(), skipper> statement_list, compound_statement;
         qi::rule<Iterator, ast::type_id(), skipper> type_id;
         qi::rule<Iterator, ast::statement(), skipper> statement_;
-        qi::rule<Iterator, ast::var_type(), skipper> var_type;
         qi::rule<Iterator, ast::if_statement(), skipper> if_statement;
         qi::rule<Iterator, ast::while_statement(), skipper> while_statement;
         qi::rule<Iterator, ast::return_statement(), skipper> return_statement;

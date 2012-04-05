@@ -5,7 +5,7 @@
 
 namespace parser {
     expression::expression(error_handler& error)
-        : expression::base_type(expr)
+        : expression::base_type(assignment_expression)
     {
         qi::_1_type _1;
         qi::_2_type _2;
@@ -30,23 +30,38 @@ namespace parser {
         typedef function<error_handler> error_handler_function;
         typedef function<annotation> annotation_function;
 
-        // tokens
-        binary_op.add
+        // operators from lowest to highest precedence
+        assign_op.add
+            ("=", ast::op_assign)
+            ;
+
+        logical_or_op.add
             ("||", ast::op_logical_or)
+            ;
+        logical_and_op.add
             ("&&", ast::op_logical_and)
+            ;
+
+        equality_op.add
             ("==", ast::op_equal)
             ("!=", ast::op_not_equal)
+            ;
+
+        relational_op.add
             ("<", ast::op_less)
             ("<=", ast::op_less_equal)
             (">", ast::op_greater)
             (">=", ast::op_greater_equal)
-            ("=", ast::op_assign)
+            ;
+
+        additive_op.add
             ("+", ast::op_plus)
             ("-", ast::op_minus)
+            ;
+
+        multiplicative_op.add
             ("*", ast::op_times)
             ("/", ast::op_divide)
-            ("->", ast::op_select_point)
-            (".", ast::op_select_ref)
             ;
 
         unary_op.add
@@ -55,6 +70,18 @@ namespace parser {
             ("!", ast::op_not)
             ("*", ast::op_indirection)
             ("&", ast::op_address)
+            ("new", ast::op_new)
+            ("delete", ast::op_delete)
+            ;
+
+        struct_op.add
+            ("->", ast::op_select_point)
+            (".", ast::op_select_ref)
+            ;
+
+        postfix_op.add
+            ("++", ast::op_post_inc)
+            ("--", ast::op_post_dec)
             ;
 
         keywords.add
@@ -65,32 +92,54 @@ namespace parser {
             ("while")
             ("struct")
             ("return")
+            ("new")
+            ("delete")
             ;
 
         // grammar
-        expr =
-                unary_expr
-            >> *(binary_op > unary_expr)
+//        expr =
+//                unary_expr
+//            >> *(binary_op > unary_expr)
+//            ;
+
+        //expressions in reverse precedence
+        assignment_expression = -(unary_expression > assign_op) > logical_OR_expression;
+
+        logical_OR_expression = logical_AND_expression > *(logical_or_op > logical_AND_expression);
+
+        logical_AND_expression = equality_expression > *(logical_and_op > equality_expression);
+
+        equality_expression = relational_expression > *(equality_op > relational_expression);
+
+        relational_expression = additive_expression > *(relational_op > additive_expression);
+
+        additive_expression = multiplicative_expression > *(additive_op > multiplicative_expression);
+
+        multiplicative_expression = unary_expression > *(multiplicative_op > unary_expression);
+
+        unary_expression =
+                (unary_op > primary_expression)
+            |   postfix_expression
             ;
 
-        unary_expr =
-                primary_expr
-            |   (unary_op > primary_expr)
+        postfix_expression =
+                primary_expression
+            >   *(struct_expr | postfix_op)
             ;
 
-        primary_expr =
+        struct_expr = struct_op > identifier;
+
+        primary_expression =
                 uint_
-            |   function_call
             |   identifier
             |   bool_
-            |   '(' > expr > ')'
+            |   '(' > assignment_expression > ')'
             ;
-
-        assignment_expression = unary_expr > '=' > expr;
+        //end expressions
 
         declarator = matches['*'] > identifier;
 
-        init_declarator = declarator > -("="  > expr);
+        init_declarator = declarator > -("="  > assignment_expression);
 
         function_call =
                 (identifier >> '(')
@@ -98,7 +147,7 @@ namespace parser {
             >   ')'
             ;
 
-        argument_list = -(expr % ',');
+        argument_list = -(assignment_expression % ',');
 
         identifier =
                 !(keywords | types)
@@ -108,9 +157,9 @@ namespace parser {
         ///////////////////////////////////////////////////////////////////////
         // Debugging and error handling and reporting support.
         BOOST_SPIRIT_DEBUG_NODES(
-            (expr)
-            (unary_expr)
-            (primary_expr)
+            (assignment_expression)
+            (unary_expression)
+            (primary_expression)
             (function_call)
             (argument_list)
             (identifier)
@@ -118,13 +167,13 @@ namespace parser {
 
         ///////////////////////////////////////////////////////////////////////
         // Error handling: on error in expr, call error_handler.
-        on_error<qi::fail>(expr,
+        on_error<qi::fail>(assignment_expression,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
 
         ///////////////////////////////////////////////////////////////////////
         // Annotation: on success in primary_expr, call annotation.
-        on_success(primary_expr,
+        on_success(primary_expression,
             annotation_function(error.iters)(_val, _1));
     }
 }

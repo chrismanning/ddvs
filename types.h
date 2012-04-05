@@ -8,12 +8,12 @@ namespace parser {
     namespace qi = boost::spirit::qi;
     namespace ascii = boost::spirit::ascii;
 
-    struct primitive_types : qi::symbols<char,int> {
+    struct primitive_types : qi::symbols<char,ast::Type> {
         primitive_types() {
             this->add
-                    ("void",0)
-                    ("int",1)
-                    ("bool",2)
+                    ("void",ast::Void)
+                    ("int",ast::Int)
+                    ("bool",ast::Bool)
                     ;
         }
     };

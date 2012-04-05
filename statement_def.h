@@ -47,8 +47,6 @@ namespace parser {
 
         type_id = identifier.alias();
 
-        var_type = types > -lexeme[char_('*')];
-
         declaration = type_specifier > -expr.init_declarator > ';';
 
         type_specifier =

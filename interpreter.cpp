@@ -110,34 +110,48 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::unary const& ast)
+    bool global::operator()(ast::unary_expression const& ast)
     {
-        BOOST_ASSERT(current_function != 0);
-        if(!boost::apply_visitor(*this, ast.operand_))
-            return false;
-        switch(ast.operator_)
-        {
-            case ast::op_negative: current_function->op(op_neg); break;
-            case ast::op_not: current_function->op(op_not); break;
-            case ast::op_positive: break;
-            case ast::op_indirection: break;
-            case ast::op_address: break;
-            default: BOOST_ASSERT(0); return false;
-        }
+//        BOOST_ASSERT(current_function != 0);
+//        if(!boost::apply_visitor(*this, ast.operand_))
+//            return false;
+//        switch(ast.operator_)
+//        {
+//            case ast::op_negative: current_function->op(op_neg); break;
+//            case ast::op_not: current_function->op(op_not); break;
+//            case ast::op_select_point:
+//                current_function->op(op_select_point);
+//                if(ast.operand_.type() == typeid(ast::identifier)) {
+
+//                }
+//                break;
+//            case ast::op_select_ref:
+//                current_function->op(op_select_ref);
+//                break;
+//            case ast::op_positive: break;
+//            case ast::op_indirection: break;
+//            case ast::op_address: break;
+//            default: BOOST_ASSERT(0); return false;
+//        }
         return true;
+    }
+
+    bool global::operator()(ast::postfix_expression const& ast)
+    {
+        return false;
     }
 
     bool global::operator()(ast::function_call const& ast)
     {
         BOOST_ASSERT(current_function != 0);
 // FIXME
-        if(ast.function_name.name == std::string("writelns")) {
-            std::string arg = boost::get<ast::identifier>(ast.args.front().first).name;
-            foreach(ast::expression arg, ast.args) {
-                //qDebug() << stack[variables[arg.expression]];
-            }
-            return true;
-        }
+//        if(ast.function_name.name == std::string("writelns")) {
+//            std::string arg = boost::get<ast::identifier>(ast.args.front().lhs).name;
+//            foreach(ast::assignment_expression arg, ast.args) {
+//                //qDebug() << stack[variables[arg.expression]];
+//            }
+//            return true;
+//        }
 
         if(functions.find(ast.function_name.name) == functions.end()) {
             //qDebug() << ast.function_name.id;
@@ -154,7 +168,7 @@ namespace interpreter {
             return false;
         }
 
-        foreach(ast::expression const& expr, ast.args)
+        foreach(ast::assignment_expression const& expr, ast.args)
         {
             if(!(*this)(expr))
                 return false;
@@ -268,16 +282,15 @@ namespace interpreter {
     {
         BOOST_ASSERT(current_function != 0);
         //qDebug() << /*"type_code:" << ast.typ <<*/ "pointer:" << ast.dec.pointer;
-        if(boost::apply_visitor(th, ast.type) == "basic")
-        {
-            if(!ast.declarator) {
-                error(ast.id, "Expected <identifier> with basic type");
-                return false;
-            }
-        }
+//        if(boost::apply_visitor(th, ast.type) == "basic")
+//        {
+//            if(!ast.declarator) {
+//                error(ast.id, "Expected <identifier> with basic type");
+//                return false;
+//            }
+//        }
         ast::init_declarator const& dec = *ast.declarator;
         int const* p = current_function->find_var(dec.dec.name.name);
-
         if(p != 0)
         {
             error(ast.id, "Duplicate variable: " + dec.dec.name.name);
@@ -416,7 +429,7 @@ namespace interpreter {
         current_function->op(op_stk_adj, 0);
         foreach(ast::arg const& arg, ast.args)
         {
-            current_function->add_var(arg.name.name);
+            current_function->add_var(arg.dec.name.name);
         }
 
         foreach(ast::statement const& state, ast.body) {
@@ -498,14 +511,18 @@ namespace interpreter {
             }
             else {
                 qDebug() << "FAIL";
-                qDebug() << *error_buf;
-                error_buf->clear();
+                if(error_buf) {
+                    qDebug() << *error_buf;
+                    error_buf->clear();
+                }
             }
         }
         else {
             qDebug() << "PARSE FAIL";
-            qDebug() << *error_buf;
-            error_buf->clear();
+            if(error_buf) {
+                qDebug() << *error_buf;
+                error_buf->clear();
+            }
         }
 
         return success;

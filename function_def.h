@@ -28,7 +28,7 @@ namespace parser {
         typedef function<annotation> annotation_function;
 
         identifier = body.expr.identifier;
-        argument_list = (body.var_type > identifier) % ',';
+        argument_list = (body.type_specifier > body.expr.declarator) % ',';
 
         start =
                 body.type_specifier
