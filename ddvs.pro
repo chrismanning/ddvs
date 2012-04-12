@@ -10,6 +10,7 @@ TARGET = ddvs
 TEMPLATE = app
 
 !win32-msvc*:QMAKE_CXXFLAGS_WARN_ON = -Wextra
+!win32-msvc*:QMAKE_CXXFLAGS= -std=c++0x
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -44,9 +45,11 @@ HEADERS  += mainwindow.h \
     function_def.h \
     expression_def.h
 
-linux:INCLUDEPATH += /usr/include/boost-1_48/
+linux:INCLUDEPATH += /usr/include/boost-1_49/
 macx:INCLUDEPATH += /Users/chris/boost_1_49_0/
 win32:INCLUDEPATH += C:\\dev\\include\\boost_1_49_0
+
+#DEFINES+= QT_NO_DEBUG_OUTPUT
 
 FORMS += mainwindow.ui \
     zoomwidget.ui \
