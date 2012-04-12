@@ -27,6 +27,8 @@ namespace parser {
             (return_statement)
             (type_specifier)
             (declaration)
+            (init_declarator)
+            (declarator)
             (struct_specifier)
             (struct_member_declaration)
         )//

@@ -11,6 +11,9 @@
 //enable/disable grammar debugging
 #define BOOST_SPIRIT_QI_DEBUG
 
+#define SUCCESS_ANNOTATE(a) on_success(a,\
+annotation_function(error.iters)(_val, _1))
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <annotation.h>
@@ -41,8 +44,6 @@ namespace parser
             (logical_AND_expression)
             (logical_OR_expression)
             (assignment_expression)
-            (init_declarator)
-            (declarator)
             (struct_expr)
             (unary_assign)
         )//

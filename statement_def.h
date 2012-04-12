@@ -13,6 +13,7 @@ namespace parser {
         qi::_4_type _4;
 
         qi::_val_type _val;
+        qi::matches_type matches;
         qi::lexeme_type lexeme;
         qi::alnum_type alnum;
         qi::lit_type lit;
@@ -42,14 +43,18 @@ namespace parser {
 
         type_id = identifier.alias();
 
-        declaration = type_specifier > -expr.init_declarator > ';';
+        declaration = type_specifier > -init_declarator > ';';
+
+        declarator = matches['*'] > identifier;
+
+        init_declarator = declarator > -("="  > expr.logical_OR_expression);
 
         type_specifier =
                 types
             |   struct_specifier
             ;
 
-        struct_member_declaration = type_specifier > expr.declarator > ';';
+        struct_member_declaration = type_specifier > declarator > ';';
 
         struct_specifier =
                 lexeme["struct"] > type_id > -('{' > +struct_member_declaration > '}');
@@ -57,7 +62,7 @@ namespace parser {
         if_statement =
                 lit("if")
             >   '('
-            >   expr
+            >   expr.logical_OR_expression
             >   ')'
             >   statement_
             >
@@ -70,7 +75,7 @@ namespace parser {
         while_statement =
                 lit("while")
             >   '('
-            >   expr
+            >   expr.logical_OR_expression
             >   ')'
             >   statement_
             ;
@@ -81,7 +86,7 @@ namespace parser {
 
         return_statement =
                 lexeme["return" >> !(alnum | '_')] // make sure we have whole words
-            >  -expr
+            >  -expr.logical_OR_expression
             >   ';'
             ;
 
@@ -90,21 +95,28 @@ namespace parser {
             (statement_list)
             (identifier)
             (type_specifier)
+            (struct_specifier)
             (type_id)
             (declaration)
+            (declarator)
+            (init_declarator)
+            (struct_member_declaration)
         );
 
         // Error handling
         on_error<qi::fail>(statement_list,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
+        on_error<fail>(declarator,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
 
-        // Annotation: on success in declaration,
-        // assignment and return_statement, call annotation.
-        on_success(declaration,
-            annotation_function(error.iters)(_val, _1));
-        on_success(return_statement,
-            annotation_function(error.iters)(_val, _1));
+        // Annotation on success
+        SUCCESS_ANNOTATE(declaration);
+        SUCCESS_ANNOTATE(struct_specifier);
+        SUCCESS_ANNOTATE(return_statement);
+        SUCCESS_ANNOTATE(init_declarator);
+        SUCCESS_ANNOTATE(declarator);
     }
 }
 

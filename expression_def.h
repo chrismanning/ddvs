@@ -13,14 +13,13 @@ namespace parser {
         qi::_4_type _4;
 
         qi::char_type char_;
-        qi::uint_type uint_;
+        qi::uint_parser<ast::Int_Value> uint_;
         qi::_val_type _val;
         qi::raw_type raw;
         qi::lexeme_type lexeme;
-        qi::matches_type matches;
         qi::alpha_type alpha;
         qi::alnum_type alnum;
-        qi::bool_type bool_;
+        qi::bool_parser<ast::Bool_Value> bool_;
 
         using qi::on_error;
         using qi::on_success;
@@ -99,6 +98,7 @@ namespace parser {
             ("return")
             ("new")
             ("delete")
+            ("error")
             ;
 
         //expressions in reverse precedence
@@ -119,8 +119,8 @@ namespace parser {
         multiplicative_expression = unary_expression > *(multiplicative_op > unary_expression);
 
         unary_expression =
-                (unary_op > primary_expression)
-            |   postfix_expression
+                -unary_op
+            >   postfix_expression
             ;
 
         struct_expr = struct_op > identifier;
@@ -134,13 +134,9 @@ namespace parser {
                 uint_
             |   identifier
             |   bool_
-            |   '(' > assignment_expression > ')'
+            |   '(' > logical_OR_expression > ')'
             ;
         //end expressions
-
-        declarator = matches['*'] > identifier;
-
-        init_declarator = declarator > -("="  > assignment_expression);
 
         identifier =
                 !(keywords | types)
@@ -151,6 +147,7 @@ namespace parser {
         // Debugging and error handling and reporting support.
         BOOST_SPIRIT_DEBUG_NODES(
             (assignment_expression)
+            (unary_assign)
             (logical_OR_expression)
             (logical_AND_expression)
             (equality_expression)
@@ -158,9 +155,9 @@ namespace parser {
             (additive_expression)
             (multiplicative_expression)
             (unary_expression)
+            (struct_expr)
+            (postfix_expression)
             (primary_expression)
-            (declarator)
-            (init_declarator)
             (identifier)
         );
 
@@ -172,14 +169,21 @@ namespace parser {
         on_error<fail>(identifier,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
-        on_error<fail>(declarator,
-            error_handler_function(error)(
-                "Error! Expecting ", _4, _3));
 
         ///////////////////////////////////////////////////////////////////////
         // Annotation: on success in primary_expression, call annotation.
-        on_success(primary_expression,
-            annotation_function(error.iters)(_val, _1));
+        SUCCESS_ANNOTATE(primary_expression);
+        SUCCESS_ANNOTATE(postfix_expression);
+        SUCCESS_ANNOTATE(multiplicative_expression);
+        SUCCESS_ANNOTATE(unary_expression);
+        SUCCESS_ANNOTATE(additive_expression);
+        SUCCESS_ANNOTATE(relational_expression);
+        SUCCESS_ANNOTATE(equality_expression);
+        SUCCESS_ANNOTATE(logical_AND_expression);
+        SUCCESS_ANNOTATE(logical_OR_expression);
+        SUCCESS_ANNOTATE(assignment_expression);
+        SUCCESS_ANNOTATE(struct_expr);
+        SUCCESS_ANNOTATE(unary_assign);
     }
 }
 #endif // EXPRESSION_DEF_H

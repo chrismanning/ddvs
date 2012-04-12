@@ -18,25 +18,23 @@
 #include <QDebug>
 
 #define DEFINE_EXPRESSION_STRUCTS(a,b) \
-    struct BOOST_PP_CAT(a,_op) {\
+    struct BOOST_PP_CAT(a,_op) : Typed {\
         optoken operator_;\
-        b operand_;\
-        Type type;\
+        b rhs;\
     };\
-    struct BOOST_PP_CAT(a,_expression) {\
-        b operand_;\
+    struct BOOST_PP_CAT(a,_expression) : Typed {\
+        b lhs;\
         std::list<BOOST_PP_CAT(a,_op)> rest;\
-        Type type;\
     };
 #define DEFINE_EXPRESSION_TUPLE(a,b) \
     BOOST_FUSION_ADAPT_STRUCT(\
         ast::BOOST_PP_CAT(a,_op),\
         (ast::optoken, operator_)\
-        (ast::b, operand_)\
+        (ast::b, rhs)\
     )\
     BOOST_FUSION_ADAPT_STRUCT(\
         ast::BOOST_PP_CAT(a,_expression),\
-        (ast::b, operand_)\
+        (ast::b, lhs)\
         (std::list<ast::BOOST_PP_CAT(a,_op)>, rest)\
     )
 
@@ -54,36 +52,192 @@ namespace ast
 
     struct Type {
         Type() : is_set(false) {}
-        Type(std::string const& type_str, bool const& pointer)
-            : type_str(type_str), pointer(pointer), is_set(true)
+        Type(std::string const& type_str, unsigned int width, bool pointer = false, bool lvalue = false)
+            : type_str(type_str), pointer(pointer), is_set(true), lvalue(lvalue), width(width)
         {}
         std::string type_str;
         bool pointer;
         bool lvalue;
         bool is_set;
+        unsigned int width;
 
         bool operator==(Type const& b) {
             return (type_str == b.type_str) && (pointer == b.pointer);
         }
+
+        bool operator==(std::string const& b) {
+            return starts_with(type_str, b);
+        }
+
         bool operator!=(Type const& b) {
             return !((*this) == b);
         }
+
+        bool operator!=(std::string const& b) {
+            return !((*this) == b);
+        }
+
+//        Type(Type const& b) {
+//            _cp(b);
+//        }
+//        Type& operator=(Type const& b) {
+//            _cp(b);
+//        }
+
+        explicit operator bool() {
+            return is_set;
+        }
+
+    private:
+        void _cp(Type const& b)
+        {
+            this->pointer = b.pointer;
+            this->type_str = b.type_str;
+            this->is_set = b.is_set;
+            this->lvalue = b.lvalue;
+            this->width = b.width;
+        }
+
+        bool starts_with(std::string const& a, std::string const& b)
+        {
+            if(a.size() >= b.size()) {
+                return a.substr(0, b.size()) == b;
+            }
+            return false;
+        }
     };
 
-    static Type Void("void", false);
-    static Type Int("int", false);
-    static Type Bool("bool", false);
-    static Type Struct("struct", false);
-    static Type Error("error", false);
+    static Type Void("void", 0, false);
+    static Type Int("int", 1, false);
+    static Type Bool("bool", 1, false);
+    static Type Struct("struct", 1, false);
+    static Type Error("error", 0, false);
 
-    struct nil {};
-    struct assignment_expression;
+    struct Typed : tagged
+    {
+        Type type;
+    };
 
-    struct identifier : tagged
+    struct Bool_Value;
+
+    struct Int_Value : Typed
+    {
+        Int_Value() : value(0)
+        {
+            type = Int;
+        }
+        Int_Value(int a) : value(a)
+        {
+            type = Int;
+        }
+        //binary ops
+        Int_Value operator+(Int_Value a)
+        {
+            return Int_Value(value + a.value);
+        }
+        Int_Value operator-(Int_Value a)
+        {
+            return Int_Value(value - a.value);
+        }
+        Int_Value operator*(Int_Value a)
+        {
+            return Int_Value(value * a.value);
+        }
+        Int_Value operator/(Int_Value a)
+        {
+            return Int_Value(value / a.value);
+        }
+        Int_Value& operator=(int a)
+        {
+            type = Int;
+            value = a;
+            return *this;
+        }
+        //unary ops
+        Int_Value operator+()
+        {
+            return Int_Value(+value);
+        }
+        Int_Value operator-()
+        {
+            return Int_Value(-value);
+        }
+
+        operator int()
+        {
+            return value;
+        }
+
+        explicit operator bool()
+        {
+            return bool(value);
+        }
+
+        int value;
+    };
+
+    struct Bool_Value : Typed
+    {
+        Bool_Value() : value(false)
+        {
+            type = Bool;
+        }
+        Bool_Value(bool a) : value(a)
+        {
+            type = Bool;
+        }
+        //binary ops
+        Bool_Value operator+(Bool_Value a)
+        {
+            return Bool_Value(value + a.value);
+        }
+        Bool_Value operator-(Bool_Value a)
+        {
+            return Bool_Value(value - a.value);
+        }
+        Bool_Value operator*(Bool_Value a)
+        {
+            return Bool_Value(value * a.value);
+        }
+        Bool_Value operator/(Bool_Value a)
+        {
+            return Bool_Value(value / a.value);
+        }
+        Bool_Value& operator=(bool a)
+        {
+            value = a;
+            return *this;
+        }
+        //unary ops
+        Bool_Value operator+()
+        {
+            return Bool_Value(+value);
+        }
+        Bool_Value operator-()
+        {
+            return Bool_Value(-value);
+        }
+
+        explicit operator bool()
+        {
+            return value;
+        }
+
+        bool value;
+    };
+
+    struct nil : Typed {
+        nil()
+        {
+            type = Error;
+        }
+    };
+    struct logical_OR_expression;
+
+    struct identifier : Typed
     {
         identifier(std::string const& name = "") : name(name){}
         std::string name;
-        Type type;
     };
 
     struct type_id : tagged
@@ -94,10 +248,10 @@ namespace ast
 
     typedef boost::variant<
             nil
-          , bool
-          , unsigned int
+          , Bool_Value
+          , Int_Value
           , identifier
-          , boost::recursive_wrapper<assignment_expression>
+          , boost::recursive_wrapper<logical_OR_expression>
         >
     operand;
     typedef operand primary_expression;
@@ -160,7 +314,7 @@ namespace ast
     };
 
     typedef boost::variant<struct_expr, optoken> postfix_op;
-    struct postfix_expression
+    struct postfix_expression : Typed
     {
         primary_expression first;
         std::list<postfix_op> rest;
@@ -172,7 +326,12 @@ namespace ast
         primary_expression operand_;
     };
 
-    typedef boost::variant<unary_op, postfix_expression> unary_expression;
+    //typedef boost::variant<unary_op, postfix_expression> unary_expression;
+    struct unary_expression : Typed
+    {
+        boost::optional<optoken> operator_;
+        postfix_expression operand_;
+    };
 
     DEFINE_EXPRESSION_STRUCTS(multiplicative, unary_expression)
     DEFINE_EXPRESSION_STRUCTS(additive, multiplicative_expression)
@@ -190,7 +349,7 @@ namespace ast
     struct function_call
     {
         identifier function_name;
-        std::list<assignment_expression> args;
+        std::list<logical_OR_expression> args;
     };
 
     struct unary_assign
@@ -199,29 +358,29 @@ namespace ast
         logical_OR_expression operand_;
     };
 
-    struct assignment_expression
+    struct assignment_expression : Typed
     {
         logical_OR_expression lhs;
         boost::optional<unary_assign> rhs;
     };
 
-    struct declarator
+    struct declarator : Typed
     {
         bool pointer;
         identifier name;
     };
 
-    struct init_declarator
+    struct init_declarator : Typed
     {
         declarator dec;
-        boost::optional<assignment_expression> assign;
+        boost::optional<logical_OR_expression> assign;
     };
 
     struct declaration;
 
     struct struct_member_declaration;
 
-    struct struct_specifier
+    struct struct_specifier : Typed
     {
         type_id type_name;
         std::list<boost::recursive_wrapper<struct_member_declaration> > members;
@@ -229,16 +388,16 @@ namespace ast
 
     typedef boost::variant<Type, struct_specifier> type_specifier;
 
-    struct struct_member_declaration
+    struct struct_member_declaration : Typed
     {
-        type_specifier type;
+        type_specifier type_spec;
         declarator dec;
     };
 
-    struct declaration : tagged
+    struct declaration : Typed
     {
-        type_specifier type;
-        boost::optional<init_declarator> declarator;
+        type_specifier type_spec;
+        boost::optional<init_declarator> init_dec;
     };
 
     struct if_statement;
@@ -262,20 +421,20 @@ namespace ast
 
     struct if_statement
     {
-        assignment_expression condition;
+        logical_OR_expression condition;
         statement then;
         boost::optional<statement> else_;
     };
 
     struct while_statement
     {
-        assignment_expression condition;
+        logical_OR_expression condition;
         statement body;
     };
 
     struct return_statement : tagged
     {
-        boost::optional<assignment_expression> expr;
+        boost::optional<logical_OR_expression> expr;
     };
 
     struct function_definition
@@ -286,7 +445,8 @@ namespace ast
         compound_statement body;
     };
 
-    typedef std::list<boost::variant<statement, function_definition> > translation_unit;
+    typedef boost::variant<statement, function_definition> statement_or_function;
+    typedef std::list<statement_or_function> translation_unit;
 
     // print functions for debugging
     inline std::ostream& operator<<(std::ostream& out, nil)
@@ -297,6 +457,16 @@ namespace ast
     inline std::ostream& operator<<(std::ostream& out, identifier const& id)
     {
         out << id.name; return out;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, Int_Value const& i)
+    {
+        out << i.value; return out;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, Bool_Value const& i)
+    {
+        out << i.value; return out;
     }
 }
 
@@ -322,6 +492,12 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+    ast::unary_expression,
+    (boost::optional<ast::optoken>, operator_)
+    (ast::postfix_expression, operand_)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
     ast::operation,
     (ast::optoken, operator_)
     (ast::operand, operand_)
@@ -330,7 +506,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::function_call,
     (ast::identifier, function_name)
-    (std::list<ast::assignment_expression>, args)
+    (std::list<ast::logical_OR_expression>, args)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -347,8 +523,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::declaration,
-    (ast::type_specifier, type)
-    (boost::optional<ast::init_declarator>, declarator)
+    (ast::type_specifier, type_spec)
+    (boost::optional<ast::init_declarator>, init_dec)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -360,12 +536,12 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::init_declarator,
     (ast::declarator, dec)
-    (boost::optional<ast::assignment_expression>, assign)
+    (boost::optional<ast::logical_OR_expression>, assign)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::struct_member_declaration,
-    (ast::type_specifier, type)
+    (ast::type_specifier, type_spec)
     (ast::declarator, dec)
 )
 
@@ -389,20 +565,20 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::if_statement,
-    (ast::assignment_expression, condition)
+    (ast::logical_OR_expression, condition)
     (ast::statement, then)
     (boost::optional<ast::statement>, else_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::while_statement,
-    (ast::assignment_expression, condition)
+    (ast::logical_OR_expression, condition)
     (ast::statement, body)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::return_statement,
-    (boost::optional<ast::assignment_expression>, expr)
+    (boost::optional<ast::logical_OR_expression>, expr)
 )
 
 #endif // AST_H
