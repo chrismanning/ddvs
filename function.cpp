@@ -7,4 +7,3 @@
 #include "function_def.h"
 
 typedef std::string::const_iterator iterator_type;
-//template struct parser::function<iterator_type>;

@@ -8,4 +8,3 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 
 typedef std::string::const_iterator iterator_type;
-//template struct parser::expression<iterator_type>;

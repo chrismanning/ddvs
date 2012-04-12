@@ -7,4 +7,3 @@
 #include "statement_def.h"
 
 typedef std::string::const_iterator iterator_type;
-//template struct parser::statement<iterator_type>;

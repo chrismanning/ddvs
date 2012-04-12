@@ -53,6 +53,14 @@ struct annotation
         }
     };
 
+    template <typename T>
+    void operator()(T& ast, Iterator pos) const
+    {
+        int id = iters.size();
+        iters.push_back(pos);
+        (set_id(id))(ast);
+    }
+
     void operator()(ast::operand& ast, Iterator pos) const
     {
         int id = iters.size();
@@ -80,20 +88,6 @@ struct annotation
         iters.push_back(pos);
         ast.id = id;
     }
-
-//    void operator()(ast::struct_declaration& ast, Iterator pos) const
-//    {
-//        int id = iters.size();
-//        iters.push_back(pos);
-//        ast.type_name.id = id;
-//    }
-
-//    void operator()(ast::struct_instantiation& ast, Iterator pos) const
-//    {
-//        int id = iters.size();
-//        iters.push_back(pos);
-//        ast.name.id = id;
-//    }
 };
 
 #endif // ANNOTATION_H
