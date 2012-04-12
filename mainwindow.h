@@ -39,7 +39,7 @@ private slots:
 #ifdef QT_DEBUG
     //debugging buttons
     void printStackButton_clicked();
-    void printCodeButton_clicked();
+    void printOffsetButton_clicked();
     void printVarsButton_clicked();
 #endif
 
@@ -53,12 +53,12 @@ private:
     QPushButton* interpretButton;
 #ifdef QT_DEBUG
     QPushButton* printStackButton;
-    QPushButton* printCodeButton;
+    QPushButton* printOffsetButton;
     QPushButton* printVarsButton;
 #endif
     QSplitter* mainSplitter;
     QSplitter* rightSplitter;
-    boost::shared_ptr<interpreter::Interpreter> interpreter;
+    interpreter::Interpreter interpreter;
 };
 
 #endif // MAINWINDOW_H

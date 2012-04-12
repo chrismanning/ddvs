@@ -6,8 +6,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    interpreter(new interpreter::Interpreter)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Dynamic Data Structure Visualisation"));
@@ -30,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     interpretButton = new QPushButton(tr("Interpret"));
 #ifdef QT_DEBUG
     printStackButton = new QPushButton(tr("Print Stack"));
-    printCodeButton = new QPushButton(tr("Print Code"));
+    printOffsetButton = new QPushButton(tr("Print Offset"));
     printVarsButton = new QPushButton(tr("Print Globals"));
 #endif
     rightSplitter = new QSplitter(Qt::Vertical, this);
@@ -42,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     rightSplitter->addWidget(interpretButton);
 #ifdef QT_DEBUG
     rightSplitter->addWidget(printStackButton);
-    rightSplitter->addWidget(printCodeButton);
+    rightSplitter->addWidget(printOffsetButton);
     rightSplitter->addWidget(printVarsButton);
 #endif
     mainSplitter->addWidget(rightSplitter);
@@ -59,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(interpretButton, SIGNAL(clicked()), this, SLOT(interpretButton_clicked()));
 #ifdef QT_DEBUG
     connect(printStackButton, SIGNAL(clicked()), this, SLOT(printStackButton_clicked()));
-    connect(printCodeButton, SIGNAL(clicked()), this, SLOT(printCodeButton_clicked()));
+    connect(printOffsetButton, SIGNAL(clicked()), this, SLOT(printOffsetButton_clicked()));
     connect(printVarsButton, SIGNAL(clicked()), this, SLOT(printVarsButton_clicked()));
 #endif
 }
@@ -102,18 +101,18 @@ void MainWindow::on_actionEdit_Item_triggered()
 void MainWindow::interpretButton_clicked()
 {
     QString tmp_str = interpreterInput->toPlainText();
-    if(interpreter->parse(tmp_str)) {
+    if(interpreter.parse(tmp_str)) {
         interpreterInput->clear();
-        interpreter->execute();
-        typedef std::map<std::string, int> varstype;
-        varstype vars = interpreter->getGlobals();
-        foreach(varstype::value_type var, vars) {
-            if(!items.contains(QString(var.first.c_str()))) {
-                DataType* tmp = new DataType(QString(var.first.c_str()),QString::number(interpreter->getStack()[var.second]));
-                scene->addItem(tmp);
-                items.insert(QString(var.first.c_str()), tmp);
-            }
-        }
+        interpreter.execute();
+        typedef std::map<std::string, boost::shared_ptr<interpreter::variable> > varstype;
+        //varstype vars = interpreter.getGlobals();
+//        foreach(varstype::value_type var, vars) {
+//            if(!items.contains(QString(var.first.c_str()))) {
+//                DataType* tmp = new DataType(QString(var.first.c_str()),QString::number(interpreter->getStack()[var.second]));
+//                scene->addItem(tmp);
+//                items.insert(QString(var.first.c_str()), tmp);
+//            }
+//        }
     }
 }
 
@@ -122,25 +121,24 @@ void MainWindow::interpretButton_clicked()
 void MainWindow::printStackButton_clicked()
 {
     QString tmp;
-    foreach(int const& val, interpreter->getStack()) {
-        tmp += QString::number(val) + ",";
+    QDebug d(&tmp);
+    qDebug().nospace() << "stack: ";
+    foreach(interpreter::variable const& val, interpreter.getStack()) {
+        std::cout << val << ',';
+        //tmp += QString::number(val) + ",";
     }
-    qDebug() << "stack: " << tmp;
+    std::cout << std::endl;
 }
 
-void MainWindow::printCodeButton_clicked()
+void MainWindow::printOffsetButton_clicked()
 {
-    QString tmp;
-    foreach(int const& val, interpreter->getCode()) {
-        tmp += QString::number(val) + ",";
-    }
-    qDebug() << "code: " << tmp;
+    qDebug() << "offset: " << interpreter.getOffset();
 }
 
 void MainWindow::printVarsButton_clicked()
 {
     QString tmp;
-    QMap<std::string,int> map(interpreter->getGlobals());
+    QMap<std::string,int> map(interpreter.getGlobals());
     QMapIterator<std::string, int> i(map);
     while(i.hasNext()) {
         i.next();

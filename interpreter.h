@@ -12,6 +12,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/type_traits/has_operator.hpp>
 #include <function.h>
 #include <types.h>
 #include <QStringList>
@@ -22,44 +23,57 @@ typedef std::string::const_iterator iterator_type;
 namespace interpreter {
     enum byte_code
     {
-        op_neg,         //  negate the top stack entry
-        op_add,         //  add top two stack entries
-        op_sub,         //  subtract top two stack entries
-        op_mul,         //  multiply top two stack entries
-        op_div,         //  divide top two stack entries
+        op_neg,         //0  negate the top stack entry
+        op_pos,         //1  make the top stack entry positive
+        op_add,         //2  add top two stack entries
+        op_sub,         //3  subtract top two stack entries
+        op_mul,         //4  multiply top two stack entries
+        op_div,         //5  divide top two stack entries
 
-        op_select_point,// ->
-        op_select_ref,  // .
-        op_increment,   // ++
-        op_decrement,   // --
+        op_select_point,//6  select struct member after dereferencing with ->
+        op_select_ref,  //7  select struct member with .
+        op_increment,   //8  postfix increment ++
+        op_decrement,   //9  postfix decrement --
+        op_dereference, //10 dereference address with *
+        op_address,     //11 get stack index with &
 
-        op_not,         //  boolean negate the top stack entry
-        op_eq,          //  compare the top two stack entries for ==
-        op_neq,         //  compare the top two stack entries for !=
-        op_lt,          //  compare the top two stack entries for <
-        op_lte,         //  compare the top two stack entries for <=
-        op_gt,          //  compare the top two stack entries for >
-        op_gte,         //  compare the top two stack entries for >=
+        op_not,         //12 boolean negate the top stack entry
+        op_eq,          //13 compare the top two stack entries for ==
+        op_neq,         //14 compare the top two stack entries for !=
+        op_lt,          //15 compare the top two stack entries for <
+        op_lte,         //16 compare the top two stack entries for <=
+        op_gt,          //17 compare the top two stack entries for >
+        op_gte,         //18 compare the top two stack entries for >=
 
-        op_and,         //  logical and top two stack entries
-        op_or,          //  logical or top two stack entries
+        op_and,         //19 logical and top two stack entries
+        op_or,          //20 logical or top two stack entries
 
-        op_load,        //  load a variable
-        op_store,       //  store a variable
+        op_load,        //21 load a variable
+        op_store,       //22 store a variable
 
-        op_int,         //  push constant integer into the stack
-        op_true,        //  push constant 0 into the stack
-        op_false,       //  push constant 1 into the stack
+        op_int,         //23 push constant integer into the stack
+        op_true,        //24 push constant 0 into the stack
+        op_false,       //25 push constant 1 into the stack
 
-        op_jump_if,     //  jump to a relative position in the code if top stack
-                        //  evaluates to false
-        op_jump,        //  jump to a relative position in the code
+        op_jump_if,     //26 jump to a relative position in the code if top stack
+                        //27 evaluates to false
+        op_jump,        //28 jump to a relative position in the code
 
-        op_stk_adj,     //  adjust the stack (for args and locals)
-        op_call,        //  function call
-        op_return,      //  return from function
-        op_void
+        op_stk_adj,     //29 adjust the stack (for args and locals)
+        op_call,        //30 function call
+        op_return,      //31 return from function
+        op_void         //32 void (no return)
     };
+
+    class null_ptr : public std::exception
+    {
+    public:
+        virtual const char* what() const throw()
+        {
+            return "null pointer";
+        }
+    };
+
     enum type_code
     {
         type_void,
@@ -68,19 +82,309 @@ namespace interpreter {
         type_struct
     };
 
-    struct cstruct
-    {
-        cstruct(std::string name, std::map<std::string, int> members)
-            : name(name), members(members)
-        {
+    struct variable;
 
-        }
-        std::string name;
-        std::map<std::string, int> members;
-        std::size_t size()
+    //variable operators for VM
+    //arithmetic
+    variable operator+(variable const& a, variable const& b);
+    variable operator-(variable const& a, variable const& b);
+    variable operator*(variable const& a, variable const& b);
+    variable operator/(variable const& a, variable const& b);
+    //relational
+    bool operator||(variable const& a, variable const& b);
+    bool operator&&(variable const& a, variable const& b);
+    bool operator==(variable const& a, variable const& b);
+    bool operator!=(variable const& a, variable const& b);
+    bool operator<(variable const& a, variable const& b);
+    bool operator<=(variable const& a, variable const& b);
+    bool operator>(variable const& a, variable const& b);
+    bool operator>=(variable const& a, variable const& b);
+    //unary
+    variable operator+(variable const& a);
+    variable operator-(variable const& a);
+    variable operator!(variable const& a);
+    variable& operator*(variable const& a);
+    variable& operator&(variable const& a);
+    //new & delete shall come later
+
+    struct variable : ast::Typed
+    {
+        variable() : var(0) {}
+        variable(int var, ast::Type type) : var(var)
         {
-            return members.size();
+            this->type = type;
+            type.lvalue = true;
         }
+        int var;
+
+        variable(variable const& b)
+        {
+            if(!type.is_set && b.type.is_set) {
+                type = b.type;
+            }
+            var = b.var;
+        }
+        void operator=(int b)
+        {
+            var = b;
+            if(b != 0) {
+                type = ast::Int;
+            }
+        }
+        void operator=(bool b)
+        {
+            var = b;
+            //type = ast::Bool;
+        }
+        void operator+=(variable const& b)
+        {
+            operator=((*this) + b);
+        }
+        void operator-=(variable const& b)
+        {
+            operator=((*this) - b);
+        }
+        void operator*=(variable const& b)
+        {
+            operator=((*this) * b);
+        }
+        void operator/=(variable const& b)
+        {
+            operator=((*this) / b);
+        }
+        explicit operator bool()
+        {
+            return bool(var);
+        }
+        const int* dereference(std::vector<int> const& stack)
+        {
+            return &stack[var];
+        }
+
+        int size()
+        {
+            return type.width;
+        }
+
+        friend std::ostream& operator<<(std::ostream& out, variable const& var);
+        friend QDebug& operator<<(QDebug& out, variable const& var);
+    };
+
+    struct cstruct : ast::Typed
+    {
+        typedef std::map<std::string, ast::Type> members_type;
+        cstruct(ast::struct_specifier& ss, std::vector<variable>& stack)
+            : name(ss.type_name.name), stack(stack)
+        {
+            qDebug() << "Creating new struct";
+            int offset = 1;
+            BOOST_FOREACH(auto& member_, ss.members) {
+                auto& member = member_.get();
+                member_specs[member.dec.name.name] = member.type;
+                members[member.dec.name.name] = offset;
+                //stack[offset].type = member.type;
+                qDebug() << member.type.type_str.c_str();
+                offset += member.type.width;
+            }
+            type = ast::Type("struct " + name, size(), false, true);
+        }
+
+        std::string name;
+        members_type member_specs;
+        std::map<std::string, int> members;
+        std::vector<variable>& stack;
+
+        int member_offset(std::string const& member, int offset)
+        {
+            auto i = members.find(member);
+            if(i != members.end()) {
+                int rv = i->second + offset;
+                if(!stack[rv].type.is_set) {
+                    stack[rv].type = member_specs[i->first];
+                }
+                return i->second + offset;
+            }
+            return -1;
+        }
+
+        int size()
+        {
+            int sum = 1;
+
+            BOOST_FOREACH(members_type::value_type a, member_specs) {
+                sum += a.second.width;
+            }
+
+            return sum;
+        }
+    };
+
+    struct Struct_Value : cstruct
+    {
+        Struct_Value(const int stack_offset, cstruct const& struct_type)
+            : cstruct(struct_type)
+        {
+        }
+        std::map<std::string, int> members;
+    };
+
+    struct Address
+    {
+        Address(size_t addr) : location(addr)
+        {}
+        Address operator&()
+        {
+            return Address(location);
+        }
+        size_t location;
+    };
+
+    typedef boost::variant<
+          ast::Int_Value
+        , ast::Bool_Value
+        , cstruct
+        , Address
+      > variable_type;
+
+    struct scope
+    {
+        scope(std::vector<int>& code, std::vector<variable>& stack, int& offset)
+            : code(code), stack(stack), offset(offset), held_value(-1)
+        {}
+        scope(boost::shared_ptr<scope> parent, std::vector<int>& code, std::vector<variable>& stack, int& offset)
+            : parent(parent), code(code), stack(stack), offset(offset), held_value(-1)
+        {}
+
+        void op(int a);
+        void op(int a, int b);
+        void op(int a, int b, int c);
+
+        const int* lookup_var(std::string const& name);
+
+        bool exists(std::string const& name)
+        {
+            return bool(lookup_var(name));
+        }
+
+        ast::Type lookup_struct_type(std::string const& name);
+        void add_var(std::string const& name, ast::Type type);
+
+        std::map<std::string, int> table;
+        boost::shared_ptr<scope> parent;
+        std::map<std::string, cstruct> structs;
+        std::vector<int>& code;
+        std::vector<variable>& stack;
+        int& offset;
+        int held_value;
+    };
+
+    struct type_resolver : boost::static_visitor<ast::Type>
+    {
+        type_resolver(error_handler& error_, scope* env)
+            : env(env), error_(error_)
+        {}
+
+        ast::Type operator()(ast::Type& t)
+        {
+            return t;
+        }
+
+        ast::Type operator()(ast::struct_specifier& ss)
+        {
+            qDebug() << "Processing: ast::struct_specifier";
+            auto t = env->lookup_struct_type(ss.type_name.name);
+            if(ss.members.size() > 0) {
+                if(t != ast::Error) {
+                    return ast::Error;
+                }
+                //typedef boost::recursive_wrapper<ast::struct_member_declaration> member_type;
+                BOOST_FOREACH(auto& member_, ss.members) {
+                    auto& member = member_.get();
+                    member.type = member.type_spec.apply_visitor(*this);
+                    if(member.type == ast::Error) {
+                        return ast::Error;
+                    }
+                    member.type.pointer = member.dec.pointer;
+                }
+                env->structs.insert(std::pair<std::string,cstruct>(ss.type_name.name, cstruct(ss, env->stack)));
+                return env->lookup_struct_type(ss.type_name.name);
+            }
+            else if(t == ast::Error) {
+                error(ss.id, "struct must have members");
+                return t;
+            }
+            return t;
+        }
+
+        void error(int id, std::string const& what)
+        {
+            error_("Error! ", what, error_.iters[id]);
+        }
+
+        scope* env;
+        error_handler& error_;
+    };
+
+    struct PrimaryExpressionTypeResolver : boost::static_visitor<ast::Type>
+    {
+        template <typename T>
+        ast::Type& operator()(T& a, typename boost::enable_if<boost::is_base_of<ast::Typed, T> >::type* dummy = 0)
+        {
+            return a.type;
+        }
+        template <typename T>
+        ast::Type& operator()(T& a, typename boost::disable_if<boost::is_base_of<ast::Typed, T> >::type* dummy = 0)
+        {
+            return ast::Error;
+        }
+    };
+
+    struct Expression : boost::static_visitor<bool>
+    {
+        Expression(error_handler& error_, scope* env) : env(env), error_(error_)
+        {
+            BOOST_ASSERT(env);
+        }
+
+        Expression(error_handler& error_, scope* env, ast::Type type, bool lvalue = false)
+            : type(type), lvalue(lvalue), env(env), error_(error_)
+        {
+            BOOST_ASSERT(env);
+        }
+
+        void error(int id, std::string const& what)
+        {
+            error_("Error! ", what, error_.iters[id]);
+        }
+
+        template<typename T>
+        bool operator()(std::list<T>& ops);
+
+        bool operator()(ast::assignment_expression& ast);
+        bool operator()(ast::logical_OR_expression& ast);
+        bool operator()(ast::logical_AND_expression& ast);
+        bool operator()(ast::equality_expression& ast);
+        bool operator()(ast::relational_expression& ast);
+        bool operator()(ast::additive_expression& ast);
+        bool operator()(ast::multiplicative_expression& ast);
+        bool operator()(ast::unary_expression& ast);
+        bool operator()(ast::struct_expr& ast);
+        bool operator()(ast::postfix_expression& ast);
+        bool operator()(ast::optoken& ast);
+        bool operator()(ast::identifier& ast);
+        bool operator()(bool ast);
+        bool operator()(ast::Bool_Value ast);
+        bool operator()(unsigned int ast);
+        bool operator()(ast::Int_Value ast);
+        bool operator()(ast::nil) { assert(0); return false; }
+
+        ast::Type operator()(ast::primary_expression& ast);
+
+        bool lvalue;
+        ast::Type type;
+        scope* env;
+        PrimaryExpressionTypeResolver petr;
+        error_handler& error_;
     };
 
     struct function
@@ -127,158 +431,115 @@ namespace interpreter {
         std::size_t nargs_;
     };
 
-    struct global : function, public boost::static_visitor<bool> {
-        global(std::vector<int>& stack, std::vector<int>& code, error_handler& error__) :
-                function(variables, pointers, code, 0, 0),
-                current_function(this),
-                global_function(this),
-                stack(stack),
-                error_(error__)
-        {
-            void_return = true;
-        }
+    struct global : public boost::static_visitor<bool> {
+        global(std::vector<int>& code, error_handler& error__, size_t size = 500)
+            :   stack(size),
+                error_(error__),
+                stack_offset(0),
+                global_scope(code, stack, stack_offset),
+                current_scope(&global_scope)
+        {}
+
         void error(int id, std::string const& what)
         {
             error_("Error! ", what, error_.iters[id]);
         }
 
         bool operator()(ast::nil) { assert(0); return false; }
-        bool operator()(unsigned int ast);
-        bool operator()(bool ast);
-        bool operator()(ast::identifier const& ast);
-        bool operator()(ast::optoken const& ast);
-        bool operator()(ast::function_call const& ast);
-        bool operator()(ast::assignment_expression const& ast);
-        bool operator()(ast::logical_OR_expression const& ast);
-        bool operator()(ast::logical_AND_expression const& ast);
-        bool operator()(ast::equality_expression const& ast);
-        bool operator()(ast::relational_expression const& ast);
-        bool operator()(ast::additive_expression const& ast);
-        bool operator()(ast::multiplicative_expression const& ast);
-        bool operator()(ast::unary_expression const& ast);
-        bool operator()(ast::postfix_expression const& ast);
-        bool operator()(ast::declaration const& ast);
-        bool operator()(ast::compound_statement const& ast);
-        bool operator()(ast::statement const& ast);
-        bool operator()(ast::if_statement const& ast);
-        bool operator()(ast::while_statement const& ast);
-        bool operator()(ast::return_statement const& ast);
-        bool operator()(ast::struct_member_declaration const& ast);
-        bool operator()(ast::struct_specifier const& ast);
-        bool operator()(ast::translation_unit const& ast);
+        bool operator()(ast::identifier& ast);
+        bool operator()(ast::function_call& ast);
+        bool operator()(ast::assignment_expression& ast);
+        bool operator()(ast::logical_OR_expression& ast);
+        bool operator()(ast::declaration& ast);
+        bool operator()(ast::declarator& ast);
+        bool operator()(ast::init_declarator& ast);
+        bool operator()(ast::compound_statement& ast);
+        bool operator()(ast::statement& ast);
+        bool operator()(ast::if_statement& ast);
+        bool operator()(ast::while_statement& ast);
+        bool operator()(ast::return_statement& ast);
+        bool operator()(ast::struct_member_declaration& ast);
+        bool operator()(ast::struct_specifier& ast);
+        bool operator()(ast::function_definition& ast);
+        bool operator()(ast::translation_unit& ast);
 
-        std::vector<int>& get_code() { return code; }
-        std::map<std::string, int> const& get_vars() { return variables; }
+        ast::Type operator()(ast::type_specifier& t);
 
-//        struct TypeHandler : public boost::static_visitor<ast::Type> {
-//            ast::Type operator()(ast::nil /*a*/) { return ast::Void;}
-//            ast::Type operator()(unsigned int /*a*/) { return ast::Int;}
-//            ast::Type operator()(bool /*a*/) { return ast::Bool;}
-//            ast::Type operator()(ast::identifier a) {
-//                if(a.type.is_set) {
-//                    return a.type;
-//                }
-//                else {
-//                    return ast::Type("", false);
-//                }
-//            }
-//            ast::Type operator()(ast::operand a) {
-//                return a.apply_visitor(*this);
-//            }
-//            ast::Type operator()(ast::type_specifier a) {
-//                return a.apply_visitor(*this);
-//            }
-//            ast::Type operator()(ast::Type a) {
-//                return a;
-//            }
-//            ast::Type operator()(ast::struct_specifier a) {
-//                return ast::Struct;
-//            }
-//            ast::Type operator()(ast::unary_expression a) {
-//                //FIXME handle * and & operators
-//                //return a.operand_.apply_visitor(*this);
-//                return ast::Type("", false);
-//            }
-//            ast::Type operator()(ast::postfix_expression a) {
-//                //FIXME handle * and & operators
-//                return ast::Void;
-//            }
-//            ast::Type operator()(ast::operation a) {
-//                //FIXME handle * and & operators
-//                return a.operand_.apply_visitor(*this);
-//            }
-//            ast::Type operator()(ast::function_call a) {
-////                boost::shared_ptr<function> p = functions[a.function_name.name];
-////                return p->return_type;
-//                return ast::Type("", false);
-//            }
-//            ast::Type operator()(ast::expression a) {
-//                ast::Type first = a.first.apply_visitor(*this);
-//                foreach(ast::operation const& op, a.rest) {
-//                    if((*this)(op) != first) {
-//                        return ast::Error;
-//                    }
-//                }
-//                return first;
-//            }
-//        };
+        std::vector<int> const& get_code()
+        {
+            return global_scope.code;
+        }
 
-//        TypeHandler th;
+        std::vector<variable>& get_stack()
+        {
+            return stack;
+        }
+
+        std::vector<variable>::iterator get_stack_pos()
+        {
+            return stack.begin() + stack_offset;
+        }
+
+        std::map<std::string, int> const& get_vars()
+        {
+            return global_scope.table;
+        }
+
+        int get_offset()
+        {
+            return stack_offset;
+        }
 
     private:
-        std::vector<cstruct> structs;
         typedef std::map<std::string, boost::shared_ptr<function> > function_table;
         function_table functions;
-        function* current_function;
-        function* global_function;
+        scope global_scope;
+        scope* current_scope;
         error_handler& error_;
-        //parser::struct_types& structs_table;
-
-        bool eval_expression(
-            int min_precedence,
-            std::list<ast::operation>::const_iterator& rbegin,
-            std::list<ast::operation>::const_iterator rend);
-
-        std::string current_function_name;
-        std::vector<int>& stack;
+        std::vector<variable> stack;
+        int stack_offset;
     };
 
     class Interpreter
     {
     public:
-        Interpreter(size_t size = 50) :
-            stack(size),
+        Interpreter() :
             error(start, end, error_buf),
-            compiler(stack, code, error)
+            compiler(code, error)
         {}
         bool parse(std::string input);
         bool parse(QString input);
-        int execute() {
-            return execute(code, code.begin(), stack.begin());
-        }
-        std::vector<int> const& getStack()
+        std::vector<variable>& getStack()
         {
-            return stack;
+            return compiler.get_stack();
         }
-        std::vector<int> const& getCode()
+        std::vector<variable>::iterator getStackPos()
         {
-            return compiler.get_code();
+            return compiler.get_stack_pos();
         }
-        std::map<std::string,int> const& getGlobals()
+        int getOffset()
+        {
+            return compiler.get_offset();
+        }
+        std::map<std::string, int> const& getGlobals()
         {
             return compiler.get_vars();
+        }
+        int execute() {
+            int r = execute(code, code.begin(), getStack().begin(), getStackPos());
+            code.clear();
+            return r;
         }
 
     private:
         iterator_type start;
         iterator_type end;
         std::string src;
-        std::vector<int> stack;
-        std::vector<int> code;
         error_handler error;
         global compiler;
         ast::translation_unit ast;
         parser::struct_types structs;
+        std::vector<int> code;
         boost::shared_ptr<QString> error_buf;
 
         parser::skipper skip;
@@ -286,7 +547,8 @@ namespace interpreter {
         int execute(
             std::vector<int> const& code            // the program code
           , std::vector<int>::const_iterator pc     // program counter
-          , std::vector<int>::iterator frame_ptr    // start of arguments and locals
+          , std::vector<variable>::iterator frame_ptr    // start of whole stack
+          , std::vector<variable>::iterator stack_ptr    // start of emptiness
         );
     };
 }
