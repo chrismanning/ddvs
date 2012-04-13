@@ -21,16 +21,12 @@ namespace parser {
 
         qi::rule<Iterator, ast::statement_list(), skipper> statement_list, compound_statement;
         DECLARE_SPIRIT_RULES(
-            (type_id)
             (if_statement)
             (while_statement)
             (return_statement)
-            (type_specifier)
             (declaration)
             (init_declarator)
             (declarator)
-            (struct_specifier)
-            (struct_member_declaration)
         )//
         qi::rule<Iterator, ast::statement(), skipper> statement_;
         qi::rule<Iterator, std::string(), skipper> identifier;

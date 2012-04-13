@@ -15,6 +15,7 @@ namespace parser {
         qi::char_type char_;
         qi::uint_parser<ast::Int_Value> uint_;
         qi::_val_type _val;
+        qi::matches_type matches;
         qi::raw_type raw;
         qi::lexeme_type lexeme;
         qi::alpha_type alpha;
@@ -74,8 +75,10 @@ namespace parser {
             ("!", ast::op_not)
             ("*", ast::op_indirection)
             ("&", ast::op_address)
+            ;
+
+        memory_op.add
             ("new", ast::op_new)
-            ("delete", ast::op_delete)
             ;
 
         struct_op.add
@@ -97,14 +100,15 @@ namespace parser {
             ("struct")
             ("return")
             ("new")
-            ("delete")
             ("error")
             ;
 
         //expressions in reverse precedence
         assignment_expression = logical_OR_expression > -unary_assign;
 
-        unary_assign = assign_op > logical_OR_expression;
+        allocation_expression = memory_op > type_specifier;
+
+        unary_assign = assign_op > (allocation_expression | logical_OR_expression);
 
         logical_OR_expression = logical_AND_expression > *(logical_or_op > logical_AND_expression);
 
@@ -138,10 +142,24 @@ namespace parser {
             ;
         //end expressions
 
+        type_specifier =
+                types
+            |   struct_specifier
+            ;
+
+        declarator = matches['*'] > identifier;
+
+        struct_member_declaration = type_specifier > declarator > ';';
+
+        struct_specifier =
+                lexeme["struct"] > type_id > -('{' > +struct_member_declaration > '}');
+
         identifier =
                 !(keywords | types)
             >>  raw[lexeme[(alpha | '_') >> *(alnum | '_')]]
             ;
+
+        type_id = identifier.alias();
 
         ///////////////////////////////////////////////////////////////////////
         // Debugging and error handling and reporting support.
@@ -159,6 +177,11 @@ namespace parser {
             (postfix_expression)
             (primary_expression)
             (identifier)
+            (struct_specifier)
+            (type_id)
+            (declarator)
+            (struct_member_declaration)
+            (allocation_expression)
         );
 
         ///////////////////////////////////////////////////////////////////////
@@ -167,6 +190,15 @@ namespace parser {
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
         on_error<fail>(identifier,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
+        on_error<fail>(declarator,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
+        on_error<fail>(type_specifier,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
+        on_error<fail>(allocation_expression,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
 
@@ -184,6 +216,9 @@ namespace parser {
         SUCCESS_ANNOTATE(assignment_expression);
         SUCCESS_ANNOTATE(struct_expr);
         SUCCESS_ANNOTATE(unary_assign);
+        SUCCESS_ANNOTATE(struct_specifier);
+        SUCCESS_ANNOTATE(declarator);
+        SUCCESS_ANNOTATE(allocation_expression);
     }
 }
 #endif // EXPRESSION_DEF_H

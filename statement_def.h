@@ -13,7 +13,6 @@ namespace parser {
         qi::_4_type _4;
 
         qi::_val_type _val;
-        qi::matches_type matches;
         qi::lexeme_type lexeme;
         qi::alnum_type alnum;
         qi::lit_type lit;
@@ -41,23 +40,9 @@ namespace parser {
         identifier = expr.identifier
             ;
 
-        type_id = identifier.alias();
+        declaration = expr.type_specifier > -init_declarator > ';';
 
-        declaration = type_specifier > -init_declarator > ';';
-
-        declarator = matches['*'] > identifier;
-
-        init_declarator = declarator > -("="  > expr.logical_OR_expression);
-
-        type_specifier =
-                types
-            |   struct_specifier
-            ;
-
-        struct_member_declaration = type_specifier > declarator > ';';
-
-        struct_specifier =
-                lexeme["struct"] > type_id > -('{' > +struct_member_declaration > '}');
+        init_declarator = expr.declarator > -("="  > (expr.allocation_expression | expr.logical_OR_expression));
 
         if_statement =
                 lit("if")
@@ -94,29 +79,25 @@ namespace parser {
         BOOST_SPIRIT_DEBUG_NODES(
             (statement_list)
             (identifier)
-            (type_specifier)
-            (struct_specifier)
-            (type_id)
             (declaration)
-            (declarator)
             (init_declarator)
-            (struct_member_declaration)
         );
 
         // Error handling
         on_error<qi::fail>(statement_list,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
-        on_error<fail>(declarator,
+        on_error<fail>(declaration,
+            error_handler_function(error)(
+                "Error! Expecting ", _4, _3));
+        on_error<fail>(init_declarator,
             error_handler_function(error)(
                 "Error! Expecting ", _4, _3));
 
         // Annotation on success
         SUCCESS_ANNOTATE(declaration);
-        SUCCESS_ANNOTATE(struct_specifier);
         SUCCESS_ANNOTATE(return_statement);
         SUCCESS_ANNOTATE(init_declarator);
-        SUCCESS_ANNOTATE(declarator);
     }
 }
 

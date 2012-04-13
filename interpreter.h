@@ -184,6 +184,9 @@ namespace interpreter {
                 members[member.dec.name.name] = offset;
                 //stack[offset].type = member.type;
                 qDebug() << member.type.type_str.c_str();
+                if(member.type.pointer) {
+                    member.type.width = 1;
+                }
                 offset += member.type.width;
             }
             type = ast::Type("struct " + name, size(), false, true);

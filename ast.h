@@ -352,10 +352,13 @@ namespace ast
         std::list<logical_OR_expression> args;
     };
 
-    struct unary_assign
+    struct allocation_expression;
+
+    typedef boost::variant<logical_OR_expression, boost::recursive_wrapper<allocation_expression> > ass_exp;
+    struct unary_assign : Typed
     {
         optoken operator_;
-        logical_OR_expression operand_;
+        ass_exp operand_;
     };
 
     struct assignment_expression : Typed
@@ -373,7 +376,7 @@ namespace ast
     struct init_declarator : Typed
     {
         declarator dec;
-        boost::optional<logical_OR_expression> assign;
+        boost::optional<ass_exp> assign;
     };
 
     struct declaration;
@@ -387,6 +390,12 @@ namespace ast
     };
 
     typedef boost::variant<Type, struct_specifier> type_specifier;
+
+    struct allocation_expression : Typed
+    {
+        optoken operator_;
+        type_specifier type_spec;
+    };
 
     struct struct_member_declaration : Typed
     {
@@ -459,6 +468,33 @@ namespace ast
         out << id.name; return out;
     }
 
+    inline std::ostream& operator<<(std::ostream& out, type_id const& id)
+    {
+        out << id.name; return out;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, Type const& id)
+    {
+        if(id.type_str.length() > 0) {
+            out << id.type_str;
+        }
+        else
+            out << "empty";
+        return out;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, struct_member_declaration const& id)
+    {
+        out << id.dec.name; return out;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, boost::recursive_wrapper<struct_member_declaration> const& id)
+    {
+        auto s = id.get();
+        out << s;
+        return out;
+    }
+
     inline std::ostream& operator<<(std::ostream& out, Int_Value const& i)
     {
         out << i.value; return out;
@@ -476,6 +512,12 @@ DEFINE_EXPRESSION_TUPLE(relational, additive_expression)
 DEFINE_EXPRESSION_TUPLE(equality, relational_expression)
 DEFINE_EXPRESSION_TUPLE(logical_AND, equality_expression)
 DEFINE_EXPRESSION_TUPLE(logical_OR, logical_AND_expression)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::allocation_expression,
+    (ast::optoken, operator_)
+    (ast::type_specifier, type_spec)
+)
 
 BOOST_FUSION_ADAPT_STRUCT(
     ast::function_definition,
@@ -536,7 +578,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::init_declarator,
     (ast::declarator, dec)
-    (boost::optional<ast::logical_OR_expression>, assign)
+    (boost::optional<ast::ass_exp>, assign)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -560,7 +602,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::unary_assign,
     (ast::optoken, operator_)
-    (ast::logical_OR_expression, operand_)
+    (ast::ass_exp, operand_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

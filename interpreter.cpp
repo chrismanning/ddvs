@@ -171,15 +171,41 @@ namespace interpreter {
                 if(tmp == -1) {
                     return false;
                 }
-                if(!(*this)(ast.rhs->operand_)) {
-                    return false;
+                if(ast.rhs->operand_.which() == 0) {
+                    ast::logical_OR_expression& operand = boost::get<ast::logical_OR_expression&>(ast.rhs->operand_);
+                    if(!(*this)(operand)) {
+                        return false;
+                    }
+                    if(!(*this)(ast.rhs->operator_)) {
+                        return false;
+                    }
+                    env->op(tmp);
+                    env->held_value = -1;
+                    return true;
                 }
-                if(!(*this)(ast.rhs->operator_)) {
-                    return false;
+                else {
+                    ast::allocation_expression& alloc_ = boost::get<ast::allocation_expression&>(ast.rhs->operand_);
+                    type_resolver tr(error_, env);
+                    ast::Type t = boost::apply_visitor(tr, alloc_.type_spec);
+                    if(!ast.lhs.type.pointer) {
+                        error(ast.lhs.id, "not a pointer");
+                        return false;
+                    }
+                    ast.type = ast.lhs.type;
+                    env->op(op_int, env->offset);
+                    if(!(*this)(ast.rhs->operator_)) {
+                        return false;
+                    }
+                    if(env->held_value != -1) {
+                        env->op(env->held_value);
+                    }
+                    else {
+                        env->op(env->offset);
+                    }
+                    env->offset += t.width;
+                    env->held_value = -1;
+                    return true;
                 }
-                env->op(tmp);
-                env->held_value = -1;
-                return true;
             }
             else {
                 error(ast.lhs.id, "not an lvalue");
@@ -214,6 +240,7 @@ namespace interpreter {
                 else
                     return */(*this)(expr.operator_);
             }
+            ast.type = ast::Bool;
         }
         else {
             ast.type = ast.lhs.type;
@@ -364,15 +391,10 @@ namespace interpreter {
                 case ast::op_negative: env->op(op_neg); break;
                 case ast::op_not: env->op(op_not); break;
                 case ast::op_indirection:
-                    if(ast.operand_.type.pointer) {
-                        env->op(op_dereference);
-                        ast.type = ast.operand_.type;
-                        ast.type.pointer = false;
-                    }
-                    else {
-                        error(ast.operand_.id, "type error");
-                        return false;
-                    }
+                    env->held_value = env->stack[env->code.back()].var;
+                    env->op(op_dereference);
+                    ast.type = ast.operand_.type;
+                    ast.type.pointer = false;
                     break;
                 case ast::op_address:
                     if(ast.operand_.type.lvalue) {
@@ -405,28 +427,11 @@ namespace interpreter {
 
         ast.type = (*this)(ast.first);
         if(ast.type == ast::Error) {
-            error(ast.id, "primary expression type error");
+            if(!error_.error_buf && !error_.error_buf->size() > 0)
+                error(ast.id, "primary expression type error");
             return false;
         }
 
-//        case ast::op_select_point:
-//            if(ast.operand_.type == "struct" && ast.operand_.type.pointer) {
-//                env->op(op_select_point);
-//            }
-//            else {
-//                error(ast.operand_.id, "type error");
-//                return false;
-//            }
-//            break;
-//        case ast::op_select_ref:
-//            if(ast.operand_.type == "struct") {
-//                env->op(op_select_ref);
-//            }
-//            else {
-//                error(ast.operand_.id, "type error");
-//                return false;
-//            }
-//            break;
         //reverse this? + all the above foreach loops
         int num = 0;
         std::string previous_name, previous_member_name;
@@ -438,10 +443,8 @@ namespace interpreter {
             if(op.which() == 0) {
                 ast::struct_expr& so = boost::get<ast::struct_expr>(op);
                 if(ast.type == "struct") {
-                    std::string name;
                     if(num == 0) {
-                        name = boost::get<ast::identifier>(ast.first).name;
-                        //previous_name = name;
+                        std::string name = boost::get<ast::identifier>(ast.first).name;
                         addr = env->lookup_var(name);
                         ++num;
                     }
@@ -463,6 +466,14 @@ namespace interpreter {
                                 return false;
                             }
                         }
+                    }
+                    if(so.operator_ == ast::op_select_point && !ast.type.pointer) {
+                        err = "not a pointer";
+                        break;
+                    }
+                    else if(so.operator_ == ast::op_select_ref && ast.type.pointer) {
+                        err = "is a pointer";
+                        break;
                     }
                     if(addr != 0) {
                         ast::Type struct_type = env->stack[*addr + member_offset].type;
@@ -499,11 +510,7 @@ namespace interpreter {
                                          << so.member.name.c_str()
                                          << "from struct"
                                          << cs.name.c_str();
-                                auto member_addr = i->second.member_offset(previous_member_name, member_offset);
-//                                auto k = cs.members.find(so.member.name);
-//                                if(k != cs.members.end()) {
-//                                    auto member_addr = k->second;
-//                                    member_offset = member_addr;
+                                auto member_addr = cs.member_offset(previous_member_name, *addr + member_offset);
                                 if(member_addr != -1) {
                                     ast.type = member_type;
                                     ast.type.lvalue = true;
@@ -713,6 +720,9 @@ namespace interpreter {
         std::size_t n = offset;
         table[name] = n;
         stack[table[name]] = 0;
+        if(type.pointer) {
+            type.width = 1;
+        }
         stack[table[name]].type = type;
         offset += type.width;
     }
@@ -835,13 +845,32 @@ namespace interpreter {
 
         //eval rhs if it exists
         if(ast.assign) {
-            Expression expr(error_, current_scope, ast.type);
-            if(!expr(*ast.assign)) {
-                return false;
+            if(ast.assign->which() == 0) {
+                Expression expr(error_, current_scope, ast.type);
+                ast::logical_OR_expression& operand = boost::get<ast::logical_OR_expression&>(*ast.assign);
+                if(!expr(operand)) {
+                    return false;
+                }
+                current_scope->add_var(ast.dec.name.name, ast.type);
+                current_scope->stack[current_scope->table[ast.dec.name.name]].type = ast.type;
+                current_scope->op(op_store, *current_scope->lookup_var(ast.dec.name.name));
             }
-            current_scope->add_var(ast.dec.name.name, ast.type);
-            current_scope->stack[current_scope->table[ast.dec.name.name]].type = ast.type;
-            current_scope->op(op_store, *current_scope->lookup_var(ast.dec.name.name));
+            else {
+                ast::allocation_expression& alloc_ = boost::get<ast::allocation_expression&>(*ast.assign);
+                type_resolver tr(error_, current_scope);
+                ast::Type t = boost::apply_visitor(tr, alloc_.type_spec);
+                if(!ast.type.pointer) {
+                    error(ast.dec.id, "not a pointer");
+                    return false;
+                }
+                for(unsigned int i=stack_offset; i<t.width; i++)
+                    stack[i] = 0;
+                stack_offset += t.width;
+                //current_scope->op(op_new, t.width);
+                current_scope->add_var(ast.dec.name.name, ast.type);
+                current_scope->op(op_store, stack_offset - t.width);
+                return true;
+            }
         }
         else {
             current_scope->add_var(ast.dec.name.name, ast.type);
@@ -1097,6 +1126,17 @@ namespace interpreter {
                 case op_div:
                     --stack_ptr;
                     stack_ptr[-1] /= stack_ptr[0];
+                    break;
+
+                case op_dereference:
+                    stack_ptr[-1] = frame_ptr[stack_ptr[-1].var];
+                    break;
+
+                case op_address:
+                    stack_ptr[-1] = *pc++;
+                    stack_ptr[-1].type = frame_ptr[*pc].type;
+                    stack_ptr[-1].type.width = 1;
+                    stack_ptr[-1].type.pointer = true;
                     break;
 
                 case op_eq:
