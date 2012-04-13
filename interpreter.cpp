@@ -1060,18 +1060,29 @@ namespace interpreter {
             }
             else {
                 qDebug() << "FAIL";
+                msg_box.setText("Semantic analysis failed");
+                msg_box.setStandardButtons(QMessageBox::Close);
+                msg_box.setDefaultButton(QMessageBox::Close);
                 if(error_buf) {
+                    msg_box.setDetailedText(*error_buf);
                     qDebug() << *error_buf;
                     error_buf->clear();
                 }
+                msg_box.exec();
             }
         }
         else {
             qDebug() << "PARSE FAIL";
+            msg_box.setText("Parsing failed");
+            msg_box.setInformativeText("Syntax error");
+            msg_box.setStandardButtons(QMessageBox::Close);
+            msg_box.setDefaultButton(QMessageBox::Close);
             if(error_buf) {
+                msg_box.setDetailedText(*error_buf);
                 qDebug() << *error_buf;
                 error_buf->clear();
             }
+            msg_box.exec();
         }
         ast.clear();
 

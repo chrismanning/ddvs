@@ -16,6 +16,7 @@
 #include <function.h>
 #include <types.h>
 #include <QStringList>
+#include <QMessageBox>
 #include <QDebug>
 
 typedef std::string::const_iterator iterator_type;
@@ -535,6 +536,7 @@ namespace interpreter {
         }
 
     private:
+        QMessageBox msg_box;
         iterator_type start;
         iterator_type end;
         std::string src;
