@@ -12,7 +12,6 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/type_traits/has_operator.hpp>
 #include <function.h>
 #include <types.h>
 #include <QStringList>
