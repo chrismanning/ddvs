@@ -179,7 +179,7 @@ namespace interpreter {
         {
             qDebug() << "Creating new struct";
             int offset = 1;
-            BOOST_FOREACH(auto& member_, ss.members) {
+            for(auto& member_ : ss.members) {
                 auto& member = member_.get();
                 member_specs[member.dec.name.name] = member.type;
                 members[member.dec.name.name] = offset;
@@ -215,7 +215,7 @@ namespace interpreter {
         {
             int sum = 1;
 
-            BOOST_FOREACH(members_type::value_type a, member_specs) {
+            for(members_type::value_type a : member_specs) {
                 sum += a.second.width;
             }
 
@@ -302,7 +302,7 @@ namespace interpreter {
                     return ast::Error;
                 }
                 //typedef boost::recursive_wrapper<ast::struct_member_declaration> member_type;
-                BOOST_FOREACH(auto& member_, ss.members) {
+                for(auto& member_ : ss.members) {
                     auto& member = member_.get();
                     member.type = member.type_spec.apply_visitor(*this);
                     if(member.type == ast::Error) {
