@@ -14,12 +14,11 @@
 #define SUCCESS_ANNOTATE(a) on_success(a,\
 annotation_function(error.iters)(_val, _1))
 
-#include <boost/spirit/include/qi.hpp>
+#include <skipper.h>
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <annotation.h>
 #include <ast.h>
 #include <error.h>
-#include <skipper.h>
 #include <types.h>
 #include <string>
 #include <vector>

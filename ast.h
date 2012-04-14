@@ -7,12 +7,10 @@
 #ifndef AST_H
 #define AST_H
 
-#include <boost/config/warning_disable.hpp>
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 #include <boost/optional.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <list>
 #include <QDebug>

@@ -7,11 +7,7 @@
 #ifndef STATEMENT_H
 #define STATEMENT_H
 
-#include <boost/spirit/include/qi.hpp>
-#include <ast.h>
 #include <expression.h>
-#include <boost/lambda/lambda.hpp>
-#include <QDebug>
 
 namespace parser {
     struct statement : qi::grammar<Iterator, ast::statement_list(), skipper > {

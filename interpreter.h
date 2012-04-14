@@ -7,11 +7,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <function.h>
 #include <types.h>
 #include <QStringList>

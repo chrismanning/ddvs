@@ -15,7 +15,6 @@
 #include <edititemdialog.h>
 #include <zoomwidget.h>
 #include <datatype.h>
-#include <boost/spirit/include/qi.hpp>
 #include <interpreter.h>
 
 namespace Ui {
