@@ -8,6 +8,7 @@
 #define INTERPRETER_H
 
 #include <boost/shared_ptr.hpp>
+#include <memory>
 #include <function.h>
 #include <types.h>
 #include <QStringList>
@@ -218,15 +219,6 @@ namespace interpreter {
         }
     };
 
-    struct Struct_Value : cstruct
-    {
-        Struct_Value(const int stack_offset, cstruct const& struct_type)
-            : cstruct(struct_type)
-        {
-        }
-        std::map<std::string, int> members;
-    };
-
     struct Address
     {
         Address(size_t addr) : location(addr)
@@ -332,7 +324,7 @@ namespace interpreter {
             return a.type;
         }
         template <typename T>
-        ast::Type& operator()(T& a, typename boost::disable_if<boost::is_base_of<ast::Typed, T> >::type* dummy = 0)
+        ast::Type& operator()(T& /*a*/, typename boost::disable_if<boost::is_base_of<ast::Typed, T> >::type* dummy = 0)
         {
             return ast::Error;
         }
@@ -355,9 +347,6 @@ namespace interpreter {
         {
             error_("Error! ", what, error_.iters[id]);
         }
-
-        template<typename T>
-        bool operator()(std::list<T>& ops);
 
         bool operator()(ast::assignment_expression& ast);
         bool operator()(ast::logical_OR_expression& ast);

@@ -222,7 +222,7 @@ namespace interpreter {
             return false;
         }
         else if(ast.rest.size() > 0) {
-            BOOST_FOREACH(ast::logical_OR_op& expr, ast.rest) {
+            for(ast::logical_OR_op& expr : ast.rest) {
                 if(!(*this)(expr.rhs)) {
                     return false;
                 }
@@ -255,7 +255,7 @@ namespace interpreter {
             return false;
         }
         else if(ast.rest.size() > 0) {
-            BOOST_FOREACH(ast::logical_AND_op& expr, ast.rest) {
+            for(ast::logical_AND_op& expr : ast.rest) {
                 if(!(*this)(expr.rhs)) {
                     return false;
                 }
@@ -281,7 +281,7 @@ namespace interpreter {
             return false;
         }
         else if(ast.rest.size() > 0) {
-            BOOST_FOREACH(ast::equality_op& expr, ast.rest) {
+            for(ast::equality_op& expr : ast.rest) {
                 if(!(*this)(expr.rhs) || expr.rhs.type != ast::Int) {
                     error(expr.id,"Type mismatch: should be int");
                     return false;
@@ -306,7 +306,7 @@ namespace interpreter {
             return false;
         }
         else if(ast.rest.size() > 0) {
-            BOOST_FOREACH(ast::relational_op& expr, ast.rest) {
+            for(ast::relational_op& expr : ast.rest) {
                 if(!(*this)(expr.rhs) || expr.rhs.type != ast::Int) {
                     error(expr.id,"Type mismatch: should be int");
                     return false;
@@ -324,13 +324,6 @@ namespace interpreter {
         return true;
     }
 
-    template<typename T>
-    bool Expression::operator()(std::list<T>& ops)
-    {
-        std::vector<int> tmp_code;
-        return false;
-    }
-
     bool Expression::operator()(ast::additive_expression& ast)
     {
         qDebug() << "Processing: ast::additive_expression";
@@ -339,7 +332,7 @@ namespace interpreter {
             return false;
         }
         if(ast.rest.size() > 0) {
-            BOOST_FOREACH(ast::additive_op& expr, ast.rest) {
+            for(ast::additive_op& expr : ast.rest) {
                 if(!(*this)(expr.rhs) || expr.rhs.type != ast::Int) {
                     error(expr.id,"Type mismatch: should be int");
                     return false;
@@ -362,7 +355,7 @@ namespace interpreter {
             return false;
         }
         else if(ast.rest.size() > 0) {
-            BOOST_FOREACH(ast::multiplicative_op& expr, ast.rest) {
+            for(ast::multiplicative_op& expr : ast.rest) {
                 if(!(*this)(expr.rhs) || expr.rhs.type != ast::Int) {
                     error(expr.id,"Type mismatch: should be int");
                     return false;
@@ -415,7 +408,7 @@ namespace interpreter {
         return true;
     }
 
-    bool Expression::operator()(ast::struct_expr& ast)
+    bool Expression::operator()(ast::struct_expr& /*ast*/)
     {
         qDebug() << "Processing: ast::struct_expr";
         return false;
@@ -439,7 +432,7 @@ namespace interpreter {
         int member_offset = 0;
         std::string err;
         int id = -1;
-        BOOST_FOREACH(ast::postfix_op& op, ast.rest) {
+        for(ast::postfix_op& op : ast.rest) {
             if(op.which() == 0) {
                 ast::struct_expr& so = boost::get<ast::struct_expr>(op);
                 if(ast.type == "struct") {
@@ -494,7 +487,7 @@ namespace interpreter {
                             //find member spec
                             auto j = cs.member_specs.find(so.member.name);
                             typedef std::pair<std::string, ast::Type> member_spec__;
-                            BOOST_FOREACH(member_spec__ v, cs.member_specs) {
+                            for(member_spec__ v : cs.member_specs) {
                                 qDebug() << v.first.c_str() << ":" << v.second.type_str.c_str();
                             }
                             if(j != cs.member_specs.end()) {
@@ -891,8 +884,7 @@ namespace interpreter {
     {
         qDebug() << "Processing: ast::compound_statement";
         BOOST_ASSERT(current_scope);
-        BOOST_FOREACH(ast::statement& s, ast)
-        {
+        for(ast::statement& s : ast) {
             if(!(*this)(s))
                 return false;
         }
@@ -1029,14 +1021,14 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::function_definition& ast)
+    bool global::operator()(ast::function_definition& /*ast*/)
     {
         qDebug() << "Processing: ast::function_definition";
         return false;
     }
 
     bool global::operator()(ast::translation_unit& ast) {
-        BOOST_FOREACH(ast::statement_or_function& fs, ast) {
+        for(ast::statement_or_function& fs : ast) {
             if(!fs.apply_visitor(*this)) {
                 return false;
             }
@@ -1256,5 +1248,6 @@ namespace interpreter {
                     return 0;
             }
         }
+        return 0;
     }
 }
