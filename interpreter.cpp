@@ -655,7 +655,7 @@ namespace interpreter {
     {
         qDebug() << "Processing: ast::Int_Value";
         if(env) {
-            env->op(op_int, ast);
+            env->op(op_int, ast.value);
             return true;
         }
         else

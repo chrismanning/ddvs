@@ -128,47 +128,14 @@ namespace ast
         {
             type = Int;
         }
-        //binary ops
+        //needed binary ops
         Int_Value operator+(Int_Value a)
         {
             return Int_Value(value + a.value);
         }
-        Int_Value operator-(Int_Value a)
-        {
-            return Int_Value(value - a.value);
-        }
         Int_Value operator*(Int_Value a)
         {
             return Int_Value(value * a.value);
-        }
-        Int_Value operator/(Int_Value a)
-        {
-            return Int_Value(value / a.value);
-        }
-        Int_Value& operator=(int a)
-        {
-            type = Int;
-            value = a;
-            return *this;
-        }
-        //unary ops
-        Int_Value operator+()
-        {
-            return Int_Value(+value);
-        }
-        Int_Value operator-()
-        {
-            return Int_Value(-value);
-        }
-
-        operator int()
-        {
-            return value;
-        }
-
-        explicit operator bool()
-        {
-            return bool(value);
         }
 
         int value;
@@ -183,42 +150,6 @@ namespace ast
         Bool_Value(bool a) : value(a)
         {
             type = Bool;
-        }
-        //binary ops
-        Bool_Value operator+(Bool_Value a)
-        {
-            return Bool_Value(value + a.value);
-        }
-        Bool_Value operator-(Bool_Value a)
-        {
-            return Bool_Value(value - a.value);
-        }
-        Bool_Value operator*(Bool_Value a)
-        {
-            return Bool_Value(value * a.value);
-        }
-        Bool_Value operator/(Bool_Value a)
-        {
-            return Bool_Value(value / a.value);
-        }
-        Bool_Value& operator=(bool a)
-        {
-            value = a;
-            return *this;
-        }
-        //unary ops
-        Bool_Value operator+()
-        {
-            return Bool_Value(+value);
-        }
-        Bool_Value operator-()
-        {
-            return Bool_Value(-value);
-        }
-
-        explicit operator bool()
-        {
-            return value;
         }
 
         bool value;
