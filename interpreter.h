@@ -527,7 +527,6 @@ namespace interpreter {
         error_handler error;
         global compiler;
         ast::translation_unit ast;
-        parser::struct_types structs;
         std::vector<int> code;
         boost::shared_ptr<QString> error_buf;
 
