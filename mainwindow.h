@@ -44,6 +44,7 @@ private slots:
 #endif
     void on_actionZoom_In_triggered();
     void on_actionZoom_Out_triggered();
+    void on_actionAbout_Qt_triggered();
 
 private:
     QHash<QString,DataType*> items;

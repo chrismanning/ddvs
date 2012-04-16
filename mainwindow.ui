@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>160</width>
+    <height>83</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>1</horstretch>
@@ -30,7 +38,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>220</width>
+     <width>160</width>
      <height>19</height>
     </rect>
    </property>
@@ -70,6 +78,7 @@
     <addaction name="actionShow_Help"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionAbout_Qt"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -288,6 +297,14 @@
    </property>
    <property name="toolTip">
     <string>Zoom Out</string>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+   <property name="toolTip">
+    <string>Show the Qt library's About box</string>
    </property>
   </action>
  </widget>

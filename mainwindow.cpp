@@ -154,3 +154,8 @@ void MainWindow::on_actionZoom_Out_triggered()
 {
     graphicsView->zoomOut();
 }
+
+void MainWindow::on_actionAbout_Qt_triggered()
+{
+    QMessageBox::aboutQt(this);
+}
