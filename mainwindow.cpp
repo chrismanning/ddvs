@@ -11,13 +11,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle(tr("Dynamic Data Structure Visualisation"));
 
-    zoomer = new ZoomWidget(graphicsView);
-    ui->statusBar->addWidget(zoomer);
-
     QSize minSize(600, 600);
     scene = new QGraphicsScene(0, 0, minSize.width(), minSize.height());
-    graphicsView = new QGraphicsView(scene, this);
+    graphicsView = new GraphicsView(this);
     graphicsView->setMinimumSize(minSize + QSize(10,10));
+    graphicsView->setScene(scene);
 
     //UI Layout
     mainSplitter = new QSplitter(Qt::Horizontal, this);
@@ -51,8 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     this->setMinimumWidth(graphicsView->minimumWidth() + rightSplitter->minimumWidth() + 5);
-    this->setMinimumHeight(graphicsView->minimumHeight() + ui->menuBar->height() + ui->mainToolBar->height()
-                           + zoomer->height() + ui->statusBar->height() + 5);
+    this->setMinimumHeight(graphicsView->minimumHeight() + ui->menuBar->height()
+                           + ui->mainToolBar->height() + ui->statusBar->height() + 5);
 
     //interpreter = new interpreter::Interpreter;
     connect(interpretButton, SIGNAL(clicked()), this, SLOT(interpretButton_clicked()));
@@ -65,8 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    //delete scene;
-    delete zoomer;
+    delete scene;
     delete ui;
 }
 
@@ -147,3 +144,13 @@ void MainWindow::printVarsButton_clicked()
     qDebug() << tmp;
 }
 #endif
+
+void MainWindow::on_actionZoom_In_triggered()
+{
+    graphicsView->zoomIn();
+}
+
+void MainWindow::on_actionZoom_Out_triggered()
+{
+    graphicsView->zoomOut();
+}

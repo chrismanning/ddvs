@@ -30,8 +30,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>98</width>
-     <height>22</height>
+     <width>220</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -96,6 +96,8 @@
    <addaction name="actionAdd_Item"/>
    <addaction name="actionRemove_Item"/>
    <addaction name="actionEdit_Item"/>
+   <addaction name="actionZoom_In"/>
+   <addaction name="actionZoom_Out"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -262,6 +264,30 @@
   <action name="actionRemove">
    <property name="text">
     <string>Remove</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/16x16/icons/16x16/zoom-in.png</normaloff>:/16x16/icons/16x16/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/16x16/icons/16x16/zoom-out.png</normaloff>:/16x16/icons/16x16/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Out</string>
    </property>
   </action>
  </widget>

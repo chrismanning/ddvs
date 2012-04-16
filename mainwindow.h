@@ -42,6 +42,8 @@ private slots:
     void printOffsetButton_clicked();
     void printVarsButton_clicked();
 #endif
+    void on_actionZoom_In_triggered();
+    void on_actionZoom_Out_triggered();
 
 private:
     QHash<QString,DataType*> items;

@@ -2,6 +2,7 @@
 #define GRAPHICSVIEW_H
 
 #include <QGraphicsView>
+#include <QWheelEvent>
 
 class GraphicsView : public QGraphicsView
 {
