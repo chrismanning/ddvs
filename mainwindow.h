@@ -11,6 +11,7 @@
 #include <QHash>
 #include <QSplitter>
 #include <QVBoxLayout>
+#include <graphicsview.h>
 #include <additemdialog.h>
 #include <edititemdialog.h>
 #include <zoomwidget.h>
@@ -46,7 +47,7 @@ private:
     QHash<QString,DataType*> items;
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
-    QGraphicsView* graphicsView;
+    GraphicsView* graphicsView;
     ZoomWidget* zoomer;
     QPlainTextEdit* interpreterInput;
     QPushButton* interpretButton;

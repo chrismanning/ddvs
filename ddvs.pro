@@ -43,7 +43,8 @@ HEADERS  += mainwindow.h \
     types.h \
     statement_def.h \
     function_def.h \
-    expression_def.h
+    expression_def.h \
+    graphicsview.h
 
 linux:INCLUDEPATH += /usr/include/boost-1_49/
 macx:INCLUDEPATH += /Users/chris/boost_1_49_0/
