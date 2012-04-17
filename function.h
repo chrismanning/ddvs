@@ -18,6 +18,7 @@ namespace parser {
         DECLARE_SPIRIT_RULES(
             (translation_unit)
             (function_definition)
+            (argument)
         )//
 
         primitive_types types;

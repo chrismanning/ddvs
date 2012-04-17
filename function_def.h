@@ -26,10 +26,17 @@ namespace parser {
             )
             ;
 
+        argument =
+                body.expr.type_specifier
+            >   body.init_declarator
+            ;
+
         function_definition =
                 body.expr.type_specifier
             >   body.expr.declarator
-            >   '(' > *body.declaration > ')'
+            >   '('
+            >   -(argument % ',')
+            >   ')'
             >   body.compound_statement
             ;
 

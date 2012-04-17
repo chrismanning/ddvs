@@ -375,11 +375,17 @@ namespace ast
         boost::optional<logical_OR_expression> expr;
     };
 
+    struct argument : Typed
+    {
+        type_specifier type_spec;
+        init_declarator dec;
+    };
+
     struct function_definition
     {
         type_specifier return_type;
         declarator declarator_;
-        std::list<declaration> args;
+        std::list<argument> args;
         compound_statement body;
     };
 
@@ -443,9 +449,16 @@ DEFINE_EXPRESSION_TUPLE(logical_AND, equality_expression)
 DEFINE_EXPRESSION_TUPLE(logical_OR, logical_AND_expression)
 
 BOOST_FUSION_ADAPT_STRUCT(
+    ast::argument,
+    (ast::type_specifier, type_spec)
+    (ast::init_declarator, dec)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
     ast::identifier,
     (std::string, name)
 )
+
 BOOST_FUSION_ADAPT_STRUCT(
     ast::type_id,
     (std::string, name)
@@ -461,7 +474,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     ast::function_definition,
     (ast::type_specifier, return_type)
     (ast::declarator, declarator_)
-    (std::list<ast::declaration>, args)
+    (std::list<ast::argument>, args)
     (ast::compound_statement, body)
 )
 
