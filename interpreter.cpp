@@ -1062,6 +1062,7 @@ namespace interpreter {
                 msg_box.setDefaultButton(QMessageBox::Close);
                 if(error_buf) {
                     msg_box.setDetailedText(*error_buf);
+                    msg_box.setStyleSheet("QAbstractScrollArea { font-family: \"monospace\"; }");
                     qDebug() << *error_buf;
                     error_buf->clear();
                 }
@@ -1076,6 +1077,7 @@ namespace interpreter {
             msg_box.setDefaultButton(QMessageBox::Close);
             if(error_buf) {
                 msg_box.setDetailedText(*error_buf);
+                msg_box.setStyleSheet("QAbstractScrollArea { font-family: \"monospace\"; }");
                 qDebug() << *error_buf;
                 error_buf->clear();
             }
