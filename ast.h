@@ -443,6 +443,15 @@ DEFINE_EXPRESSION_TUPLE(logical_AND, equality_expression)
 DEFINE_EXPRESSION_TUPLE(logical_OR, logical_AND_expression)
 
 BOOST_FUSION_ADAPT_STRUCT(
+    ast::identifier,
+    (std::string, name)
+)
+BOOST_FUSION_ADAPT_STRUCT(
+    ast::type_id,
+    (std::string, name)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
     ast::allocation_expression,
     (ast::optoken, operator_)
     (ast::type_specifier, type_spec)

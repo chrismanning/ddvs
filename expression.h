@@ -51,8 +51,8 @@ namespace parser
             (type_id)
             (allocation_expression)
             (declarator)
+            (identifier)
         )//
-        qi::rule<Iterator, std::string(), skipper> identifier;
         qi::symbols<char, ast::optoken> unary_op, binary_op, struct_op, postfix_op,
                 assign_op, relational_op, multiplicative_op, additive_op, equality_op,
                 logical_and_op, logical_or_op, memory_op;

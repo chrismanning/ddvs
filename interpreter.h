@@ -286,6 +286,7 @@ namespace interpreter {
             auto t = env->lookup_struct_type(ss.type_name.name);
             if(ss.members.size() > 0) {
                 if(t != ast::Error) {
+                    error(ss.type_name.id, "Duplicate struct type");
                     return ast::Error;
                 }
                 //typedef boost::recursive_wrapper<ast::struct_member_declaration> member_type;

@@ -168,7 +168,7 @@ namespace interpreter {
         if(ast.rhs) {
             if(ast.lhs.type.lvalue) {
                 int tmp = env->held_value;
-                if(tmp == -1) {
+                if(tmp == -1 && ast.lhs.type != "struct") {
                     return false;
                 }
                 if(ast.rhs->operand_.which() == 0) {
@@ -179,8 +179,10 @@ namespace interpreter {
                     if(!(*this)(ast.rhs->operator_)) {
                         return false;
                     }
-                    env->op(tmp);
-                    env->held_value = -1;
+                    if(tmp != -1) {
+                        env->op(tmp);
+                        env->held_value = -1;
+                    }
                     return true;
                 }
                 else {
@@ -391,7 +393,8 @@ namespace interpreter {
                     break;
                 case ast::op_address:
                     if(ast.operand_.type.lvalue) {
-                        env->op(op_address);
+                        env->held_value = env->code.back();
+                        env->op(op_address, env->code.back());
                         ast.type = ast.operand_.type;
                         ast.type.pointer = true;
                     }
@@ -439,6 +442,9 @@ namespace interpreter {
                     if(num == 0) {
                         std::string name = boost::get<ast::identifier>(ast.first).name;
                         addr = env->lookup_var(name);
+                        if(env->stack[*addr].type.pointer) {
+                            addr = &env->stack[*addr].var;
+                        }
                         ++num;
                     }
                     else {
@@ -605,11 +611,10 @@ namespace interpreter {
         if(var != 0) {
             ast.type = env->stack[*var].type;
             qDebug() << "identifier type:" << ast.type.type_str.c_str();
-            if(ast.type == "struct") {
-                return true;
-            }
+
             env->op(op_load, *var);
             env->held_value = *var;
+
             return true;
         }
         else {
@@ -1137,9 +1142,6 @@ namespace interpreter {
 
                 case op_address:
                     stack_ptr[-1] = *pc++;
-                    stack_ptr[-1].type = frame_ptr[*pc].type;
-                    stack_ptr[-1].type.width = 1;
-                    stack_ptr[-1].type.pointer = true;
                     break;
 
                 case op_eq:

@@ -159,7 +159,10 @@ namespace parser {
             >>  raw[lexeme[(alpha | '_') >> *(alnum | '_')]]
             ;
 
-        type_id = identifier.alias();
+        type_id =
+                !(keywords | types)
+            >>  raw[lexeme[(alpha | '_') >> *(alnum | '_')]]
+            ;
 
         ///////////////////////////////////////////////////////////////////////
         // Debugging and error handling and reporting support.
@@ -182,6 +185,7 @@ namespace parser {
             (declarator)
             (struct_member_declaration)
             (allocation_expression)
+            (type_specifier)
         );
 
         ///////////////////////////////////////////////////////////////////////
@@ -215,6 +219,7 @@ namespace parser {
         SUCCESS_ANNOTATE(logical_OR_expression);
         SUCCESS_ANNOTATE(assignment_expression);
         SUCCESS_ANNOTATE(struct_expr);
+        SUCCESS_ANNOTATE(identifier);
         SUCCESS_ANNOTATE(unary_assign);
         SUCCESS_ANNOTATE(struct_specifier);
         SUCCESS_ANNOTATE(declarator);

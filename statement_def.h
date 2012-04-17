@@ -95,6 +95,7 @@ namespace parser {
                 "Error! Expecting ", _4, _3));
 
         // Annotation on success
+        SUCCESS_ANNOTATE(identifier);
         SUCCESS_ANNOTATE(declaration);
         SUCCESS_ANNOTATE(return_statement);
         SUCCESS_ANNOTATE(init_declarator);

@@ -22,10 +22,9 @@ namespace parser {
             (return_statement)
             (declaration)
             (init_declarator)
-            (declarator)
+            (identifier)
         )//
         qi::rule<Iterator, ast::statement(), skipper> statement_;
-        qi::rule<Iterator, std::string(), skipper> identifier;
 
         primitive_types& types;
     };

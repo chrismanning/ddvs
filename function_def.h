@@ -28,7 +28,7 @@ namespace parser {
 
         function_definition =
                 body.expr.type_specifier
-            >   body.declarator
+            >   body.expr.declarator
             >   '(' > *body.declaration > ')'
             >   body.compound_statement
             ;
