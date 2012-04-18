@@ -107,17 +107,6 @@ void MainWindow::on_actionAdd_Item_triggered()
     dialog->show();
 }
 
-void MainWindow::on_actionRemove_Item_triggered()
-{
-    QList<QGraphicsItem*> items = scene->selectedItems();
-    foreach(QGraphicsItem *item,items) {
-        scene->removeItem(item);
-        this->items.remove(((DataType*)item)->name);
-    }
-    qDebug("Removing %d items...",items.size());
-    qDeleteAll(items);
-}
-
 void MainWindow::on_actionEdit_Item_triggered()
 {
     if(scene->selectedItems().size() == 0) return;

@@ -60,7 +60,6 @@
     <addaction name="separator"/>
     <addaction name="actionAdd_Item"/>
     <addaction name="actionEdit_Item"/>
-    <addaction name="actionRemove_Item"/>
    </widget>
    <widget class="QMenu" name="menuQueue">
     <property name="title">
@@ -103,7 +102,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd_Item"/>
-   <addaction name="actionRemove_Item"/>
    <addaction name="actionEdit_Item"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
@@ -200,15 +198,6 @@
    </property>
    <property name="text">
     <string>Add Item</string>
-   </property>
-  </action>
-  <action name="actionRemove_Item">
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/16x16/icons/16x16/list-remove.png</normaloff>:/16x16/icons/16x16/list-remove.png</iconset>
-   </property>
-   <property name="text">
-    <string>Remove Item</string>
    </property>
   </action>
   <action name="actionEdit_Item">

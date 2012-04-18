@@ -37,7 +37,6 @@ public:
 
 private slots:
     void on_actionAdd_Item_triggered();
-    void on_actionRemove_Item_triggered();
     void on_actionEdit_Item_triggered();
 
     void interpretButton_clicked();
@@ -60,7 +59,6 @@ private:
     QTreeWidget* structTreeWidget;
     QTreeWidget* variableTreeWidget;
     QTableWidget* stackTableWidget;
-    //interpreter::StructTreeModel* model;
     QHash<QString,DataType*> items;
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
