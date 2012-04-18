@@ -677,7 +677,7 @@ namespace interpreter {
         return 0;
     }
 
-    void scope::add_var(std::string const& name, ast::Type type)
+    void scope::add_var(std::string const& name, ast::Type& type)
     {
         std::size_t n = offset;
         table[name] = n;
