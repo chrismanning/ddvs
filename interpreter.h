@@ -573,6 +573,31 @@ namespace interpreter {
           , std::vector<variable>::iterator stack_ptr    // start of emptiness
         );
     };
+
+    template <typename Iterator>
+    struct Range
+    {
+        Range(Iterator const& begin_, Iterator const& end_)
+            : begin_(begin_), end_(end_) {}
+
+        Iterator const& begin()
+        {
+            return begin_;
+        }
+        Iterator const& end()
+        {
+            return end_;
+        }
+
+        Iterator const& begin_;
+        Iterator const& end_;
+    };
+
+    template <typename Iterator>
+    Range<Iterator> makeRange(Iterator const& begin, Iterator const& end)
+    {
+        return Range<Iterator>(begin, end);
+    }
 }
 
 #endif // INTERPRETER_H
