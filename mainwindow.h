@@ -12,6 +12,7 @@
 #include <QSplitter>
 #include <QTabWidget>
 #include <QTreeWidget>
+#include <QTableWidget>
 #include <QVBoxLayout>
 #include <graphicsview.h>
 #include <additemdialog.h>
@@ -57,6 +58,8 @@ signals:
 private:
     QTabWidget* tabWidget;
     QTreeWidget* structTreeWidget;
+    QTreeWidget* variableTreeWidget;
+    QTableWidget* stackTableWidget;
     //interpreter::StructTreeModel* model;
     QHash<QString,DataType*> items;
     Ui::MainWindow* ui;

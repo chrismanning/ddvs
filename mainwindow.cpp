@@ -34,13 +34,34 @@ MainWindow::MainWindow(QWidget *parent) :
     rightSplitter->setMinimumWidth(200);
 
     tabWidget = new QTabWidget(this);
+    //structs
     structTreeWidget = new QTreeWidget(this);
     structTreeWidget->setColumnCount(2);
-    structTreeWidget->setHeaderLabels({"Type", "Name"});
-    //treeWidget->setModel(model);
-//    tabWidget->addTab(this, "Variables");
+    structTreeWidget->setHeaderLabels({"Type", "Name"});//
+    //variables
+    variableTreeWidget = new QTreeWidget(this);
+    variableTreeWidget->setColumnCount(3);
+    variableTreeWidget->setHeaderLabels({"Name", "Address", "Width"});//
+    //stack
+    stackTableWidget = new QTableWidget(DDVS_STACK_SIZE, 2, this);
+    stackTableWidget->setHorizontalHeaderLabels({"Value", "Type"});//
+    stackTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    //set row height + labels
+    QStringList vertLabels;
+    for(int i = 0; i < stackTableWidget->rowCount(); i++) {
+        stackTableWidget->verticalHeader()->resizeSection(i, stackTableWidget->rowHeight(i)-15);
+        vertLabels << QString::number(i);
+    }
+    stackTableWidget->setVerticalHeaderLabels(vertLabels);
+    stackTableWidget->verticalHeader()->setUpdatesEnabled(true);
+    //set column widths
+    stackTableWidget->setColumnWidth(0, 50);
+    //tabs
+    tabWidget->addTab(variableTreeWidget, "Variables");
     tabWidget->addTab(structTreeWidget, "Structs");
+    tabWidget->addTab(stackTableWidget, "Stack");
     rightSplitter->addWidget(tabWidget);
+    stackTableWidget->setColumnWidth(1, stackTableWidget->width()-7);
 
     //text input
     interpreterInput = new QPlainTextEdit(tr("Enter code here"), this);
@@ -121,6 +142,39 @@ void MainWindow::interpretButton_clicked()
 //                items.insert(QString(var.first.c_str()), tmp);
 //            }
 //        }
+
+        int i = 0;
+        //populate stack table widget
+        for(auto const& var : makeRange(interpreter.getStack().begin(), interpreter.getStackPos())) {
+            QString p = "";
+            if(var.type.pointer) {
+                p += "*";
+            }
+
+            auto t1 = new QTableWidgetItem(QString::number(var.var));
+            t1->setToolTip(t1->text());
+            stackTableWidget->setItem(i, 0, t1);
+
+            auto t2 = new QTableWidgetItem(QString::fromStdString(var.type.type_str)+p);
+            t2->setToolTip(t2->text());
+            stackTableWidget->setItem(i, 1, t2);
+            ++i;
+        }
+        i = 0;
+        auto const& stack = interpreter.getStack();
+        //populate variable tree
+        variableTreeWidget->clear();
+        for(auto const& var : interpreter.getGlobals()) {
+            QTreeWidgetItem* item = new QTreeWidgetItem(
+                {QString::fromStdString(var.first)
+                ,QString::number(var.second)
+                ,QString::number(stack[var.second].type.width)});//
+            item->setToolTip(0,item->text(0));
+            item->setToolTip(1,item->text(1));
+            item->setToolTip(2,item->text(2));
+            variableTreeWidget->insertTopLevelItem(i, item);
+            ++i;
+        }
     }
 }
 
@@ -174,14 +228,14 @@ void MainWindow::on_actionAbout_Qt_triggered()
 void MainWindow::structDefined(cstruct const& s)
 {
     qDebug() << "Adding struct to tree";
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(QString::fromStdString(s.name)));
+    QTreeWidgetItem* item = new QTreeWidgetItem({QString::fromStdString(s.name)});
     item->setToolTip(0, QString::fromStdString(s.name));
-    for(cstruct::members_type::value_type const& mem : s.member_specs) {
+    for(auto const& mem : s.member_specs) {
         QString p = "";
         if(mem.second.pointer) {
             p += "*";
         }
-        QStringList cols({QString::fromStdString(mem.second.type_str) + p,QString::fromStdString(mem.first)});
+        QStringList cols({QString::fromStdString(mem.second.type_str) + p, QString::fromStdString(mem.first)});
         auto child = new QTreeWidgetItem(cols);
         child->setToolTip(0,cols.at(0));
         child->setToolTip(1,cols.at(1));
@@ -189,5 +243,4 @@ void MainWindow::structDefined(cstruct const& s)
         item->addChild(child);
     }
     structTreeWidget->insertTopLevelItem(structTreeWidget->topLevelItemCount(), item);
-
 }
