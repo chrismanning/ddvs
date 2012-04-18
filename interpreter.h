@@ -422,9 +422,11 @@ namespace interpreter {
         std::size_t nargs_;
     };
 
+#define DDVS_STACK_SIZE 500
+
     struct global : public QObject, public boost::static_visitor<bool> {
-        global(std::vector<int>& code, error_handler& error__, size_t size = 500)
-            :   stack(size),
+        global(std::vector<int>& code, error_handler& error__)
+            :   stack(DDVS_STACK_SIZE),
                 error_(error__),
                 stack_offset(0),
                 global_scope(code, stack, stack_offset),
