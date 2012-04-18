@@ -381,10 +381,10 @@ namespace ast
         init_declarator dec;
     };
 
-    struct function_definition
+    struct function_definition : Typed
     {
         type_specifier return_type;
-        declarator declarator_;
+        declarator dec;
         std::list<argument> args;
         compound_statement body;
     };
@@ -473,7 +473,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     ast::function_definition,
     (ast::type_specifier, return_type)
-    (ast::declarator, declarator_)
+    (ast::declarator, dec)
     (std::list<ast::argument>, args)
     (ast::compound_statement, body)
 )

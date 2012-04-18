@@ -12,6 +12,8 @@ namespace parser {
         qi::_3_type _3;
         qi::_4_type _4;
 
+        qi::_val_type _val;
+
         using qi::on_error;
         using qi::on_success;
         using qi::fail;
@@ -44,6 +46,7 @@ namespace parser {
         BOOST_SPIRIT_DEBUG_NODES(
             (translation_unit)
             (function_definition)
+            (argument)
         );
 
         // Error handling
@@ -52,6 +55,8 @@ namespace parser {
                 "Error! Expecting ", _4, _3));
 
         // Annotation: on success in start, call annotation.
+        SUCCESS_ANNOTATE(function_definition);
+        SUCCESS_ANNOTATE(argument);
 //        on_success(identifier,
 //            annotation_function(error.iters)(_val, _1));
     }

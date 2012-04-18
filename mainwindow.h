@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QHash>
 #include <QSplitter>
+#include <QTabWidget>
+#include <QTreeWidget>
 #include <QVBoxLayout>
 #include <graphicsview.h>
 #include <additemdialog.h>
@@ -21,6 +23,8 @@
 namespace Ui {
     class MainWindow;
 }
+
+using interpreter::cstruct;
 
 class MainWindow : public QMainWindow
 {
@@ -45,8 +49,15 @@ private slots:
     void on_actionZoom_In_triggered();
     void on_actionZoom_Out_triggered();
     void on_actionAbout_Qt_triggered();
+public slots:
+    void structDefined(cstruct const& s);
+signals:
+    void newStructDefinition(cstruct const& s);
 
 private:
+    QTabWidget* tabWidget;
+    QTreeWidget* structTreeWidget;
+    //interpreter::StructTreeModel* model;
     QHash<QString,DataType*> items;
     Ui::MainWindow* ui;
     QGraphicsScene* scene;

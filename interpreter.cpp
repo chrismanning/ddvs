@@ -17,42 +17,6 @@
     }
 
 namespace interpreter {
-    void function::op(int a)
-    {
-        code.push_back(a);
-        size_ += 1;
-    }
-
-    void function::op(int a, int b)
-    {
-        code.push_back(a);
-        code.push_back(b);
-        size_ += 2;
-    }
-
-    void function::op(int a, int b, int c)
-    {
-        code.push_back(a);
-        code.push_back(b);
-        code.push_back(c);
-        size_ += 3;
-    }
-
-    int const* function::find_var(std::string const& name) const
-    {
-        std::map<std::string, int>::const_iterator i = variables.find(name);
-        if(i == variables.end())
-            return 0;
-        return &i->second;
-    }
-
-    void function::add_var(std::string const& name)
-    {
-        std::size_t n = offset;
-        variables[name] = n;
-        ++offset;
-    }
-
     void function::link_to(std::string const& name, std::size_t address)
     {
         function_calls[address] = name;
@@ -969,45 +933,51 @@ namespace interpreter {
         return true;
     }
 
-//    bool global::operator()(ast::function_definition const& ast)
-//    {
-//        //void_return = ast.return_type == "void";
-////        if(ast.return_type_code) {
-////            return_type = 1;
-////        }
-//        if(functions.find(ast.function_name.name) != functions.end())
-//        {
-//            //qDebug() << ast.function_name.id;
-//            error(ast.function_name.id, "Duplicate function: " + ast.function_name.name);
-//            return false;
+    bool global::operator()(ast::function_definition& ast)
+    {
+        qDebug() << "Processing: ast::function_definition";
+        //void_return = ast.return_type == "void";
+//        if(ast.return_type_code) {
+//            return_type = 1;
 //        }
-//        //offset = this->variables.size();
-////        foreach(function_table::value_type const& fun, functions) {
-////            offset += fun.second.get()->nvars();
-////        }
-
-//        boost::shared_ptr<function>& p = functions[ast.function_name.name];
-//        p.reset(new function(variables, pointers, code, ast.args.size(), offset));
-//        current_function = p.get();
-//        current_function_name = ast.function_name.name;
-
-//        // op_stk_adj 0 for now. we'll know how many variables
-//        // we'll have later and add them
-//        current_function->op(op_stk_adj, 0);
-//        foreach(ast::arg const& arg, ast.args)
-//        {
-//            current_function->add_var(arg.dec.name.name);
+        error(ast.id, "Functions not implemented");
+        return false;
+        if(functions.find(ast.dec.name.name) != functions.end())
+        {
+            //qDebug() << ast.function_name.id;
+            error(ast.dec.name.id, "Duplicate function: " + ast.dec.name.name);
+            return false;
+        }
+        //offset = this->variables.size();
+//        foreach(function_table::value_type const& fun, functions) {
+//            offset += fun.second.get()->nvars();
 //        }
+
+        boost::shared_ptr<function>& p = functions[ast.dec.name.name];
+        p.reset(new function(ast.args.size(), stack_offset, current_scope));
+
+        // op_stk_adj 0 for now. we'll know how many variables
+        // we'll have later and add them
+        current_scope->op(op_stk_adj, 0);
+        for(ast::argument& arg : ast.args) {
+            type_resolver tr(error_, current_scope);
+            ast::Type t = arg.type_spec.apply_visitor(tr);
+            if(t == ast::Error) {
+                error(arg.id, "Invalid type");
+                return false;
+            }
+            current_scope->add_var(arg.dec.dec.name.name, t);
+        }
 
 //        foreach(ast::statement const& state, ast.body) {
 //            if(!boost::apply_visitor(*this,state))
 //                return false;
 //        }
-//        (*current_function)[1] = current_function->nvars();   // now store the actual number of variables
-//                                            // this includes the arguments
-//        offset += current_function->nvars();
-//        return true;
-//    }
+        //(*current_function)[1] = current_function->nvars();   // now store the actual number of variables
+                                            // this includes the arguments
+        //offset += current_function->nvars();
+        return true;
+    }
 
 //    bool global::operator()(ast::struct_member_declaration const& /*ast*/)
 //    {
@@ -1024,12 +994,6 @@ namespace interpreter {
 //        structs.push_back(cstruct(ast.type_name.name,members));
 
         return true;
-    }
-
-    bool global::operator()(ast::function_definition& /*ast*/)
-    {
-        qDebug() << "Processing: ast::function_definition";
-        return false;
     }
 
     bool global::operator()(ast::translation_unit& ast) {

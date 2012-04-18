@@ -33,6 +33,15 @@ MainWindow::MainWindow(QWidget *parent) :
     rightSplitter = new QSplitter(Qt::Vertical, this);
     rightSplitter->setMinimumWidth(200);
 
+    tabWidget = new QTabWidget(this);
+    structTreeWidget = new QTreeWidget(this);
+    structTreeWidget->setColumnCount(2);
+    structTreeWidget->setHeaderLabels({"Type", "Name"});
+    //treeWidget->setModel(model);
+//    tabWidget->addTab(this, "Variables");
+    tabWidget->addTab(structTreeWidget, "Structs");
+    rightSplitter->addWidget(tabWidget);
+
     //text input
     interpreterInput = new QPlainTextEdit(tr("Enter code here"), this);
     rightSplitter->addWidget(interpreterInput);
@@ -59,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(printOffsetButton, SIGNAL(clicked()), this, SLOT(printOffsetButton_clicked()));
     connect(printVarsButton, SIGNAL(clicked()), this, SLOT(printVarsButton_clicked()));
 #endif
+    //structs stuff
+    connect(&interpreter, SIGNAL(newStructDefinition(cstruct)), this, SLOT(structDefined(cstruct)));
 }
 
 MainWindow::~MainWindow()
@@ -158,4 +169,25 @@ void MainWindow::on_actionZoom_Out_triggered()
 void MainWindow::on_actionAbout_Qt_triggered()
 {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::structDefined(cstruct const& s)
+{
+    qDebug() << "Adding struct to tree";
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(QString::fromStdString(s.name)));
+    item->setToolTip(0, QString::fromStdString(s.name));
+    for(cstruct::members_type::value_type const& mem : s.member_specs) {
+        QString p = "";
+        if(mem.second.pointer) {
+            p += "*";
+        }
+        QStringList cols({QString::fromStdString(mem.second.type_str) + p,QString::fromStdString(mem.first)});
+        auto child = new QTreeWidgetItem(cols);
+        child->setToolTip(0,cols.at(0));
+        child->setToolTip(1,cols.at(1));
+
+        item->addChild(child);
+    }
+    structTreeWidget->insertTopLevelItem(structTreeWidget->topLevelItemCount(), item);
+
 }

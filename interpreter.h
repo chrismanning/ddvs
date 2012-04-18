@@ -237,13 +237,17 @@ namespace interpreter {
         , Address
       > variable_type;
 
-    struct scope
+    struct scope : QObject
     {
         scope(std::vector<int>& code, std::vector<variable>& stack, int& offset)
             : code(code), stack(stack), offset(offset), held_value(-1)
         {}
-        scope(boost::shared_ptr<scope> parent, std::vector<int>& code, std::vector<variable>& stack, int& offset)
-            : parent(parent), code(code), stack(stack), offset(offset), held_value(-1)
+        scope(scope* parent)
+            : parent(parent)
+            , code(parent->code)
+            , stack(parent->stack)
+            , offset(parent->offset)
+            , held_value(-1)
         {}
 
         void op(int a);
@@ -267,6 +271,18 @@ namespace interpreter {
         std::vector<variable>& stack;
         int& offset;
         int held_value;
+    public slots:
+        void addStruct(std::string const& name, cstruct const& s)
+        {
+            qDebug() << "scope: addStruct";
+            structs.insert(std::pair<std::string,cstruct>(name, s));
+            emit newStructDefinition(s);
+        }
+
+    signals:
+        void newStructDefinition(cstruct const& s);
+    private:
+        Q_OBJECT
     };
 
     struct type_resolver : boost::static_visitor<ast::Type>
@@ -289,7 +305,6 @@ namespace interpreter {
                     error(ss.type_name.id, "Duplicate struct type");
                     return ast::Error;
                 }
-                //typedef boost::recursive_wrapper<ast::struct_member_declaration> member_type;
                 for(auto& member_ : ss.members) {
                     auto& member = member_.get();
                     member.type = member.type_spec.apply_visitor(*this);
@@ -298,11 +313,11 @@ namespace interpreter {
                     }
                     member.type.pointer = member.dec.pointer;
                 }
-                env->structs.insert(std::pair<std::string,cstruct>(ss.type_name.name, cstruct(ss, env->stack)));
+                env->addStruct(ss.type_name.name, cstruct(ss, env->stack));
                 return env->lookup_struct_type(ss.type_name.name);
             }
             else if(t == ast::Error) {
-                error(ss.id, "struct must have members");
+                error(ss.type_name.id, "No such struct");
                 return t;
             }
             return t;
@@ -378,21 +393,13 @@ namespace interpreter {
 
     struct function
     {
-        function(std::map<std::string, int>& global_variables, std::map<std::string, int*>& global_pointers,
-                 std::vector<int>& code, std::size_t nargs, std::size_t offset_) :
-            global_variables(global_variables),
-            global_pointers(global_pointers),
-            code(code),
+        function(std::size_t nargs, std::size_t offset_, scope* current_scope) :
             offset(offset_),
-            address(code.size()),
             size_(0),
             nargs_(nargs),
-            void_return(false)
+            void_return(false)/*,
+            env(new scope(current_scope,))*/
         {}
-
-        void op(int a);
-        void op(int a, int b);
-        void op(int a, int b, int c);
 
         int& operator[](std::size_t i) { return code[address+i]; }
         int const& operator[](std::size_t i) const { return code[address+i]; }
@@ -400,34 +407,31 @@ namespace interpreter {
         std::size_t get_address() const { return address; }
 
         std::size_t nargs() const { return nargs_; }
-        std::size_t nvars() const { return variables.size(); }
-        int const* find_var(std::string const& name) const;
-        void add_var(std::string const& name);
+//        std::size_t nvars() const { return variables.size(); }
         void link_to(std::string const& name, std::size_t address);
         std::size_t offset;
         bool void_return;
         ast::Type return_type;
 
     protected:
-        std::map<std::string, int> variables;
-        std::map<std::string, int>& global_variables;
-        std::map<std::string, int*> pointers;
-        std::map<std::string, int*>& global_pointers;
         std::map<std::size_t, std::string> function_calls;
-        std::vector<int>& code;
+        scope* env;
+        std::vector<int> code;
         std::size_t address;
         std::size_t size_;
         std::size_t nargs_;
     };
 
-    struct global : public boost::static_visitor<bool> {
+    struct global : public QObject, public boost::static_visitor<bool> {
         global(std::vector<int>& code, error_handler& error__, size_t size = 500)
             :   stack(size),
                 error_(error__),
                 stack_offset(0),
                 global_scope(code, stack, stack_offset),
                 current_scope(&global_scope)
-        {}
+        {
+            connect(&global_scope, SIGNAL(newStructDefinition(cstruct)), this, SLOT(structDefined(cstruct)));
+        }
 
         void error(int id, std::string const& what)
         {
@@ -474,12 +478,26 @@ namespace interpreter {
             return global_scope.table;
         }
 
+        std::map<std::string, cstruct> const& get_structs() {
+            return global_scope.structs;
+        }
+
         int get_offset()
         {
             return stack_offset;
         }
 
+    public slots:
+        void structDefined(cstruct const& s)
+        {
+            qDebug() << "global: structDefined";
+            emit newStructDefinition(s);
+        }
+
+    signals:
+        void newStructDefinition(cstruct const& s);
     private:
+        Q_OBJECT
         typedef std::map<std::string, boost::shared_ptr<function> > function_table;
         function_table functions;
         scope global_scope;
@@ -489,13 +507,16 @@ namespace interpreter {
         int stack_offset;
     };
 
-    class Interpreter
+    class Interpreter : public QObject
     {
+        Q_OBJECT
     public:
         Interpreter() :
             error(start, end, error_buf),
             compiler(code, error)
-        {}
+        {
+            connect(&compiler, SIGNAL(newStructDefinition(cstruct)), this, SLOT(structDefined(cstruct)));
+        }
         bool parse(std::string input);
         bool parse(QString input);
         std::vector<variable>& getStack()
@@ -519,6 +540,16 @@ namespace interpreter {
             code.clear();
             return r;
         }
+
+    public slots:
+        void structDefined(cstruct const& s)
+        {
+            qDebug() << "Interpreter: structDefined";
+            emit newStructDefinition(s);
+        }
+
+    signals:
+        void newStructDefinition(cstruct const& s);
 
     private:
         QMessageBox msg_box;
