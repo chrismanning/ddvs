@@ -545,6 +545,9 @@ namespace interpreter {
         {
             return compiler.get_vars();
         }
+        std::map<std::string, cstruct> const& getStructs() {
+            return compiler.get_structs();
+        }
         int execute() {
             int r = execute(code, code.begin(), getStack().begin(), getStackPos());
             code.clear();

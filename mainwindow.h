@@ -14,12 +14,14 @@
 #include <QTreeWidget>
 #include <QTableWidget>
 #include <QVBoxLayout>
+#include <QGraphicsGridLayout>
 #include <graphicsview.h>
 #include <additemdialog.h>
 #include <edititemdialog.h>
 #include <zoomwidget.h>
 #include <datatype.h>
 #include <interpreter.h>
+#include <graphicsitems.h>
 
 namespace Ui {
     class MainWindow;
@@ -55,13 +57,18 @@ signals:
     void newStructDefinition(cstruct const& s);
 
 private:
+    void updateStackTable();
+    void updateVariableTree();
+    void updateVisualisation();
+    std::map<std::string, cstruct> const& structs;
     QTabWidget* tabWidget;
     QTreeWidget* structTreeWidget;
     QTreeWidget* variableTreeWidget;
     QTableWidget* stackTableWidget;
-    QHash<QString,DataType*> items;
+    QHash<QString, QGraphicsWidget*> items;
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
+    QGraphicsGridLayout* layout;
     GraphicsView* graphicsView;
     ZoomWidget* zoomer;
     QPlainTextEdit* interpreterInput;
@@ -74,6 +81,8 @@ private:
     QSplitter* mainSplitter;
     QSplitter* rightSplitter;
     interpreter::Interpreter interpreter;
+
+    int row, column;
 };
 
 #endif // MAINWINDOW_H

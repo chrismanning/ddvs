@@ -6,7 +6,9 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    structs(interpreter.getStructs()),
+    row(0), column(0)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Dynamic Data Structure Visualisation"));
@@ -16,6 +18,13 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsView = new GraphicsView(this);
     graphicsView->setMinimumSize(minSize + QSize(10,10));
     graphicsView->setScene(scene);
+
+    layout = new QGraphicsGridLayout;
+    QGraphicsWidget* form = new QGraphicsWidget;
+    form->setLayout(layout);
+    scene->addItem(form);
+    layout->setHorizontalSpacing(10);
+    layout->setVerticalSpacing(10);
 
     //UI Layout
     mainSplitter = new QSplitter(Qt::Horizontal, this);
@@ -102,9 +111,9 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionAdd_Item_triggered()
 {
     qDebug("Adding item...");
-    AddItemDialog *dialog = new AddItemDialog(scene, &items);
-    dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
-    dialog->show();
+//    AddItemDialog *dialog = new AddItemDialog(scene, &items);
+//    dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
+//    dialog->show();
 }
 
 void MainWindow::on_actionEdit_Item_triggered()
@@ -131,39 +140,81 @@ void MainWindow::interpretButton_clicked()
 //                items.insert(QString(var.first.c_str()), tmp);
 //            }
 //        }
+        updateStackTable();
+        updateVariableTree();
+        updateVisualisation();
+    }
+}
 
-        int i = 0;
-        //populate stack table widget
-        for(auto const& var : makeRange(interpreter.getStack().begin(), interpreter.getStackPos())) {
-            QString p = "";
-            if(var.type.pointer) {
-                p += "*";
+void MainWindow::updateVisualisation()
+{
+    auto const& stack = interpreter.getStack();
+    for(auto const& var : interpreter.getGlobals()) {
+        ast::Type t = stack[var.second].type;
+        auto name = QString::fromStdString(var.first);
+        if(!items.contains(QString::fromStdString(var.first))) {
+            QGraphicsWidget* item;
+            if(t.pointer) {
+                auto link = new QGraphicsLineItem;
+                scene->addItem(link);
+                item = new Graphics::Pointer(var.first, stack[var.second].var, t.type_str + "*",
+                                             interpreter.getGlobals(), items, link);
             }
-
-            auto t1 = new QTableWidgetItem(QString::number(var.var));
-            t1->setToolTip(t1->text());
-            stackTableWidget->setItem(i, 0, t1);
-
-            auto t2 = new QTableWidgetItem(QString::fromStdString(var.type.type_str)+p);
-            t2->setToolTip(t2->text());
-            stackTableWidget->setItem(i, 1, t2);
-            ++i;
+            else if(t == "struct") {
+                //item = new Graphics::Struct(var.first, stack[var.second].var, t.type_str);
+            }
+            else {
+                item = new Graphics::Variable(var.first, stack[var.second].var, t.type_str);
+            }
+            items.insert(name, item);
+            if(!(layout->count() % 4)) {
+                column = 0;
+                row++;
+            }
+            layout->addItem(item, row, column);
+            column++;
         }
-        i = 0;
-        auto const& stack = interpreter.getStack();
-        //populate variable tree
-        variableTreeWidget->clear();
-        for(auto const& var : interpreter.getGlobals()) {
-            QTreeWidgetItem* item = new QTreeWidgetItem(
-                {QString::fromStdString(var.first)
-                ,QString::number(var.second)
-                ,QString::number(stack[var.second].type.width)});//
-            item->setToolTip(0,item->text(0));
-            item->setToolTip(1,item->text(1));
-            item->setToolTip(2,item->text(2));
-            variableTreeWidget->insertTopLevelItem(i, item);
-            ++i;
+    }
+    scene->update(scene->sceneRect());
+}
+
+void MainWindow::updateStackTable()
+{
+    int i = 0;
+    //populate stack table widget
+    for(auto const& var : makeRange(interpreter.getStack().begin(), interpreter.getStackPos())) {
+        QString p = "";
+        if(var.type.pointer) {
+            p += "*";
         }
+
+        auto t1 = new QTableWidgetItem(QString::number(var.var));
+        t1->setToolTip(t1->text());
+        stackTableWidget->setItem(i, 0, t1);
+
+        auto t2 = new QTableWidgetItem(QString::fromStdString(var.type.type_str)+p);
+        t2->setToolTip(t2->text());
+        stackTableWidget->setItem(i, 1, t2);
+        ++i;
+    }
+}
+
+void MainWindow::updateVariableTree()
+{
+    int i = 0;
+    auto const& stack = interpreter.getStack();
+    //populate variable tree
+    variableTreeWidget->clear();
+    for(auto const& var : interpreter.getGlobals()) {
+        QTreeWidgetItem* item = new QTreeWidgetItem(
+            {QString::fromStdString(var.first)
+            ,QString::number(var.second)
+            ,QString::number(stack[var.second].type.width)});//
+        item->setToolTip(0,item->text(0));
+        item->setToolTip(1,item->text(1));
+        item->setToolTip(2,item->text(2));
+        variableTreeWidget->insertTopLevelItem(i, item);
+        ++i;
     }
 }
 
