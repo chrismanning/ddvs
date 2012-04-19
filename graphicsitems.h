@@ -6,6 +6,9 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QDebug>
+#include <ast.h>
+#include <interpreter.h>
+#include <tuple>
 
 namespace Graphics
 {
@@ -13,7 +16,7 @@ namespace Graphics
 class Variable : public QGraphicsWidget
 {
 public:
-    Variable(std::string const& name, int const& value, std::string const type_str);
+    Variable(std::string const name, int const& value, std::string const type_str);
     ~Variable() {}
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
@@ -23,7 +26,7 @@ protected:
     {
         return boundingRect().size();
     }
-    std::string const& name;
+    std::string const name;
     int const& value;
     std::string const type_str;
     int textHeight;
@@ -33,7 +36,7 @@ protected:
 class Pointer : public Variable
 {
 public:
-    Pointer(std::string const& name,
+    Pointer(std::string const name,
             int const& value,
             std::string const type_str,
             std::map<std::string, int> const& vars,
@@ -54,15 +57,59 @@ private:
     QGraphicsLineItem* link;
 };
 
-class Struct : public QGraphicsItem
+struct member_container
+{
+    member_container(const std::string name,
+                     const std::string type_name,
+                     const int& value)
+        : value(value), name(name), type_name(type_name)
+    {}
+    const std::string name;
+    const std::string type_name;
+    const int& value;
+};
+
+struct MemberContainer
+{
+    MemberContainer(QString type_name, const int & value)
+        : type_name(type_name), value(value)
+    {}
+    MemberContainer(MemberContainer const& b)
+        : value(b.value)
+    {
+        type_name = b.type_name;
+    }
+    MemberContainer& operator=(MemberContainer const& b)
+    {
+        type_name = b.type_name;
+    }
+
+    QString type_name;
+    const int& value;
+};
+
+class Struct : public QGraphicsWidget
 {
 public:
-    Struct();
+    Struct(std::string const name,
+           std::string const type_str,
+           std::list<member_container> members);
     QRectF boundingRect() const;
-    QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
 protected:
+    QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const
+    {
+        return boundingRect().size();
+    }
 //    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
+private:
+    QRectF* textBounds;
+    QMap<QString, MemberContainer> members;
+    QString buildString();
+    std::string const name;
+    std::string const type_str;
+    int textHeight;
+    int textWidth;
 };
 }
 

@@ -131,42 +131,67 @@ void MainWindow::interpretButton_clicked()
     if(interpreter.parse(tmp_str)) {
         interpreterInput->clear();
         interpreter.execute();
-        typedef std::map<std::string, boost::shared_ptr<interpreter::variable> > varstype;
-        //varstype vars = interpreter.getGlobals();
-//        foreach(varstype::value_type var, vars) {
-//            if(!items.contains(QString(var.first.c_str()))) {
-//                DataType* tmp = new DataType(QString(var.first.c_str()),QString::number(interpreter->getStack()[var.second]));
-//                scene->addItem(tmp);
-//                items.insert(QString(var.first.c_str()), tmp);
-//            }
-//        }
+
         updateStackTable();
         updateVariableTree();
         updateVisualisation();
     }
 }
 
+std::string const MainWindow::findByValue(const int value)
+{
+    for(auto const& var : interpreter.getGlobals()) {
+        if(var.second == value) {
+            return var.first;
+        }
+    }
+    return "";
+}
+
 void MainWindow::updateVisualisation()
 {
     auto const& stack = interpreter.getStack();
-    for(auto const& var : interpreter.getGlobals()) {
-        ast::Type t = stack[var.second].type;
-        auto name = QString::fromStdString(var.first);
-        if(!items.contains(QString::fromStdString(var.first))) {
+    for(auto i=stack.begin(); i<interpreter.getStackPos(); ) {
+        ast::Type t = i->type;
+        auto std_name = findByValue(i-stack.begin());
+        if(std_name.size() <= 0) {
+            std::stringstream ss;
+            ss << t.type_str << i-stack.begin();
+            std_name = ss.str();
+            qDebug() << "name:" << std_name.c_str();
+        }
+        auto name = QString::fromStdString(std_name);
+        if(!items.contains(name)) {
             QGraphicsWidget* item;
             if(t.pointer) {
                 auto link = new QGraphicsLineItem;
                 scene->addItem(link);
-                item = new Graphics::Pointer(var.first, stack[var.second].var, t.type_str + "*",
+                item = new Graphics::Pointer(std_name, i->var, t.type_str + "*",
                                              interpreter.getGlobals(), items, link);
             }
             else if(t == "struct") {
-                //item = new Graphics::Struct(var.first, stack[var.second].var, t.type_str);
+                auto const& structs = interpreter.getStructs();
+                auto j = structs.find(t.type_str.substr(7));
+                if(j != structs.end()) {
+                    interpreter::cstruct cs = j->second;
+                    std::list<Graphics::member_container> tmp_mems;
+                    for(auto const& mem : cs.member_specs) {
+                        tmp_mems.push_back(
+                                    Graphics::member_container(mem.first,
+                                                               mem.second.type_str,
+                                                               std::cref((i+cs.members[mem.first])->var)
+                                                               ));
+                    }
+                    item = new Graphics::Struct(std_name, t.type_str, tmp_mems);
+                }
+                else
+                    return;
             }
             else {
-                item = new Graphics::Variable(var.first, stack[var.second].var, t.type_str);
+                item = new Graphics::Variable(std_name, i->var, t.type_str);
             }
             items.insert(name, item);
+            qDebug() << items;
             if(!(layout->count() % 4)) {
                 column = 0;
                 row++;
@@ -174,7 +199,10 @@ void MainWindow::updateVisualisation()
             layout->addItem(item, row, column);
             column++;
         }
+        i += t.width;
     }
+//    for(auto const& var : interpreter.getGlobals()) {
+//    }
     scene->update(scene->sceneRect());
 }
 

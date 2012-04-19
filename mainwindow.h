@@ -22,6 +22,7 @@
 #include <datatype.h>
 #include <interpreter.h>
 #include <graphicsitems.h>
+#include <tuple>
 
 namespace Ui {
     class MainWindow;
@@ -57,6 +58,7 @@ signals:
     void newStructDefinition(cstruct const& s);
 
 private:
+    std::string const findByValue(const int value);
     void updateStackTable();
     void updateVariableTree();
     void updateVisualisation();

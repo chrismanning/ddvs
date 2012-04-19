@@ -29,10 +29,6 @@ void DataType::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setPen(pen);
     painter->setBrush(QColor(200,200,200));
     painter->drawRoundedRect(createRect(),5,5);
-    //painter->setPen(textColor);
-//    foreach(Member *member, members) {
-//        painter->drawText(createRect(5), Qt::AlignHCenter, member->name + " : " + member->value);
-//    }
     painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignTop, name + " : " + value);
     painter->drawText(createRect(5), Qt::AlignHCenter|Qt::AlignBottom, type);
 }
