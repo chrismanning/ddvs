@@ -158,8 +158,10 @@ namespace interpreter {
                         return false;
                     }
                     ast.type = ast.lhs.type;
-                    env->stack[env->offset].type = ast.type;
-                    env->stack[env->offset].type.pointer = false;
+                    env->stack[env->offset].type = t;
+                    for(unsigned int i=env->offset; i<env->offset+t.width; i++) {
+                        env->stack[i] = 0;
+                    }
                     env->op(op_int, env->offset);
                     if(!(*this)(ast.rhs->operator_)) {
                         return false;
@@ -832,7 +834,7 @@ namespace interpreter {
                     return false;
                 }
                 stack[stack_offset].type = t;
-                for(unsigned int i=stack_offset; i<t.width; i++) {
+                for(unsigned int i=stack_offset; i<stack_offset+t.width; i++) {
                     stack[i] = 0;
                 }
                 current_scope->op(op_int, stack_offset);
