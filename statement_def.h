@@ -50,11 +50,6 @@ namespace parser {
             >   expr.logical_OR_expression
             >   ')'
             >   statement_
-            >
-               -(
-                    lexeme["else" >> !(alnum | '_')] // make sure we have whole words
-                >   statement_
-                )
             ;
 
         while_statement =

@@ -875,23 +875,25 @@ namespace interpreter {
     {
         qDebug() << "Processing: ast::if_statement";
         BOOST_ASSERT(current_scope);
-        if(!(*this)(ast.condition))
+
+        Expression if_expr(error_, current_scope);
+        if(!if_expr(ast.condition)) {
             return false;
-        current_scope->op(op_jump_if, 0);                 // we shall fill this (0) in later
-//        std::size_t skip = current_function->size()-1;       // mark its position
+        }
+
+        current_scope->op(op_jump_if, 0);
+        const int skip = current_scope->code.size() - 1;
+        std::vector<int> code;
+        scope* if_scope = new scope(code, current_scope->stack, current_scope->offset);
+        if_scope->parent.reset(current_scope);
+        current_scope = if_scope;
         if(!(*this)(ast.then))
             return false;
-//        (*current_function)[skip] = current_function->size()-skip;    // now we know where to jump to (after the if branch)
+        current_scope->parent->code.insert(current_scope->parent->code.end(),code.begin(),code.end());
+        current_scope->parent->code[skip] = current_scope->code.size();
+        //skip = current_scope->code.size()-skip;// now we know where to jump to (after the if branch)
 
-        if(ast.else_)                                // We got an else
-        {
-//            (*current_function)[skip] += 2;                  // adjust for the "else" jump
-            current_scope->op(op_jump, 0);                // we shall fill this (0) in later
-//            std::size_t exit = current_function->size()-1;   // mark its position
-            if(!(*this)(*ast.else_))
-                return false;
-//            (*current_function)[exit] = current_function->size()-exit;// now we know where to jump to (after the else branch)
-        }
+        current_scope = if_scope->parent.get();
 
         return true;
     }
@@ -900,16 +902,30 @@ namespace interpreter {
     {
         qDebug() << "Processing: ast::while_statement";
         BOOST_ASSERT(current_scope);
-//        std::size_t loop = current_function->size();         // mark our position
-        if(!(*this)(ast.condition))
+
+        const int loop = current_scope->code.size();// mark our position
+        Expression while_expr(error_, current_scope);
+        if(!while_expr(ast.condition)) {
             return false;
-//        current_function->op(op_jump_if, 0);                 // we shall fill this (0) in later
-//        std::size_t exit = current_function->size()-1;       // mark its position
+        }
+
+        current_scope->op(op_jump_if, 0);// we shall fill this (0) in later
+        const int exit = current_scope->code.size()-1;// mark its position
+
+        std::vector<int> code;
+        scope* while_scope = new scope(code, current_scope->stack, current_scope->offset);
+        while_scope->parent.reset(current_scope);
+        current_scope = while_scope;
+
         if(!(*this)(ast.body))
             return false;
-//        current_function->op(op_jump,
-//            int(loop-1) - int(current_function->size()));    // loop back
-//        (*current_function)[exit] = current_function->size()-exit;    // now we know where to jump to (to exit the loop)
+
+        current_scope->parent->code.insert(current_scope->parent->code.end(),code.begin(),code.end());
+        current_scope = while_scope->parent.get();
+        current_scope->op(op_jump,
+            (loop-1) - int(current_scope->code.size()));// loop back
+        current_scope->code[exit] = current_scope->code.size();
+
         return true;
     }
 
@@ -1093,8 +1109,6 @@ namespace interpreter {
 
                 case op_add:
                     --stack_ptr;
-                    std::cout << stack_ptr[-1] << std::endl;
-                    std::cout << stack_ptr[0] << std::endl;
                     stack_ptr[-1] += stack_ptr[0];
                     break;
 

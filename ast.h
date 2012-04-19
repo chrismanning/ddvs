@@ -361,7 +361,6 @@ namespace ast
     {
         logical_OR_expression condition;
         statement then;
-        boost::optional<statement> else_;
     };
 
     struct while_statement
@@ -560,7 +559,6 @@ BOOST_FUSION_ADAPT_STRUCT(
     ast::if_statement,
     (ast::logical_OR_expression, condition)
     (ast::statement, then)
-    (boost::optional<ast::statement>, else_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

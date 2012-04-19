@@ -53,13 +53,13 @@ namespace interpreter {
         op_false,       //25 push constant 1 into the stack
 
         op_jump_if,     //26 jump to a relative position in the code if top stack
-                        //27 evaluates to false
-        op_jump,        //28 jump to a relative position in the code
+                        //   evaluates to false
+        op_jump,        //27 jump to a relative position in the code
 
-        op_stk_adj,     //29 adjust the stack (for args and locals)
-        op_call,        //30 function call
-        op_return,      //31 return from function
-        op_void         //32 void (no return)
+        op_stk_adj,     //28 adjust the stack (for args and locals)
+        op_call,        //29 function call
+        op_return,      //30 return from function
+        op_void         //31 void (no return)
     };
 
     class null_ptr : public std::exception
