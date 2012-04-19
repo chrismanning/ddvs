@@ -158,6 +158,8 @@ namespace interpreter {
                         return false;
                     }
                     ast.type = ast.lhs.type;
+                    env->stack[env->offset].type = ast.type;
+                    env->stack[env->offset].type.pointer = false;
                     env->op(op_int, env->offset);
                     if(!(*this)(ast.rhs->operator_)) {
                         return false;
@@ -440,6 +442,9 @@ namespace interpreter {
                     }
                     if(addr != 0) {
                         ast::Type struct_type = env->stack[*addr + member_offset].type;
+                        if(struct_type.pointer) {
+                            member_offset = env->stack[member_offset].var;
+                        }
                         qDebug() << struct_type.type_str.c_str();
                         qDebug() << ast.type.type_str.c_str();
                         std::string type_name;
@@ -465,6 +470,7 @@ namespace interpreter {
                                 if(member_type == "struct") {
                                     ast.type = member_type;
                                     qDebug() << "member type:" << member_type.type_str.c_str();
+                                    env->held_value = cs.member_offset(previous_member_name, *addr + member_offset);
                                     continue;
                                 }
 
@@ -825,12 +831,15 @@ namespace interpreter {
                     error(ast.dec.id, "not a pointer");
                     return false;
                 }
-                for(unsigned int i=stack_offset; i<t.width; i++)
+                stack[stack_offset].type = t;
+                for(unsigned int i=stack_offset; i<t.width; i++) {
                     stack[i] = 0;
+                }
+                current_scope->op(op_int, stack_offset);
                 stack_offset += t.width;
                 //current_scope->op(op_new, t.width);
                 current_scope->add_var(ast.dec.name.name, ast.type);
-                current_scope->op(op_store, stack_offset - t.width);
+                current_scope->op(op_store, *current_scope->lookup_var(ast.dec.name.name));
                 return true;
             }
         }

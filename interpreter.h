@@ -121,6 +121,14 @@ namespace interpreter {
             }
             var = b.var;
         }
+        void operator=(variable const& b)
+        {
+            if(!type.is_set && b.type.is_set) {
+                type = b.type;
+            }
+            var = b.var;
+        }
+
         void operator=(int b)
         {
             var = b;
@@ -177,13 +185,13 @@ namespace interpreter {
             int offset = 1;
             for(auto& member_ : ss.members) {
                 auto& member = member_.get();
-                member_specs[member.dec.name.name] = member.type;
-                members[member.dec.name.name] = offset;
                 //stack[offset].type = member.type;
                 qDebug() << member.type.type_str.c_str();
                 if(member.type.pointer) {
                     member.type.width = 1;
                 }
+                member_specs[member.dec.name.name] = member.type;
+                members[member.dec.name.name] = offset;
                 offset += member.type.width;
             }
             type = ast::Type("struct " + name, size(), false, true);
