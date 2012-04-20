@@ -1,10 +1,12 @@
-\documentclass{article}
+\documentclass[a4paper,11pt]{article}
 \usepackage[a4paper]{geometry}
 \usepackage{hyperref}
 \usepackage{syntax}
 \usepackage{listings}
 \lstset{language=C}
 \usepackage{parskip}
+\usepackage{setspace}
+\onehalfspace
 
 \hypersetup{
     colorlinks,
@@ -20,7 +22,7 @@ De Montfort University}
     Dynamic Data Structure Visualisation\\
     User Documentation
 }
-\date{February 2012}
+\date{April 2012}
 
 \begin{document}
 \maketitle
@@ -31,11 +33,15 @@ De Montfort University}
 
 \section{Introduction}
 
-The Dynamic Data Structure Visualisation (DDSV) application aims to provide help to students who are learning to program. The focus of this application is on the concept of pointers; specifically, how they are used to build data structures.
+The Dynamic Data Structure Visualisation (DDSV) application aims to provide help to students who are learning to program.
+The focus of this application is on the concept of pointers; specifically, how they are used to build data structures.
 
-It does this by utilising a graphical user interface (GUI) to provide a visualisation containing graphical representations of abstract data types and pointers to them. This facilitates the visual construction of a data structure, which can then be manipulated to simulate algorithmic operations.
+It does this by utilising a graphical user interface (GUI) to provide a visualisation containing graphical representations of abstract data types and pointers to them.
+This facilitates the visual construction of a data structure, which can then be manipulated to simulate algorithmic operations.
 
-Another interface to this application utilises the expressiveness of a programming language from the GUI in the form of an interpreter. The language accepted by this interpreter is a subset of the C programming language, defined later in this document, which uses quite a low level model and so pointers are exposed to the user more readily.
+Another interface to this application utilises the expressiveness of a programming language from the GUI in the form of an interpreter.
+The language accepted by this interpreter, defined later in this document, is a small subset of the C programming language which has quite a low level model and so pointers are exposed to the user more readily.
+With this interpreter, C code can then be visualised graphically, allowing the user to learn 
 
 \section{User Interface}
 
@@ -45,194 +51,231 @@ Another interface to this application utilises the expressiveness of a programmi
 
 This is the formal grammar specification of the interpreted language using an Extended Backus-Naur Form (EBNF)-like notation, with some brief descriptions.
 
-\noindent\textit{binary\_op} ::=
-    '$||$'
-    $|$ '$\&\&$'
-    $|$ '$==$'
-    $|$ '$!=$'
-    $|$ '$<$'
-    $|$ '$\leq$'
-    $|$ '$>$'
-    $|$ '$\geq$'
-    $|$ '$+$'
-    $|$ '$-$'
-    $|$ '$*$'
-    $|$ '$/$'
+\noindent\textit{assign\_op} ::=
+    `$=$'
     ;
 
-\noindent These are \textit{binary operators}, meaning they require two \textit{operands}.
+\noindent\textit{logical\_or\_op} ::=
+    `$||$'
+    ;
+\noindent\textit{logical\_and\_op} ::=
+    `$\&\&$'
+    ;
+\noindent\textit{equality\_op} ::=
+    `$==$'
+    $|$ `$!=$'
+    ;
+\noindent\textit{relational\_op} ::=
+    `$<$'
+    $|$ `$\leq$'
+    $|$ `$>$'
+    $|$ `$\geq$'
+\noindent\textit{additive\_op} ::=
+    `$+$'
+    $|$ `$-$'
+\noindent\textit{multiplicative\_op} ::=
+    `$*$'
+    $|$ `$/$'
+    ;
+
+\noindent Listed above are the \textit{binary operators}, meaning they require two \textit{operands}. These are arithmetic and boolean operators.
 
 \noindent\textit{unary\_op} ::=
-    '$+$'
-    $|$ '$-$'
-    $|$ '$!$'
-    $|$ '$*$'
-    $|$ '$\rightarrow$'
-    $|$ '$.$'
-    $|$ '$\&$'
+    `$+$'
+    $|$ `$-$'
+    $|$ `$!$'
+    $|$ `$*$'
+    $|$ `$\&$'
     ;
 
 \noindent\textit{Unary operators} require only one \textit{operand}.
 
+\noindent\textit{struct\_op} ::=
+    `$\rightarrow$'
+    $|$ `$.$'
+
+\noindent\textit{Struct operators} are used to select members of a struct variable.
+    
+\noindent\textit{memory\_op} ::=
+    `\verb+new+'
+    
+\noindent The \textit{new} operator is used for dynamically allocating memory.
+
 \noindent\textit{keywords} ::=
-    'true' $|$ 'false' $|$ 'if' $|$ 'else' $|$ 'while' $|$ 'struct' $|$ 'return'
+    `\verb+true+' $|$ `\verb+false+' $|$ `\verb+if+' $|$ `\verb+while+' $|$ `\verb+struct+' $|$ `\verb+return+' $|$ `\verb+new+'
     ;
 
 \noindent These are the \textit{keywords} which are reserved words and cannot be used outside of their required context.
 
 \noindent\textit{types} ::=
-    'void' $|$ 'int' $|$ 'bool' ;
+    `\verb+void+' $|$ `\verb+int+' $|$ `\verb+bool+' ;
     
 \noindent These are the predefined primitive \textit{types} that are used for declaring variables, etc.
 
 \begin{grammar}
-<expr> ::=
-    <unary\_expr> {<binary\_op> <unary\_expr>}
-    ;
-\end{grammar}
-An \textit{expression} must contain at least one \textit{unary expression}, with an option for any number of \textit{binary} operations paired with another \textit{unary expression} appended.
-\begin{grammar}
-<unary\_expr> ::=
-	<primary\_expr>
-    \alt (<unary\_op> <primary\_expr>)
-    ;
-\end{grammar}
-A \textit{unary expression} consists of either a \textit{primary expression} or a \textit{unary operator} followed by a \textit{primary expression}.
-\begin{grammar}
 <identifier> ::=
 	-(keywords | types) ,
-	alpha | '\_' , \{ alpha | digit | '\_' \} ;
+	alpha | `\_' , \{ alpha | digit | `\_' \} ;
 \end{grammar}
 An \textit{identifier} must not be a \textit{keyword}, a primitive type or begin with a digit. It must start with an alphabetic character or an underscore (\_) to be optionally followed by zero or more alphabetic characters, digits or underscores. 
+
 \begin{grammar}
-<primary\_expr> ::=
-	integer
-    \alt   <function\_call>
-    \alt   <identifier>
-    \alt   boolean
-    \alt   '(' <expr> ')'
-;
+        <assignment_expression> ::= <logical_OR_expression> [<unary_assign>];
+
+        <allocation_expression> ::= <memory_op> <type_specifier>;
+
+        <unary_assign> ::= <assign_op>\\
+        (<allocation_expression> \alt <logical_OR_expression>);
+
+        <logical_OR_expression> ::= <logical_AND_expression>\\
+        \{<logical_or_op> <logical_AND_expression>\};
+
+        <logical_AND_expression> ::= <equality_expression>\\
+        \{<logical_and_op> <equality_expression>\};
+
+        <equality_expression> ::= <relational_expression>\\
+        \{<equality_op> <relational_expression>\};
+
+        <relational_expression> ::= <additive_expression>\\
+        \{<relational_op> <additive_expression>\};
+
+        <additive_expression> ::= <multiplicative_expression>\\
+        \{<additive_op> <multiplicative_expression>\};
+
+        <multiplicative_expression> ::= <unary_expression>\\
+        \{<multiplicative_op> <unary_expression>\};
+
+        <unary_expression> ::=
+                [<unary_op>]
+               <postfix_expression>
+            ;
+
+        <struct_expr> ::= <struct_op> <identifier>;
+
+        <postfix_expression> ::=
+                <primary_expression>\\
+               \{<struct_expr> \alt <postfix_op>\}
+            ;
+
+        <primary_expression> ::=
+                int
+            \alt   <identifier>
+            \alt   bool
+            \alt   `(' <logical_OR_expression> `)'
+            ;
 \end{grammar}
-Apart from the other specified \textit{expressions}, a \textit{primary expression} can also be an integer literal, a boolean literal (\textit{true} \& \textit{false}), or an expression enclosed in parentheses ('(' \& ')').
+\textit{Assignment expression} is the catch-all expression rule.
+This rule uses recursion so that it also takes into account operator precedence without additional algorithms.
+Each of its constituent rules have a specific set of operators, each with their own precedence.
+
+As can be seen from the top rule only one variable can be assigned at a time, whereas the rest can be composed of any of the others, allowing complex expressions to be formed.
+Available primitive types for constants and variables are integer and boolean only.
+
+An \textit{allocation expression} is one which allocates memory of a specified type to be assigned to a pointer.
+
 \begin{grammar}
-<function\_call> ::=
-<identifier> '(' [<call_argument_list>] ')'
-;
+        <type_specifier> ::=
+                <types>
+            \alt   <struct_specifier>
+            ;
+
+        <declarator> ::= [`*'] <identifier>;
+        
+	<declaration> ::= <type_specifier> [<init_declarator>] `;';
+
+        <init_declarator> ::= <declarator>
+        [`=' <allocation_expression>
+        \alt <logical_OR_expression>];
+
+
+        <struct_member_declaration> ::= <type_specifier> <declarator> `;';
+
+        <struct_specifier> ::=
+                `struct' <identifier> [`{' \{<struct_member_declaration>\} `}';
 \end{grammar}
-\begin{grammar}
-<call_argument\_list> ::= [<expr> | <expr> ',' <call_argument_list>] ;
-\end{grammar}
-A \textit{call argument list} can contain zero, one or many expressions.
+The above lists the rule to match a \verb+struct+ definition, which may contain one or more member declarations.
+A struct member declaration must not be initialised in any form.
+Variable declarations may have a single initialisation from an expression.
+The optional `*' denotes a pointer type.
+
 \begin{grammar}
 <statement_list> ::=
-    \{statement_\}
+    \{<statement>\}
     ;
-\end{grammar}
-\begin{grammar}
-<statement_> ::=
-	<variable_declaration>
-    \alt   <struct_member_declaration>
-    \alt   <struct_declaration>
-    \alt   <struct_instantiation>
-    \alt   <assignment>
-    \alt   <compound_statement>
-    \alt   <function_call_statement>
+
+<statement> ::=
+	<declaration>
+    \alt   <assignment_expression> `;'
     \alt   <if_statement>
     \alt   <while_statement>
     \alt   <return_statement>
+    \alt   <compound_statement>
     ;
 \end{grammar}
+
 Any of the above listed \textit{statements} can take the place of a $\langle statement\_\rangle$ instance.
-\begin{grammar}
-<type_id> ::= <identifier> ;
-\end{grammar}
-\begin{grammar}
-<var_type> ::= <types> ['*'] ;
-\end{grammar}
-The optional '*' denotes a pointer type.
-\begin{grammar}
-<variable_declaration> ::=
-	<var_type> <identifier> [('=' <expr>)] ';' ;
-\end{grammar}
-\begin{grammar}
-<struct_member_declaration> ::=
-	(<var_type> | <struct_instantiation>) <identifier> ';' ;
-\end{grammar}
-\begin{grammar}
-<struct_declaration> ::=
-	'struct' <type_id>
-    '\{'
-    \{<struct_member_declaration>\}
-    '\}'
-    ';'
-    ;
-\end{grammar}
-\begin{grammar}
-<struct_instantiation> ::=
-	'struct'
-    <type_id>
-    <identifier>
-    ';'
-    ;
-\end{grammar}
-\begin{grammar}
-<assignment> ::=
-	<identifier>
-       '='
-       <expr>
-       ';'
-    ;
-\end{grammar}
+
 \begin{grammar}
 <if_statement> ::=
-	'if'
-       '('
-       <expr>
-       ')'
-       <statement_>
-	[
-	    'else'
-	   <statement_>
-	]
+	`if'
+       `('
+       <logical_OR_expression>
+       `)'
+       <statement>
     ;
 \end{grammar}
+
+An \textit{if statement} is a conditional which will only execute its encompassed statement if a condition is evaluated as \verb+true+.
+This condition can be anything that can be represented by a \textit{logical or expression}, which is any expression other than an assignment.
+
 \begin{grammar}
 <while_statement> ::=
-	'while'
+	`while'
        '('
-       <expr>
-       ')'
-       <statement_>
+       <logical_OR_expression>
+       `)'
+       <statement>
     ;
 \end{grammar}
+
+The \textit{while statement} is a looping statement which will execute its enclosed statement for as long as its conditional \textit{logical or expression} evaluates to \verb+true+.
+
 \begin{grammar}
 <compound_statement> ::=
     '\{' [<statement_list>] '\}'
     ;
 \end{grammar}
-A \textit{compound statement} is an optional list of \textit{statements} enclosed in braces ('\{' \& '\}').
+A \textit{compound statement} is an list of zero, one or many \textit{statements} enclosed in braces (`\{' \& `\}').
 \begin{grammar}
 <return_statement> ::=
-	'return'
-    [expr]
-       ';'
+	`return'
+    [<logical_OR_expression>]
+       `;'
     ;
 \end{grammar}
+
 \begin{grammar}
-<argument_list> ::= \{<var_type> <identifier>\} ;
+        <argument> ::=
+                <type_specifier>
+            <init_declarator>
+            ;
+
+        <function_definition> ::=
+                <type_specifier>
+            <declarator>\\
+            `('
+            [\%<argument>]
+               `)'\\
+            <compound_statement>
+            ;
+
+        <translation_unit> ::=
+            \{  <statement>
+            \alt   <function_definition>
+            \}
+            ;
 \end{grammar}
-\begin{grammar}
-<function_declaration> ::=
-	<var_type>
-       <identifier>
-       '(' <argument_list> ')'
-       <compound_statement>
-    ;
-\end{grammar}
-\begin{grammar}
-<translation_unit> ::=
-    \{ <statement_list> | <function> \} ;
-\end{grammar}
+
 The \textit{translation unit} consists of a list of both \textit{function} declarations and \textit{statement lists}. This is root of all that can be passed to the interpreter, i.e.\ everything must be entered in this form.
 
 \subsection{Operator Precedence}
@@ -262,20 +305,35 @@ Precedence & Operator & Description \\ \hline
   & * (unary) & Dereference \\ \hline
 10 & $-$$>$ & Select element through pointer \\
    & . & Select element \\ \hline
-
 \end{tabular}
+
+The \verb+new+ operator does not have a particular precedence as it can only be used in assignments and declarations, effectively giving it a precedence higher than that of `=', though it is considered a special operator.
+
+\subsection{Notes}
+
+This language may be similar to C but their are some notable exceptions and omissions.
+
 
 \subsection{Examples}
 
 \subsubsection{Variable Declaration}
 
 \begin{lstlisting}
-int a; //declare an integer variable named "a"
-int b = 3; //assignment on declaration
-int c = b + 2; //assignment & binary operation
+//declare an integer variable named "a"
+int a;
+//assignment on declaration
+int b = 3;
+//assignment from an expression
+int c = b + 2;
 
+//declare a pointer and assign it the address of a
 int * p = &a;
 *p = 51; // a == 51
+
+//declare a pointer variable and allocate it some memory
+int * x = new int;
+//dereference and assign
+*x = 123;
 \end{lstlisting}
 
 \subsubsection{Function Declaration}
@@ -292,10 +350,21 @@ int factorial(int n) {
 \subsubsection{Struct Declaration}
 
 \begin{lstlisting}
+//Define a struct
 struct point {
   int x;
   int y;
 };
+
+//Define and declare a struct variable in one statement
+struct point {
+  int x;
+  int y;
+} p1;
+
+struct point * ptr = new struct point;
+ptr->x = 42;
+ptr->y = 24;
 \end{lstlisting}
 
 \subsubsection{Struct Instantiation}
