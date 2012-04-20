@@ -63,8 +63,13 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     stackTableWidget->setVerticalHeaderLabels(vertLabels);
     stackTableWidget->verticalHeader()->setUpdatesEnabled(true);
-    //set column widths
-    stackTableWidget->setColumnWidth(0, 50);
+    //set initial column widths
+    stackTableWidget->setColumnWidth(0, 45);
+    variableTreeWidget->setColumnWidth(0,60);
+    variableTreeWidget->setColumnWidth(1,50);
+    variableTreeWidget->setColumnWidth(2,30);
+    structTreeWidget->setColumnWidth(0, structTreeWidget->width()/2);
+    structTreeWidget->setColumnWidth(1, structTreeWidget->width()/2);
     //tabs
     tabWidget->addTab(variableTreeWidget, "Variables");
     tabWidget->addTab(structTreeWidget, "Structs");
