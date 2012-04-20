@@ -212,7 +212,7 @@ void MainWindow::updateVisualisation()
             }
             items.insert(name, item);
             qDebug() << items;
-            if(!(layout->count() % 4)) {
+            if(!(layout->count() % 6)) {
                 column = 0;
                 row++;
             }
