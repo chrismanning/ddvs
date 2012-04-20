@@ -70,6 +70,7 @@ void AddItemDialog::on_typeComboBox_activated(int index)
 {
     ui->userTypeGroupBox->hide();
     ui->simpleTypeGroupBox->hide();
+    ui->pointerGroupBox->hide();
 
     switch(index)
     {
