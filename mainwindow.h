@@ -18,7 +18,6 @@
 #include <graphicsview.h>
 #include <additemdialog.h>
 #include <edititemdialog.h>
-#include <zoomwidget.h>
 #include <datatype.h>
 #include <interpreter.h>
 #include <graphicsitems.h>
@@ -76,7 +75,6 @@ private:
     QGraphicsScene* scene;
     QGraphicsGridLayout* layout;
     GraphicsView* graphicsView;
-    ZoomWidget* zoomer;
     QPlainTextEdit* interpreterInput;
     QPushButton* interpretButton;
 #ifdef QT_DEBUG
