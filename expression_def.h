@@ -34,10 +34,6 @@ namespace parser {
         // operators from lowest to highest precedence
         assign_op.add
             ("=" , ast::op_assign)
-            ("+=", ast::op_assign_add)
-            ("-=", ast::op_assign_sub)
-            ("*=", ast::op_assign_mul)
-            ("/=", ast::op_assign_mul)
             ;
 
         logical_or_op.add
@@ -95,7 +91,6 @@ namespace parser {
             ("true")
             ("false")
             ("if")
-            ("else")
             ("while")
             ("struct")
             ("return")

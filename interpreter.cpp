@@ -1097,6 +1097,14 @@ namespace interpreter {
         std::vector<int>::const_iterator start = pc;
         while(pc<code.end())
         {
+            if(stack_ptr - frame_ptr > DDVS_STACK_SIZE-3) {
+                msg_box.setText("Stack overflow!");
+                msg_box.setInformativeText("You should be able to safely resume after this box disappears.");
+                msg_box.setStandardButtons(QMessageBox::Close);
+                msg_box.setDefaultButton(QMessageBox::Close);
+                msg_box.exec();
+                return -1;
+            }
             switch(*pc++)
             {
                 case op_neg:
