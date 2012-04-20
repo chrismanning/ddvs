@@ -339,3 +339,9 @@ void MainWindow::on_actionRefresh_Visualisation_triggered()
     updateVariableTree();
     updateVisualisation();
 }
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "Information", "Dynamic Data Structure Visualisation\n"
+                       "Copyright \x00A9 2012 Christian Manning");
+}

@@ -54,6 +54,7 @@ private slots:
     void on_actionZoom_Out_triggered();
     void on_actionAbout_Qt_triggered();
     void on_actionRefresh_Visualisation_triggered();
+    void on_actionAbout_triggered();
 
 public slots:
     void structDefined(cstruct const& s);
