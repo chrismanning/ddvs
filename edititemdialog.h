@@ -2,20 +2,21 @@
 #define EDITITEMDIALOG_H
 
 #include <QDialog>
-#include <graphicsitems.h>
+#include <mainwindow.h>
+#include <interpreter.h>
 
 namespace Ui {
     class EditItemDialog;
 }
 
-using Graphics::GraphicsWidget;
+using interpreter::Interpreter;
 
 class EditItemDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit EditItemDialog(int& d,QWidget *parent = 0);
+    explicit EditItemDialog(std::string const& name, Interpreter& inter,QWidget *parent = 0);
     ~EditItemDialog();
 
 private slots:
@@ -23,7 +24,8 @@ private slots:
 
 private:
     Ui::EditItemDialog *ui;
-    int& d;
+    Interpreter& inter;
+    std::string const& name;
 };
 
 #endif // EDITITEMDIALOG_H

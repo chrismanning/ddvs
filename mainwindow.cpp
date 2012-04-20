@@ -135,7 +135,7 @@ void MainWindow::on_actionEdit_Item_triggered()
         msgbox.exec();
         return;
     }
-    EditItemDialog *dialog = new EditItemDialog(const_cast<int&>(dynamic_cast<Graphics::Variable*>(item)->value));
+    EditItemDialog *dialog = new EditItemDialog(dynamic_cast<Graphics::Variable*>(item)->name, interpreter, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
     dialog->show();
 }

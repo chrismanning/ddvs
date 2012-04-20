@@ -26,16 +26,16 @@ public:
     ~Variable() {}
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
-    int const& value;
+    std::string const name;
 protected:
 //    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint = QSizeF()) const
     {
         return boundingRect().size();
     }
-    std::string const name;
     int textHeight;
     int textWidth;
+    int const& value;
 };
 
 class Pointer : public Variable
