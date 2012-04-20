@@ -14,7 +14,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    zoomwidget.cpp \
     datatype.cpp \
     additemdialog.cpp \
     newmemberswidget.cpp \
@@ -27,7 +26,6 @@ SOURCES += main.cpp\
     graphicsitems.cpp
 
 HEADERS  += mainwindow.h \
-    zoomwidget.h \
     datatype.h \
     additemdialog.h \
     newmemberswidget.h \
@@ -55,7 +53,6 @@ win32:INCLUDEPATH += C:\\dev\\include\\boost_1_49_0
 #DEFINES+= QT_NO_DEBUG_OUTPUT
 
 FORMS += mainwindow.ui \
-    zoomwidget.ui \
     additemdialog.ui \
     newmemberswidget.ui \
     edititemdialog.ui
