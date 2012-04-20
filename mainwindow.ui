@@ -87,6 +87,7 @@
     <addaction name="actionBinary_Tree_Layout"/>
     <addaction name="actionGeneralised_Tree_Layout"/>
     <addaction name="actionGraph_Layout"/>
+    <addaction name="actionRefresh_Visualisation"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -105,6 +106,7 @@
    <addaction name="actionEdit_Item"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
+   <addaction name="actionRefresh_Visualisation"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -294,6 +296,18 @@
    </property>
    <property name="toolTip">
     <string>Show the Qt library's About box</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Visualisation">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/16x16/icons/16x16/view-refresh.png</normaloff>:/16x16/icons/16x16/view-refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh Visualisation</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
  </widget>

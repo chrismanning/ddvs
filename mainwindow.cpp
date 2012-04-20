@@ -108,19 +108,34 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::updateAll() {
+    updateStackTable();
+    updateVariableTree();
+    updateVisualisation();
+}
+
 void MainWindow::on_actionAdd_Item_triggered()
 {
     qDebug("Adding item...");
-//    AddItemDialog *dialog = new AddItemDialog(scene, &items);
-//    dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
-//    dialog->show();
+    AddItemDialog *dialog = new AddItemDialog(interpreter, structs, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
+    dialog->show();
 }
 
 void MainWindow::on_actionEdit_Item_triggered()
 {
     if(scene->selectedItems().size() == 0) return;
     qDebug("Editing item...");
-    EditItemDialog *dialog = new EditItemDialog((DataType*) scene->selectedItems().first());
+    Graphics::GraphicsWidget* item = dynamic_cast<Graphics::GraphicsWidget*>(scene->selectedItems().first());
+    QString ts = QString::fromStdString(item->type_str);
+    if(!ts.contains('*') && ts.contains("struct")) {
+        msgbox.setText("Cannot edit struct value");
+        msgbox.setStandardButtons(QMessageBox::Close);
+        msgbox.setDefaultButton(QMessageBox::Close);
+        msgbox.exec();
+        return;
+    }
+    EditItemDialog *dialog = new EditItemDialog(const_cast<int&>(dynamic_cast<Graphics::Variable*>(item)->value));
     dialog->setAttribute(Qt::WA_DeleteOnClose); //make it free its memory on close
     dialog->show();
 }
@@ -162,7 +177,7 @@ void MainWindow::updateVisualisation()
         }
         auto name = QString::fromStdString(std_name);
         if(!items.contains(name)) {
-            QGraphicsWidget* item;
+            Graphics::GraphicsWidget* item;
             if(t.pointer) {
                 auto link = new QGraphicsLineItem;
                 scene->addItem(link);
@@ -311,4 +326,11 @@ void MainWindow::structDefined(cstruct const& s)
         item->addChild(child);
     }
     structTreeWidget->insertTopLevelItem(structTreeWidget->topLevelItemCount(), item);
+}
+
+void MainWindow::on_actionRefresh_Visualisation_triggered()
+{
+    updateStackTable();
+    updateVariableTree();
+    updateVisualisation();
 }

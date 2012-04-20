@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>429</width>
-    <height>328</height>
+    <width>434</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -50,7 +50,17 @@
        </item>
        <item>
         <property name="text">
-         <string>New Type</string>
+         <string>Primitive Type (int)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Struct Type (user defined)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Pointer</string>
         </property>
        </item>
       </widget>
@@ -63,13 +73,13 @@
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Simple Type</string>
+      <string>Primitive Type</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <item row="2" column="0">
        <widget class="QLabel" name="valueLabel">
         <property name="text">
-         <string>Value:</string>
+         <string>Value (optional):</string>
         </property>
        </widget>
       </item>
@@ -92,33 +102,28 @@
    <item>
     <widget class="QGroupBox" name="userTypeGroupBox">
      <property name="title">
-      <string>User-Defined Type</string>
+      <string>Struct Type</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
-      <item row="2" column="0">
-       <widget class="QLabel" name="membersLabel">
+      <item row="3" column="0">
+       <widget class="QLabel" name="structMembersLabel">
         <property name="text">
          <string>Members:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="userNameLabel">
+      <item row="1" column="0">
+       <widget class="QLabel" name="structNameLabel">
         <property name="text">
          <string>Name:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="userTypeNameText"/>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="structNameText"/>
       </item>
-      <item row="2" column="1">
-       <widget class="QTableWidget" name="userTypeMembersWidget">
-        <column>
-         <property name="text">
-          <string>Type</string>
-         </property>
-        </column>
+      <item row="3" column="1">
+       <widget class="QTableWidget" name="structMembersWidget">
         <column>
          <property name="text">
           <string>Name</string>
@@ -131,34 +136,54 @@
         </column>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="structTypeLabel">
+        <property name="text">
+         <string>Struct Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="structTypeComboBox"/>
+      </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="newTypeGroupBox">
+    <widget class="QGroupBox" name="pointerGroupBox">
      <property name="title">
-      <string>New Type</string>
+      <string>Pointer</string>
      </property>
-     <layout class="QFormLayout" name="formLayout_5">
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="newTypeNameText"/>
-      </item>
+     <layout class="QFormLayout" name="formLayout_2">
       <item row="0" column="0">
-       <widget class="QLabel" name="typeNameLabel">
+       <widget class="QLabel" name="pointerTypeLabel">
         <property name="text">
-         <string>Type Name:</string>
+         <string>Pointer to type:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="membersLabel_2">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="pointerTypeText"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="pointerNameLabel">
         <property name="text">
-         <string>Members:</string>
+         <string>Pointer name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="pointerNameText"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="pointerValueLabel">
+        <property name="text">
+         <string>Value (address or allocation):</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="NewMembersWidget" name="newMembersWidget" native="true"/>
+       <widget class="QLineEdit" name="pointerValueText"/>
       </item>
      </layout>
     </widget>
@@ -175,14 +200,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>NewMembersWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">newmemberswidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>

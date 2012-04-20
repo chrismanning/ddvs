@@ -2,18 +2,20 @@
 #define EDITITEMDIALOG_H
 
 #include <QDialog>
-#include <datatype.h>
+#include <graphicsitems.h>
 
 namespace Ui {
     class EditItemDialog;
 }
+
+using Graphics::GraphicsWidget;
 
 class EditItemDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit EditItemDialog(DataType *d,QWidget *parent = 0);
+    explicit EditItemDialog(int& d,QWidget *parent = 0);
     ~EditItemDialog();
 
 private slots:
@@ -21,7 +23,7 @@ private slots:
 
 private:
     Ui::EditItemDialog *ui;
-    DataType *item;
+    int& d;
 };
 
 #endif // EDITITEMDIALOG_H

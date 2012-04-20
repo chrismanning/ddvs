@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
+    void updateAll();
 
 private slots:
     void on_actionAdd_Item_triggered();
@@ -52,12 +53,15 @@ private slots:
     void on_actionZoom_In_triggered();
     void on_actionZoom_Out_triggered();
     void on_actionAbout_Qt_triggered();
+    void on_actionRefresh_Visualisation_triggered();
+
 public slots:
     void structDefined(cstruct const& s);
 signals:
     void newStructDefinition(cstruct const& s);
 
 private:
+    QMessageBox msgbox;
     std::string const findByValue(const int value);
     void updateStackTable();
     void updateVariableTree();
@@ -67,7 +71,7 @@ private:
     QTreeWidget* structTreeWidget;
     QTreeWidget* variableTreeWidget;
     QTableWidget* stackTableWidget;
-    QHash<QString, QGraphicsWidget*> items;
+    QHash<QString, Graphics::GraphicsWidget*> items;
     Ui::MainWindow* ui;
     QGraphicsScene* scene;
     QGraphicsGridLayout* layout;

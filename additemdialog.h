@@ -5,8 +5,11 @@
 #include <QGraphicsScene>
 #include <QHash>
 #include <mainwindow.h>
-#include <datatype.h>
-#include <pointer.h>
+#include <graphicsitems.h>
+
+using Graphics::GraphicsWidget;
+using interpreter::cstruct;
+using interpreter::Interpreter;
 
 namespace Ui {
     class AddItemDialog;
@@ -17,18 +20,21 @@ class AddItemDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddItemDialog(QGraphicsScene *scene, QHash<QString,DataType*> *items, QWidget * parent = 0);
+    explicit AddItemDialog(Interpreter& inter
+                           , std::map<std::string, cstruct> const& structs
+                           , QWidget *parent);
     ~AddItemDialog();
 
 private slots:
     void on_buttonBox_accepted();
-
     void on_typeComboBox_activated(int index);
+    void on_structTypeComboBox_activated(const QString &arg1);
 
 private:
-    Ui::AddItemDialog *ui;
-    QGraphicsScene *scene;
-    QHash<QString,DataType*> *items;
+    std::map<std::string, cstruct> const& structs;
+    QString str;
+    Ui::AddItemDialog * ui;
+    Interpreter& inter;
 };
 
 #endif // ADDITEMDIALOG_H

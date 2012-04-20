@@ -1,13 +1,12 @@
 #include "edititemdialog.h"
 #include "ui_edititemdialog.h"
 
-EditItemDialog::EditItemDialog(DataType *d,QWidget *parent) :
+EditItemDialog::EditItemDialog(int& d,QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::EditItemDialog)
+    ui(new Ui::EditItemDialog),
+    d(d)
 {
     ui->setupUi(this);
-
-    item = d;
 }
 
 EditItemDialog::~EditItemDialog()
@@ -17,5 +16,5 @@ EditItemDialog::~EditItemDialog()
 
 void EditItemDialog::on_buttonBox_accepted()
 {
-    item->value = ui->lineEdit->displayText();
+    d = ui->lineEdit->text().toInt();
 }

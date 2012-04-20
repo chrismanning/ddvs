@@ -4,9 +4,13 @@ namespace Graphics
 {
 
 Variable::Variable(const std::string name, const int &value, const std::string type_str)
-    : name(name), value(value), type_str(type_str), textHeight(0), textWidth(0)
+    : name(name)
+    , value(value)
+    , textHeight(0)
+    , textWidth(0)
 {
     setFlags(ItemIsSelectable | ItemSendsGeometryChanges);
+    this->type_str = type_str;
 }
 
 void Variable::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget*)
@@ -85,8 +89,9 @@ std::string const Pointer::findByValue(const int value)
 Struct::Struct(std::string const name,
        std::string const type_str,
        std::list<member_container> members)
-    : name(name), type_str(type_str), textBounds(0)
+    : name(name), textBounds(0)
 {
+    this->type_str = type_str;
     setFlags(ItemIsSelectable | ItemSendsGeometryChanges);
     for(member_container const& mem : members) {
         this->members.insert(QString::fromStdString(mem.name),

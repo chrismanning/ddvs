@@ -13,13 +13,20 @@
 namespace Graphics
 {
 
-class Variable : public QGraphicsWidget
+class GraphicsWidget : public QGraphicsWidget
+{
+public:
+    std::string type_str;
+};
+
+class Variable : public GraphicsWidget
 {
 public:
     Variable(std::string const name, int const& value, std::string const type_str);
     ~Variable() {}
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
+    int const& value;
 protected:
 //    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
     QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint = QSizeF()) const
@@ -27,8 +34,6 @@ protected:
         return boundingRect().size();
     }
     std::string const name;
-    int const& value;
-    std::string const type_str;
     int textHeight;
     int textWidth;
 };
@@ -40,7 +45,7 @@ public:
             int const& value,
             std::string const type_str,
             std::map<std::string, int> const& vars,
-            QHash<QString, QGraphicsWidget*> const& items,
+            QHash<QString, GraphicsWidget*> const& items,
             QGraphicsLineItem* link)
         : Variable(name, value, type_str),
           vars(vars),
@@ -53,7 +58,7 @@ protected:
 private:
     std::string const findByValue(const int value);
     std::map<std::string, int> const& vars;
-    QHash<QString, QGraphicsWidget*> const& items;
+    QHash<QString, GraphicsWidget*> const& items;
     QGraphicsLineItem* link;
 };
 
@@ -88,7 +93,7 @@ struct MemberContainer
     const int& value;
 };
 
-class Struct : public QGraphicsWidget
+class Struct : public GraphicsWidget
 {
 public:
     Struct(std::string const name,
@@ -107,7 +112,6 @@ private:
     QMap<QString, MemberContainer> members;
     QString buildString();
     std::string const name;
-    std::string const type_str;
     int textHeight;
     int textWidth;
 };
