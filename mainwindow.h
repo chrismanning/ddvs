@@ -18,10 +18,8 @@
 #include <graphicsview.h>
 #include <additemdialog.h>
 #include <edititemdialog.h>
-#include <datatype.h>
 #include <interpreter.h>
 #include <graphicsitems.h>
-#include <tuple>
 
 namespace Ui {
     class MainWindow;

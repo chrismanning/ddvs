@@ -14,10 +14,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    datatype.cpp \
     additemdialog.cpp \
     newmemberswidget.cpp \
-    pointer.cpp \
     edititemdialog.cpp \
     expression.cpp \
     statement.cpp \
@@ -26,10 +24,8 @@ SOURCES += main.cpp\
     graphicsitems.cpp
 
 HEADERS  += mainwindow.h \
-    datatype.h \
     additemdialog.h \
     newmemberswidget.h \
-    pointer.h \
     edititemdialog.h \
     statement.h \
     ast.h \
