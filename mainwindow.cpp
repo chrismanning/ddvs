@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //set row height + labels
     QStringList vertLabels;
     for(int i = 0; i < stackTableWidget->rowCount(); i++) {
-        stackTableWidget->verticalHeader()->resizeSection(i, stackTableWidget->rowHeight(i)-15);
+        stackTableWidget->verticalHeader()->resizeSection(i, stackTableWidget->rowHeight(i)-14);
         vertLabels << QString::number(i);
     }
     stackTableWidget->setVerticalHeaderLabels(vertLabels);
