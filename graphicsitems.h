@@ -108,9 +108,7 @@ protected:
     }
 //    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
 private:
-    QRectF* textBounds;
     QMap<QString, MemberContainer> members;
-    QString buildString();
     std::string const name;
     int textHeight;
     int textWidth;

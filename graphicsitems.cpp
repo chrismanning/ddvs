@@ -89,7 +89,7 @@ std::string const Pointer::findByValue(const int value)
 Struct::Struct(std::string const name,
        std::string const type_str,
        std::list<member_container> members)
-    : name(name), textBounds(0)
+    : name(name), textHeight(0), textWidth(0)
 {
     this->type_str = type_str;
     setFlags(ItemIsSelectable | ItemSendsGeometryChanges);
