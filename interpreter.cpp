@@ -1063,6 +1063,7 @@ namespace interpreter {
             else {
                 qDebug() << "FAIL";
                 msg_box.setText("Semantic analysis failed");
+                msg_box.setInformativeText("");
                 msg_box.setStandardButtons(QMessageBox::Close);
                 msg_box.setDefaultButton(QMessageBox::Close);
                 if(error_buf) {
