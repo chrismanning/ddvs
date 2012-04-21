@@ -7,6 +7,9 @@
 \usepackage{parskip}
 \usepackage{setspace}
 \onehalfspace
+\usepackage{subfig}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
 
 \hypersetup{
     colorlinks,
@@ -28,8 +31,9 @@ De Montfort University}
 \maketitle
 
 \tableofcontents
+\listoffigures
 
-\pagebreak
+\clearpage
 
 \section{Introduction}
 
@@ -40,16 +44,34 @@ It does this by utilising a graphical user interface (GUI) to provide a visualis
 This facilitates the visual construction of a data structure, which can then be manipulated to simulate algorithmic operations.
 
 Another interface to this application utilises the expressiveness of a programming language from the GUI in the form of an interpreter.
-The language accepted by this interpreter, defined later in this document, is a small subset of the C programming language which has quite a low level model and so pointers are exposed to the user more readily.
+The language accepted by this interpreter, is a small subset of the C programming language which has quite a low level model and so pointers are exposed to the user more readily.
 With this interpreter, C code can then be visualised graphically, allowing the user to learn 
 
-\section{User Interface}
 
 \section{Interpreted Language}
 
 \subsection{Specification}
 
 This is the formal grammar specification of the interpreted language using an Extended Backus-Naur Form (EBNF)-like notation, with some brief descriptions.
+Each entry is referred to as a grammar \textit{rule}.
+
+Key:\\
+\begin{tabular}{|c|l|}
+ \hline
+ \textbf{Symbols} & \textbf{Description} \\ \hline
+ \verb+<a>+ & \verb+a+ is a non-terminal \\ \hline
+ \verb+a+ ::= \verb+b+ & \verb+a+ is defined as a rule with \verb+b+ as its singular constituent \\ \hline
+ \verb+a+ \verb+b+ & \verb+a+ followed by \verb+b+ \\ \hline
+ (\verb+a+ \verb+b+) & Groups rules \verb+a+ and \verb+b+ together \\ \hline
+ {\verb+a+} & Repeat \verb+a+ zero, one or more times \\ \hline
+ [\verb+a+] & \verb+a+ is to be matched zero or one times. (Optional) \\ \hline
+ \verb+a | b+ & \verb+a+ \textit{or} \verb+b+ \\ \hline
+ \verb+-a+ & Do not match \verb+a+ \\ \hline
+ `\verb+c+' & Character string \verb+c+ \\ \hline
+ \%\verb+a+ & Comma separated list of \verb+a+ \\ \hline
+ ; & End of rule \\ \hline
+\end{tabular}
+
 
 \noindent\textit{assign\_op} ::=
     `$=$'
@@ -58,21 +80,28 @@ This is the formal grammar specification of the interpreted language using an Ex
 \noindent\textit{logical\_or\_op} ::=
     `$||$'
     ;
+
 \noindent\textit{logical\_and\_op} ::=
     `$\&\&$'
     ;
+
 \noindent\textit{equality\_op} ::=
     `$==$'
     $|$ `$!=$'
     ;
+
 \noindent\textit{relational\_op} ::=
     `$<$'
     $|$ `$\leq$'
     $|$ `$>$'
     $|$ `$\geq$'
+    ;
+
 \noindent\textit{additive\_op} ::=
     `$+$'
     $|$ `$-$'
+    ;
+
 \noindent\textit{multiplicative\_op} ::=
     `$*$'
     $|$ `$/$'
@@ -91,7 +120,7 @@ This is the formal grammar specification of the interpreted language using an Ex
 \noindent\textit{Unary operators} require only one \textit{operand}.
 
 \noindent\textit{struct\_op} ::=
-    `$\rightarrow$'
+    `$->$'
     $|$ `$.$'
 
 \noindent\textit{Struct operators} are used to select members of a struct variable.
@@ -213,7 +242,7 @@ The optional `*' denotes a pointer type.
     ;
 \end{grammar}
 
-Any of the above listed \textit{statements} can take the place of a $\langle statement\_\rangle$ instance.
+Any of the above listed \textit{statements} can take the place of a $\langle statement\rangle$ instance.
 
 \begin{grammar}
 <if_statement> ::=
@@ -281,38 +310,56 @@ The \textit{translation unit} consists of a list of both \textit{function} decla
 \subsection{Operator Precedence}
 The following table shows the operator precedence of the interpreted language, from lowest to highest.
 
-\begin{tabular}{| c | l | l |}
+\begin{tabular}{| c | c | l |}
 \hline
 Precedence & Operator & Description \\ \hline
-1 & , & Comma \\ \hline
-2 & = & Assignment \\ \hline
-3 & $\parallel$ & Logical OR \\ \hline
-4 & \&\& & Logical AND \\ \hline
-5 & == & Equal \\
+1 & = & Assignment \\ \hline
+2 & $\parallel$ & Logical OR \\ \hline
+3 & \&\& & Logical AND \\ \hline
+4 & == & Equal \\
   & != & Not Equal \\ \hline
-6 & $<$ & Less than \\
+5 & $<$ & Less than \\
   & $\leq$ & Less than or equal to \\
   & $>$ & More than \\
   & $\geq$ & More than or equal to \\ \hline
-7 & + (binary) & Addition \\
+6 & + (binary) & Addition \\
   & $-$ (binary) & Subtraction \\ \hline
-8 & * & Multiplication \\
+7 & * & Multiplication \\
   & / & Division \\ \hline
-9 & + (unary) & Plus \\
+8 & + (unary) & Plus \\
   & -- (unary) & Minus \\
   & ! & Not \\
   & $\&$ & Address of \\
   & * (unary) & Dereference \\ \hline
-10 & $-$$>$ & Select element through pointer \\
-   & . & Select element \\ \hline
+9 & $-$$>$ & Select element through pointer \\
+  & . & Select element \\ \hline
 \end{tabular}
 
 The \verb+new+ operator does not have a particular precedence as it can only be used in assignments and declarations, effectively giving it a precedence higher than that of `=', though it is considered a special operator.
 
 \subsection{Notes}
 
-This language may be similar to C but their are some notable exceptions and omissions.
+This language may be similar to C but there are some notable exceptions and omissions:
+\begin{itemize}
+ \item Only primitive types are \verb+int+ and \verb+bool+
+ \item No arrays.
+ \item No increment, decrement or arithmetic assignment (\verb/+=/, \verb+*=+, etc.) operators.
+ \item No \verb+for+ loop.
+ \item No \verb+else+ to accompany an \verb+if+ statement. A similar effect could be accomplished by negating the condition of the \verb+if+ statement.
+ \item No recursive struct data types.
+ \item Functions are currently parsed but not processed.
+ \item Struct variables occupy an additional stack entry at its beginning.
+\end{itemize}
 
+Should the parser fail (i.e.\ fail to match any of the above rules), an error message is displayed in a dialog.
+The information it provides will refer to the above rules informing of what rule was to be expected and also where it was expected (see figure \ref{fig:parseerror1}).
+\begin{figure}[h!]
+\centering
+\includegraphics{parseerror1}
+\caption{Syntax error.}
+\label{fig:parseerror1}
+\end{figure}
+A similar error dialog will appear if an error occurs during processing after parsing (semantic analysis), though it attempts to be slightly more informative without needing to have the language specification handy.
 
 \subsection{Examples}
 
@@ -375,5 +422,110 @@ p1.x = 4;
 p1.y = 6;
 \end{lstlisting}
 
+\subsubsection{If Statement}
+
+\begin{lstlisting}
+int a = 123;
+
+// performs the statement(s) only if the
+// expression enclosed in () evaluates to true
+if(a < 200) {
+  a = a * 2;
+}
+// a == 246
+\end{lstlisting}
+
+\subsubsection{While Statement}
+
+\begin{lstlisting}
+int a = 123;
+
+// performs the statement(s) repeatedly until the
+// expression enclosed in () evaluates to false
+while(a < 200) {
+  a = a + 1;
+}
+// a == 200
+\end{lstlisting}
+
+
+\section{User Interface}
+
+The user interface provides several ways to control and visualise program data.
+Figure \ref{fig:mainwindow1} shows how the main UI appears when it is first opens, with nothing other than the basic UI elements displayed.
+The large empty space here is the visualisation area.
+This is where data items are displayed graphically once defined with the interpreter text input or added with the UI.
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{mainwindow1}
+\caption{Empty main window.}
+\label{fig:mainwindow1}
+\end{figure}
+In the upper-right of this screen-shot is a tabbed widget containing three tabs: Variables, Structs and Stack.
+These contain informational (read-only) data concerning the underlying data structures and also to indicate the available struct types and their members.
+
+Below the tabs is a text box, in which code for the C-like language defined above can be entered and then interpreted by using the wide push-button.
+
+The tool bar pictured shows five icons which perform separate operations: add item, edit item, zoom in, zoom out and refresh view.
+The mouse wheel also performs zooming functions, i.e.\ scroll up to zoom in and vice versa.
+Once in a zoomed in state the visualisation area can be moved by clicking and dragging an empty space, or by using the scrollbars which will appear when applicable.
+
+\subsection{Adding Variables}
+
+Creating a variable instance to add to the visualisation can be accomplished in two ways, through the programming language interpreter (see previous examples) or by using the ``Add Item'' dialog.
+This is activated by clicking either the `+' tool-bar button or the ``Add Item'' entry in the ``Edit'' menu.
+Figure \ref{fig:addint1} shows this dialog with values entered for the declaration of a integer variable.
+\begin{figure}[h!]
+\centering
+\includegraphics{addint1}
+\caption{Add item dialog.}
+\label{fig:addint1}
+\end{figure}
+If the entered values are at all invalid, the same dialog windows as those produced by entering text into the interpreter directly are utilised.
+
+\subsection{Editing Variables}
+
+Editing the values of variables can be achieved through the use of assignment expression statements using the interpreter, or the ``Edit Item'' dialog.
+The graphic representing the variable intended to be edited must be selected, then either click the edit tool-bar button or the ``Edit Item'' entry in the ``Edit'' menu.
+\begin{figure}[h!]
+\centering
+\includegraphics[trim=0 100mm 100mm 0,clip]{editint1}
+\caption{Edit item dialog.}
+\label{fig:editint1}
+\end{figure}
+
+\subsection{Stack Table}
+
+The stack table provides information on the stack data structure which is operated on by the interpreter (see figures \ref{fig:stacktable1} and \ref{fig:stacktable2}).
+\begin{figure}[h!]
+\centering
+\subfloat[Stack table]{\label{fig:stacktable1}\includegraphics[trim=460 300 0 35,clip]{stacktable1}}
+\hspace{10pt}
+\subfloat[Items]{\label{fig:stacktable2}\includegraphics[trim=0 350 400 0,clip]{stacktable1}}
+\caption{Stack table and items.}
+\end{figure}
+This information is useful in determining the memory layout of variables and struct data, and also to determine what value occupies at a particular stack address (the values in the left side headers are the stack addresses).
+
+\subsection{Variable Table}
+
+Figure \ref{fig:variabletable1} shows the variable table for the previous example.
+\begin{figure}[h!]
+\centering
+\includegraphics[trim=460 300 0 35,clip]{variabletable1}
+\caption{Variable table.}
+\label{fig:variabletable1}
+\end{figure}
+It shows each declared (or dynamically allocated) variable's name, stack address and the number of stack entries it occupies.
+This, in combination with the stack table and struct tree described below, provides some important information with regard to diagnosing problems caused by pointers, much like a visual debugging interface.
+
+\subsection{Struct Tree}
+
+The struct tree, as shown in figure \ref{fig:structtree1}, displays each defined struct data type, with each of its members and their types as its children.
+\begin{figure}[h!]
+\centering
+\includegraphics[trim=460 300 0 35,clip]{structtree1}
+\caption{Struct tree.}
+\label{fig:structtree1}
+\end{figure}
+This can be used with the stack table to determine which stack entries are for which member variable by both the order they appear in, and their type.
 
 \end{document}
