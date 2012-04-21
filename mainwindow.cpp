@@ -46,14 +46,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //structs
     structTreeWidget = new QTreeWidget(this);
     structTreeWidget->setColumnCount(2);
-    structTreeWidget->setHeaderLabels({"Type", "Name"});//
+    structTreeWidget->setHeaderLabels(QStringList() << "Type" << "Name");//
     //variables
     variableTreeWidget = new QTreeWidget(this);
     variableTreeWidget->setColumnCount(3);
-    variableTreeWidget->setHeaderLabels({"Name", "Address", "Width"});//
+    variableTreeWidget->setHeaderLabels(QStringList() << "Name" << "Address" << "Width");//
     //stack
     stackTableWidget = new QTableWidget(DDVS_STACK_SIZE, 2, this);
-    stackTableWidget->setHorizontalHeaderLabels({"Value", "Type"});//
+    stackTableWidget->setHorizontalHeaderLabels(QStringList() << "Value" << "Type");//
     stackTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //set row height + labels
     QStringList vertLabels;
@@ -254,10 +254,10 @@ void MainWindow::updateVariableTree()
     //populate variable tree
     variableTreeWidget->clear();
     for(auto const& var : interpreter.getGlobals()) {
-        QTreeWidgetItem* item = new QTreeWidgetItem(
-            {QString::fromStdString(var.first)
-            ,QString::number(var.second)
-            ,QString::number(stack[var.second].type.width)});//
+        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()
+            << QString::fromStdString(var.first)
+            << QString::number(var.second)
+            << QString::number(stack[var.second].type.width));//
         item->setToolTip(0,item->text(0));
         item->setToolTip(1,item->text(1));
         item->setToolTip(2,item->text(2));
@@ -316,14 +316,14 @@ void MainWindow::on_actionAbout_Qt_triggered()
 void MainWindow::structDefined(cstruct const& s)
 {
     qDebug() << "Adding struct to tree";
-    QTreeWidgetItem* item = new QTreeWidgetItem({QString::fromStdString(s.name)});
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::fromStdString(s.name));
     item->setToolTip(0, QString::fromStdString(s.name));
     for(auto const& mem : s.member_specs) {
         QString p = "";
         if(mem.second.pointer) {
             p += "*";
         }
-        QStringList cols({QString::fromStdString(mem.second.type_str) + p, QString::fromStdString(mem.first)});
+        QStringList cols(QStringList() << (QString::fromStdString(mem.second.type_str) + p) << QString::fromStdString(mem.first));
         auto child = new QTreeWidgetItem(cols);
         child->setToolTip(0,cols.at(0));
         child->setToolTip(1,cols.at(1));
