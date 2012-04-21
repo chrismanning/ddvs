@@ -416,11 +416,11 @@ namespace interpreter {
                         ++num;
                     }
                     else {
-                        auto i = env->structs.find(previous_name);
+                        auto i = env->lookup_struct(previous_name);
                         qDebug() << "struct type:" << previous_name.c_str();
-                        if(i != env->structs.end()) {
+                        if(i != 0) {
                             if(addr != 0) {
-                                member_offset = i->second.member_offset(previous_member_name, *addr);
+                                member_offset = i->member_offset(previous_member_name, *addr);
                             }
                             else {
                                 err = "bad address";
@@ -457,9 +457,9 @@ namespace interpreter {
                             type_name = struct_type.type_str;
                         previous_name = type_name;
                         //find struct spec
-                        auto i = env->structs.find(type_name);
-                        if(i != env->structs.end()) {
-                            cstruct& cs = i->second;
+                        auto i = env->lookup_struct(type_name);
+                        if(i != 0) {
+                            cstruct& cs = *i;
                             previous_member_name = so.member.name;
                             //find member spec
                             auto j = cs.member_specs.find(so.member.name);
@@ -664,14 +664,26 @@ namespace interpreter {
 
     ast::Type scope::lookup_struct_type(std::string const& name)
     {
-        auto i = structs.find(name);
-        if(i != structs.end()) {
-            return i->second.type;
+        auto i = lookup_struct(name);
+        if(i != 0) {
+            return i->type;
         }
         if(parent) {
             return parent->lookup_struct_type(name);
         }
         return ast::Error;
+    }
+
+    cstruct* scope::lookup_struct(std::string const& name)
+    {
+        auto i = structs.find(name);
+        if(i != structs.end()) {
+            return &(i->second);
+        }
+        if(parent) {
+            return parent->lookup_struct(name);
+        }
+        return 0;
     }
 
     const int* scope::lookup_var(const std::string &name)
@@ -887,8 +899,10 @@ namespace interpreter {
         scope* if_scope = new scope(code, current_scope->stack, current_scope->offset);
         if_scope->parent.reset(current_scope);
         current_scope = if_scope;
-        if(!(*this)(ast.then))
+        if(!(*this)(ast.then)) {
+            current_scope = if_scope->parent.get();
             return false;
+        }
         current_scope->parent->code.insert(current_scope->parent->code.end(),code.begin(),code.end());
         current_scope->parent->code[skip] = current_scope->code.size();
         //skip = current_scope->code.size()-skip;// now we know where to jump to (after the if branch)

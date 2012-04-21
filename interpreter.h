@@ -270,6 +270,7 @@ namespace interpreter {
         }
 
         ast::Type lookup_struct_type(std::string const& name);
+        cstruct *lookup_struct(std::string const& name);
         void add_var(std::string const& name, ast::Type& type);
 
         std::map<std::string, int> table;
