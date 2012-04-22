@@ -237,7 +237,7 @@ namespace ast
         op_post_dec
     };
 
-    struct struct_expr {
+    struct struct_expr : tagged {
         optoken operator_;
         identifier member;
     };
