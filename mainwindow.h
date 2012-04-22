@@ -64,13 +64,13 @@ private:
     void updateStackTable();
     void updateVariableTree();
     void updateVisualisation();
+    Ui::MainWindow* ui;
     std::map<std::string, cstruct> const& structs;
     QTabWidget* tabWidget;
     QTreeWidget* structTreeWidget;
     QTreeWidget* variableTreeWidget;
     QTableWidget* stackTableWidget;
     QHash<QString, Graphics::GraphicsWidget*> items;
-    Ui::MainWindow* ui;
     QGraphicsScene* scene;
     QGraphicsGridLayout* layout;
     GraphicsView* graphicsView;

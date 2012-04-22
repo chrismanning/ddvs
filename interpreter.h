@@ -372,7 +372,7 @@ namespace interpreter {
         }
 
         Expression(error_handler& error_, scope* env, ast::Type type, bool lvalue = false)
-            : type(type), lvalue(lvalue), env(env), error_(error_)
+            : lvalue(lvalue), type(type), env(env), error_(error_)
         {
             BOOST_ASSERT(env);
         }
@@ -405,8 +405,8 @@ namespace interpreter {
         bool lvalue;
         ast::Type type;
         scope* env;
-        PrimaryExpressionTypeResolver petr;
         error_handler& error_;
+        PrimaryExpressionTypeResolver petr;
     };
 
     struct function
@@ -414,8 +414,7 @@ namespace interpreter {
         function(std::size_t nargs, std::size_t offset_, scope* current_scope) :
             offset(offset_),
             size_(0),
-            nargs_(nargs),
-            void_return(false)/*,
+            nargs_(nargs)/*,
             env(new scope(current_scope,))*/
         {}
 
@@ -428,16 +427,15 @@ namespace interpreter {
 //        std::size_t nvars() const { return variables.size(); }
         void link_to(std::string const& name, std::size_t address);
         std::size_t offset;
-        bool void_return;
         ast::Type return_type;
 
     protected:
+        std::size_t size_;
+        std::size_t nargs_;
         std::map<std::size_t, std::string> function_calls;
         scope* env;
         std::vector<int> code;
         std::size_t address;
-        std::size_t size_;
-        std::size_t nargs_;
     };
 
 #define DDVS_STACK_SIZE 8192
@@ -518,13 +516,13 @@ namespace interpreter {
         void newStructDefinition(cstruct const& s);
     private:
         Q_OBJECT
+        std::vector<variable> stack;
         typedef std::map<std::string, boost::shared_ptr<function> > function_table;
         function_table functions;
+        error_handler& error_;
+        int stack_offset;
         scope global_scope;
         scope* current_scope;
-        error_handler& error_;
-        std::vector<variable> stack;
-        int stack_offset;
     };
 
     class Interpreter : public QObject

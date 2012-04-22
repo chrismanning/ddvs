@@ -1028,13 +1028,8 @@ namespace interpreter {
     bool global::operator()(ast::struct_specifier& ast)
     {
         qDebug() << "Processing: ast::struct_specifier";
-        std::map<std::string, int> members;
-        foreach(boost::recursive_wrapper<ast::struct_member_declaration> const& mem, ast.members) {
-            //members[mem.get().dec.name.name] = members.size();
-        }
-//        structs.push_back(cstruct(ast.type_name.name,members));
-
-        return true;
+        //shouldn't be reached
+        return false;
     }
 
     bool global::operator()(ast::translation_unit& ast) {
@@ -1058,7 +1053,6 @@ namespace interpreter {
             success = compiler(ast);
             if(success) {
                 qDebug() << "SUCCESS";
-                ast.clear();
             }
             else {
                 qDebug() << "FAIL";
@@ -1083,13 +1077,13 @@ namespace interpreter {
             msg_box.setDefaultButton(QMessageBox::Close);
             if(error_buf) {
                 msg_box.setDetailedText(*error_buf);
-                msg_box.setStyleSheet("QAbstractScrollArea { font-family: \"monospace\"; }");
                 qDebug() << *error_buf;
                 error_buf->clear();
             }
             msg_box.exec();
         }
         ast.clear();
+        error.iters.clear();
 
         return success;
     }

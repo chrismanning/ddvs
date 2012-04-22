@@ -51,7 +51,7 @@ namespace ast
     struct Type {
         Type() : is_set(false) {}
         Type(std::string const& type_str, unsigned int width, bool pointer = false, bool lvalue = false)
-            : type_str(type_str), pointer(pointer), is_set(true), lvalue(lvalue), width(width)
+            : type_str(type_str), pointer(pointer), lvalue(lvalue), is_set(true), width(width)
         {}
         std::string type_str;
         bool pointer;

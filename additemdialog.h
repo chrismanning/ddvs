@@ -31,9 +31,9 @@ private slots:
     void on_structTypeComboBox_activated(const QString &arg1);
 
 private:
+    Ui::AddItemDialog * ui;
     std::map<std::string, cstruct> const& structs;
     QString str;
-    Ui::AddItemDialog * ui;
     Interpreter& inter;
 };
 

@@ -33,9 +33,9 @@ protected:
     {
         return boundingRect().size();
     }
+    int const& value;
     int textHeight;
     int textWidth;
-    int const& value;
 };
 
 class Pointer : public Variable
@@ -69,9 +69,9 @@ struct member_container
                      const int& value)
         : value(value), name(name), type_name(type_name)
     {}
+    const int& value;
     const std::string name;
     const std::string type_name;
-    const int& value;
 };
 
 struct MemberContainer
@@ -87,6 +87,7 @@ struct MemberContainer
     MemberContainer& operator=(MemberContainer const& b)
     {
         type_name = b.type_name;
+        return *this;
     }
 
     QString type_name;
