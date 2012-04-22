@@ -30,7 +30,7 @@ namespace parser {
 
         statement_ =
                 declaration
-            |   expr > ';'
+            |   (expr > ';')
             |   if_statement
             |   while_statement
             |   return_statement

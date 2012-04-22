@@ -9,7 +9,6 @@ QT       += core gui opengl
 TARGET = ddvs
 TEMPLATE = app
 
-!win32-msvc*:QMAKE_CXXFLAGS_WARN_ON = -Wextra
 !win32-msvc*:QMAKE_CXXFLAGS= -std=c++0x
 
 SOURCES += main.cpp\

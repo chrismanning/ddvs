@@ -133,7 +133,7 @@ namespace parser {
                 uint_
             |   identifier
             |   bool_
-            |   '(' > logical_OR_expression > ')'
+            |   ('(' > logical_OR_expression > ')')
             ;
         //end expressions
 
