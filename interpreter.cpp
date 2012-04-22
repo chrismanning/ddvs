@@ -17,10 +17,10 @@
     }
 
 namespace interpreter {
-    void function::link_to(std::string const& name, std::size_t address)
-    {
-        function_calls[address] = name;
-    }
+//    void function::link_to(std::string const& name, std::size_t address)
+//    {
+//        function_calls[address] = name;
+//    }
 
     template<typename T>
     variable ignore(T a)
@@ -974,41 +974,41 @@ namespace interpreter {
         return true;
     }
 
-    bool global::operator()(ast::function_definition& ast)
+    bool global::operator()(ast::function_definition& /*ast*/)
     {
         qDebug() << "Processing: ast::function_definition";
         //void_return = ast.return_type == "void";
 //        if(ast.return_type_code) {
 //            return_type = 1;
 //        }
-        error(ast.id, "Functions not implemented");
-        return false;
-        if(functions.find(ast.dec.name.name) != functions.end())
-        {
-            //qDebug() << ast.function_name.id;
-            error(ast.dec.name.id, "Duplicate function: " + ast.dec.name.name);
-            return false;
-        }
+//        error(ast.id, "Functions not implemented");
+//        return false;
+//        if(functions.find(ast.dec.name.name) != functions.end())
+//        {
+//            //qDebug() << ast.function_name.id;
+//            error(ast.dec.name.id, "Duplicate function: " + ast.dec.name.name);
+//            return false;
+//        }
         //offset = this->variables.size();
 //        foreach(function_table::value_type const& fun, functions) {
 //            offset += fun.second.get()->nvars();
 //        }
 
-        boost::shared_ptr<function>& p = functions[ast.dec.name.name];
-        p.reset(new function(ast.args.size(), stack_offset, current_scope));
+//        boost::shared_ptr<function>& p = functions[ast.dec.name.name];
+//        p.reset(new function(ast.args.size(), stack_offset, current_scope));
 
-        // op_stk_adj 0 for now. we'll know how many variables
-        // we'll have later and add them
-        current_scope->op(op_stk_adj, 0);
-        for(ast::argument& arg : ast.args) {
-            type_resolver tr(error_, current_scope);
-            ast::Type t = arg.type_spec.apply_visitor(tr);
-            if(t == ast::Error) {
-                error(arg.id, "Invalid type");
-                return false;
-            }
-            current_scope->add_var(arg.dec.dec.name.name, t);
-        }
+//        // op_stk_adj 0 for now. we'll know how many variables
+//        // we'll have later and add them
+//        current_scope->op(op_stk_adj, 0);
+//        for(ast::argument& arg : ast.args) {
+//            type_resolver tr(error_, current_scope);
+//            ast::Type t = arg.type_spec.apply_visitor(tr);
+//            if(t == ast::Error) {
+//                error(arg.id, "Invalid type");
+//                return false;
+//            }
+//            current_scope->add_var(arg.dec.dec.name.name, t);
+//        }
 
 //        foreach(ast::statement const& state, ast.body) {
 //            if(!boost::apply_visitor(*this,state))
@@ -1025,7 +1025,7 @@ namespace interpreter {
 //        return true;
 //    }
 
-    bool global::operator()(ast::struct_specifier& ast)
+    bool global::operator()(ast::struct_specifier& /*ast*/)
     {
         qDebug() << "Processing: ast::struct_specifier";
         //shouldn't be reached

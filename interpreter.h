@@ -409,34 +409,34 @@ namespace interpreter {
         PrimaryExpressionTypeResolver petr;
     };
 
-    struct function
-    {
-        function(std::size_t nargs, std::size_t offset_, scope* current_scope) :
-            offset(offset_),
-            size_(0),
-            nargs_(nargs)/*,
-            env(new scope(current_scope,))*/
-        {}
+//    struct function
+//    {
+//        function(std::size_t nargs, std::size_t offset_, scope* current_scope) :
+//            offset(offset_),
+//            size_(0),
+//            nargs_(nargs)/*,
+//            env(new scope(current_scope,))*/
+//        {}
 
-        int& operator[](std::size_t i) { return code[address+i]; }
-        int const& operator[](std::size_t i) const { return code[address+i]; }
-        std::size_t size() const { return size_; }
-        std::size_t get_address() const { return address; }
+//        int& operator[](std::size_t i) { return code[address+i]; }
+//        int const& operator[](std::size_t i) const { return code[address+i]; }
+//        std::size_t size() const { return size_; }
+//        std::size_t get_address() const { return address; }
 
-        std::size_t nargs() const { return nargs_; }
-//        std::size_t nvars() const { return variables.size(); }
-        void link_to(std::string const& name, std::size_t address);
-        std::size_t offset;
-        ast::Type return_type;
+//        std::size_t nargs() const { return nargs_; }
+////        std::size_t nvars() const { return variables.size(); }
+//        void link_to(std::string const& name, std::size_t address);
+//        std::size_t offset;
+//        ast::Type return_type;
 
-    protected:
-        std::size_t size_;
-        std::size_t nargs_;
-        std::map<std::size_t, std::string> function_calls;
-        scope* env;
-        std::vector<int> code;
-        std::size_t address;
-    };
+//    protected:
+//        std::size_t size_;
+//        std::size_t nargs_;
+//        std::map<std::size_t, std::string> function_calls;
+//        scope* env;
+//        std::vector<int> code;
+//        std::size_t address;
+//    };
 
 #define DDVS_STACK_SIZE 8192
 
@@ -517,8 +517,8 @@ namespace interpreter {
     private:
         Q_OBJECT
         std::vector<variable> stack;
-        typedef std::map<std::string, boost::shared_ptr<function> > function_table;
-        function_table functions;
+//        typedef std::map<std::string, boost::shared_ptr<function> > function_table;
+//        function_table functions;
         error_handler& error_;
         int stack_offset;
         scope global_scope;

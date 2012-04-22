@@ -29,7 +29,7 @@ public:
     std::string const name;
 protected:
 //    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
-    QSizeF sizeHint(Qt::SizeHint which, const QSizeF& constraint = QSizeF()) const
+    QSizeF sizeHint(Qt::SizeHint /*which*/, const QSizeF& /*constraint*/) const
     {
         return boundingRect().size();
     }
@@ -103,7 +103,7 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
 protected:
-    QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const
+    QSizeF sizeHint(Qt::SizeHint /*which*/, const QSizeF & /*constraint*/) const
     {
         return boundingRect().size();
     }
