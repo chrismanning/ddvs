@@ -180,7 +180,6 @@ namespace parser {
             (declarator)
             (struct_member_declaration)
             (allocation_expression)
-            (type_specifier)
         );
 
         ///////////////////////////////////////////////////////////////////////

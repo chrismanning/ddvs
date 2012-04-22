@@ -311,7 +311,7 @@ namespace interpreter {
             auto t = env->lookup_struct_type(ss.type_name.name);
             if(ss.members.size() > 0) {
                 if(t != ast::Error) {
-                    error(ss.type_name.id, "Duplicate struct type");
+                    error(ss.id, "Duplicate struct type");
                     return ast::Error;
                 }
                 for(auto& member_ : ss.members) {
@@ -343,6 +343,7 @@ namespace interpreter {
 
         void error(int id, std::string const& what)
         {
+            qDebug() << "id:" << id;
             error_("Error! ", what, error_.iters[id]);
         }
 
