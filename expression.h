@@ -9,7 +9,7 @@
 
 #define BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 //enable/disable grammar debugging
-#define BOOST_SPIRIT_QI_DEBUG
+//#define BOOST_SPIRIT_QI_DEBUG
 
 #define SUCCESS_ANNOTATE(a) on_success(a,\
 annotation_function(error.iters)(_val, _1))
