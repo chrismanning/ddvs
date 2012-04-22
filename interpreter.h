@@ -534,6 +534,11 @@ namespace interpreter {
             compiler(code, error)
         {
             connect(&compiler, SIGNAL(newStructDefinition(cstruct)), this, SLOT(structDefined(cstruct)));
+#ifdef _WIN32
+            msg_box.setStyleSheet("QAbstractScrollArea { font-family: \"Courier\"; }");
+#else
+            msg_box.setStyleSheet("QAbstractScrollArea { font-family: \"monospace\"; }");
+#endif
         }
         bool parse(std::string input);
         bool parse(QString input);
