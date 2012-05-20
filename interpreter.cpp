@@ -108,6 +108,52 @@ namespace interpreter {
         return variable(!a.var, a.type);
     }
 
+    void inc_var(variable& a,
+                 std::vector<variable>::iterator const& frame_ptr,
+                 std::string const& src,
+                 error_handler& error)
+    {
+        unsigned int val = 1;
+        if(a.type.pointer || a.type.type_str[a.type.type_str.size()-1] == '*') {
+            val = a.type.width;
+            qDebug() << "Incrementing pointer";
+            if(a.type == "struct") {
+                qDebug() << "Incrementing struct pointer";
+                val = frame_ptr[a.var].type.width;
+            }
+        }
+        else if(a.type == "struct") {
+            std::string str = "++";
+            qDebug() << "Cannot increment struct";
+            error("ERROR", "Cannot increment struct", search(src.begin(), src.end(), str.begin(), str.end()));
+            return;
+        }
+        a.var += val;
+    }
+
+    void dec_var(variable& a,
+                 std::vector<variable>::iterator const& frame_ptr,
+                 std::string const& src,
+                 error_handler& error)
+    {
+        unsigned int val = 1;
+        if(a.type.pointer || a.type.type_str[a.type.type_str.size()-1] == '*') {
+            val = a.type.width;
+            qDebug() << "Decrementing pointer";
+            if(a.type == "struct") {
+                qDebug() << "Decrementing struct pointer";
+                val = frame_ptr[a.var].type.width;
+            }
+        }
+        else if(a.type == "struct") {
+            std::string str = "--";
+            qDebug() << "Cannot decrement struct";
+            error("ERROR", "Cannot decrement struct", search(src.begin(), src.end(), str.begin(), str.end()));
+            return;
+        }
+        a.var -= val;
+    }
+
     variable& operator*(variable const& a);
     variable& operator&(variable const& a);
 
@@ -569,6 +615,8 @@ namespace interpreter {
 
             case ast::op_logical_or: env->op(op_or); break;
             case ast::op_logical_and: env->op(op_and); break;
+            case ast::op_post_inc: env->op(op_increment); break;
+            case ast::op_post_dec: env->op(op_decrement); break;
             default: BOOST_ASSERT(0); return false;
         }
         return true;
@@ -1141,6 +1189,14 @@ namespace interpreter {
                 case op_div:
                     --stack_ptr;
                     stack_ptr[-1] /= stack_ptr[0];
+                    break;
+
+                case op_increment:
+                    inc_var(frame_ptr[*(pc-2)], frame_ptr, src, error);
+                    break;
+
+                case op_decrement:
+                    dec_var(frame_ptr[*(pc-2)], frame_ptr, src, error);
                     break;
 
                 case op_dereference:
