@@ -182,8 +182,8 @@ namespace ast
           , identifier
           , boost::recursive_wrapper<logical_OR_expression>
         >
-    operand;
-    typedef operand primary_expression;
+    primary_expression;
+    typedef primary_expression operand;
 
     enum optoken
     {

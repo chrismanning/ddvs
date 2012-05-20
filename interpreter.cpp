@@ -189,6 +189,10 @@ namespace interpreter {
                     if(!(*this)(ast.rhs->operator_)) {
                         return false;
                     }
+                    if(operand.type != ast.lhs.type) {
+                        error(ast.lhs.id,"Incompatible types: "+ast.lhs.type.type_str+" & "+operand.type.type_str);
+                        return false;
+                    }
                     if(tmp != -1) {
                         env->op(tmp);
                         env->held_value = -1;
@@ -837,6 +841,7 @@ namespace interpreter {
 
         ast.type = (*this)(ast.type_spec);
         if(ast.type == ast::Error) {
+            qDebug() << "Type error";
             return false;
         }
 
@@ -879,6 +884,10 @@ namespace interpreter {
                 Expression expr(error_, current_scope, ast.type);
                 ast::logical_OR_expression& operand = boost::get<ast::logical_OR_expression&>(*ast.assign);
                 if(!expr(operand)) {
+                    return false;
+                }
+                if(operand.type != ast.dec.type) {
+                    error(ast.dec.id,"Incompatible types: "+ast.dec.type.type_str+" & "+operand.type.type_str);
                     return false;
                 }
                 current_scope->add_var(ast.dec.name.name, ast.type);

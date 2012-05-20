@@ -319,6 +319,7 @@ namespace interpreter {
                     member.type = member.type_spec.apply_visitor(*this);
                     if(member.type == ast::Error) {
                         if(member.type_spec.which() == 1) {
+                            //handle recursive types
                             auto mss = boost::get<ast::struct_specifier&>(member.type_spec);
                             if(mss.type_name.name == ss.type_name.name) {
                                 member.type.pointer = member.dec.pointer;
