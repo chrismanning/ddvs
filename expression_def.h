@@ -216,6 +216,7 @@ namespace parser {
         SUCCESS_ANNOTATE(identifier);
         SUCCESS_ANNOTATE(unary_assign);
         SUCCESS_ANNOTATE(struct_specifier);
+        SUCCESS_ANNOTATE(type_id);
         SUCCESS_ANNOTATE(declarator);
         SUCCESS_ANNOTATE(allocation_expression);
     }
