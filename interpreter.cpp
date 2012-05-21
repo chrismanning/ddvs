@@ -207,6 +207,10 @@ namespace interpreter {
                         error(ast.lhs.id, "not a pointer");
                         return false;
                     }
+                    if(t != ast.lhs.type) {
+                        error(ast.lhs.id,"Incompatible types: "+ast.lhs.type.type_str+" & "+t.type_str);
+                        return false;
+                    }
                     ast.type = ast.lhs.type;
                     env->stack[env->offset].type = t;
                     for(unsigned int i=env->offset; i<env->offset+t.width; i++) {
@@ -877,6 +881,7 @@ namespace interpreter {
             return false;
         }
         ast.type.pointer = ast.dec.pointer;
+        ast.dec.type = ast.type;
 
         //eval rhs if it exists
         if(ast.assign) {
@@ -900,6 +905,10 @@ namespace interpreter {
                 ast::Type t = boost::apply_visitor(tr, alloc_.type_spec);
                 if(!ast.type.pointer) {
                     error(ast.dec.id, "not a pointer");
+                    return false;
+                }
+                if(t != ast.dec.type) {
+                    error(ast.dec.id,"Incompatible types: "+ast.dec.type.type_str+" & "+t.type_str);
                     return false;
                 }
                 stack[stack_offset].type = t;
