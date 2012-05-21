@@ -203,6 +203,7 @@ namespace interpreter {
                     ast::allocation_expression& alloc_ = boost::get<ast::allocation_expression&>(ast.rhs->operand_);
                     type_resolver tr(error_, env);
                     ast::Type t = boost::apply_visitor(tr, alloc_.type_spec);
+                    t.pointer = true;
                     if(!ast.lhs.type.pointer) {
                         error(ast.lhs.id, "not a pointer");
                         return false;
@@ -211,6 +212,7 @@ namespace interpreter {
                         error(ast.lhs.id,"Incompatible types: "+ast.lhs.type.type_str+" & "+t.type_str);
                         return false;
                     }
+                    t.pointer = false;
                     ast.type = ast.lhs.type;
                     env->stack[env->offset].type = t;
                     for(unsigned int i=env->offset; i<env->offset+t.width; i++) {
@@ -903,6 +905,7 @@ namespace interpreter {
                 ast::allocation_expression& alloc_ = boost::get<ast::allocation_expression&>(*ast.assign);
                 type_resolver tr(error_, current_scope);
                 ast::Type t = boost::apply_visitor(tr, alloc_.type_spec);
+                t.pointer = true;
                 if(!ast.type.pointer) {
                     error(ast.dec.id, "not a pointer");
                     return false;
@@ -911,6 +914,7 @@ namespace interpreter {
                     error(ast.dec.id,"Incompatible types: "+ast.dec.type.type_str+" & "+t.type_str);
                     return false;
                 }
+                t.pointer = false;
                 stack[stack_offset].type = t;
                 for(unsigned int i=stack_offset; i<stack_offset+t.width; i++) {
                     stack[i] = 0;
