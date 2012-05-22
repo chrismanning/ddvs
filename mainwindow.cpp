@@ -228,7 +228,8 @@ void MainWindow::updateVisualisation()
 //            layout->removeItem(item);
 //            layout->addItem(item, row, column);
             item->setMinimumHeight(item->boundingRect().height());
-            if(QString::fromStdString(item->type_str).startsWith("struct")) {
+            if(QString::fromStdString(item->type_str).startsWith("struct")
+                    && !QString::fromStdString(item->type_str).contains('*')) {
                 qDebug() << "Updating struct graphic";
                 static_cast<Graphics::Struct*>(item)->updateString();
             }
