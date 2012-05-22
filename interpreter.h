@@ -59,7 +59,8 @@ namespace interpreter {
         op_stk_adj,     //28 adjust the stack (for args and locals)
         op_call,        //29 function call
         op_return,      //30 return from function
-        op_void         //31 void (no return)
+        op_void,        //31 void (no return)
+        op_alloc        //32 allocate stack entry
     };
 
     class null_ptr : public std::exception
@@ -247,8 +248,9 @@ namespace interpreter {
 
     struct scope : QObject
     {
-        scope(std::vector<int>& code, std::vector<variable>& stack, int& offset)
-            : code(code), stack(stack), offset(offset), held_value(-1)
+        scope(std::vector<int>& code, std::vector<variable>& stack, int& offset,
+              std::list<ast::Type>& dyn_types)
+            : code(code), stack(stack), offset(offset), held_value(-1), dyn_types(dyn_types)
         {}
         scope(scope* parent)
             : parent(parent)
@@ -256,6 +258,7 @@ namespace interpreter {
             , stack(parent->stack)
             , offset(parent->offset)
             , held_value(-1)
+            , dyn_types(parent->dyn_types)
         {}
 
         void op(int a);
@@ -280,6 +283,7 @@ namespace interpreter {
         std::vector<variable>& stack;
         int& offset;
         int held_value;
+        std::list<ast::Type>& dyn_types;
     public slots:
         void addStruct(std::string const& name, cstruct const& s)
         {
@@ -314,17 +318,17 @@ namespace interpreter {
                     error(ss.id, "Duplicate struct type");
                     return ast::Error;
                 }
+                std::list<ast::struct_member_declaration> marked;
                 for(auto& member_ : ss.members) {
                     auto& member = member_.get();
                     member.type = member.type_spec.apply_visitor(*this);
                     if(member.type == ast::Error) {
                         if(member.type_spec.which() == 1) {
-                            //handle recursive types
                             auto mss = boost::get<ast::struct_specifier&>(member.type_spec);
                             if(mss.type_name.name == ss.type_name.name) {
-                                member.type.pointer = member.dec.pointer;
-                                member.type = ss.type;
-                                continue;
+                                //no recursive types
+                                error(member.id, "Recursive types not supported");
+                                return ast::Error;
                             }
                         }
                         error(member.id, "Type error");
@@ -443,12 +447,13 @@ namespace interpreter {
 #define DDVS_STACK_SIZE 8192
 
     struct global : public QObject, public boost::static_visitor<bool> {
-        global(std::vector<int>& code, error_handler& error__)
-            :   stack(DDVS_STACK_SIZE),
+        global(std::vector<int>& code, error_handler& error__, std::list<ast::Type>& dyn_types)
+            :   stack_offset(0),
+                stack(DDVS_STACK_SIZE),
                 error_(error__),
-                stack_offset(0),
-                global_scope(code, stack, stack_offset),
-                current_scope(&global_scope)
+                global_scope(code, stack, stack_offset, dyn_types),
+                current_scope(&global_scope),
+                dyn_types(dyn_types)
         {
             connect(&global_scope, SIGNAL(newStructDefinition(cstruct)), this, SLOT(structDefined(cstruct)));
         }
@@ -506,6 +511,7 @@ namespace interpreter {
         {
             return stack_offset;
         }
+        int stack_offset;
 
     public slots:
         void structDefined(cstruct const& s)
@@ -522,9 +528,9 @@ namespace interpreter {
 //        typedef std::map<std::string, boost::shared_ptr<function> > function_table;
 //        function_table functions;
         error_handler& error_;
-        int stack_offset;
         scope global_scope;
         scope* current_scope;
+        std::list<ast::Type>& dyn_types;
     };
 
     class Interpreter : public QObject
@@ -533,7 +539,8 @@ namespace interpreter {
     public:
         Interpreter() :
             error(start, end, error_buf),
-            compiler(code, error)
+            compiler(code, error, dyn_types),
+            stack_offset(compiler.stack_offset)
         {
             connect(&compiler, SIGNAL(newStructDefinition(cstruct)), this, SLOT(structDefined(cstruct)));
 #ifdef _WIN32
@@ -566,6 +573,7 @@ namespace interpreter {
         int execute() {
             int r = execute(code, code.begin(), getStack().begin(), getStackPos());
             code.clear();
+            dyn_types.clear();
             return r;
         }
 
@@ -580,6 +588,7 @@ namespace interpreter {
         void newStructDefinition(cstruct const& s);
 
     private:
+        std::list<ast::Type> dyn_types;
         QMessageBox msg_box;
         iterator_type start;
         iterator_type end;
@@ -589,6 +598,7 @@ namespace interpreter {
         ast::translation_unit ast;
         std::vector<int> code;
         boost::shared_ptr<QString> error_buf;
+        int& stack_offset;
 
         parser::skipper skip;
 

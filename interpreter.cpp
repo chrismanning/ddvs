@@ -214,11 +214,13 @@ namespace interpreter {
                     }
                     t.pointer = false;
                     ast.type = ast.lhs.type;
-                    env->stack[env->offset].type = t;
-                    for(unsigned int i=env->offset; i<env->offset+t.width; i++) {
-                        env->stack[i] = 0;
-                    }
-                    env->op(op_int, env->offset);
+                    //env->stack[env->offset].type = t;
+                    env->dyn_types.push_back(t);
+//                    for(unsigned int i=env->offset; i<env->offset+t.width; i++) {
+//                        env->stack[i] = 0;
+//                    }
+//                    env->op(op_int, env->offset);
+                    env->op(op_alloc, t.width);
                     if(!(*this)(ast.rhs->operator_)) {
                         return false;
                     }
@@ -228,7 +230,7 @@ namespace interpreter {
                     else {
                         env->op(env->offset);
                     }
-                    env->offset += t.width;
+//                    env->offset += t.width;
                     env->held_value = -1;
                     return true;
                 }
@@ -915,14 +917,15 @@ namespace interpreter {
                     return false;
                 }
                 t.pointer = false;
-                stack[stack_offset].type = t;
-                for(unsigned int i=stack_offset; i<stack_offset+t.width; i++) {
-                    stack[i] = 0;
-                }
-                current_scope->op(op_int, stack_offset);
-                stack_offset += t.width;
-                //current_scope->op(op_new, t.width);
+//                stack[stack_offset].type = t;
+                dyn_types.push_back(t);
+//                for(unsigned int i=stack_offset; i<stack_offset+t.width; i++) {
+//                    stack[i] = 0;
+//                }
+//                current_scope->op(op_int, stack_offset);
+//                stack_offset += t.width;
                 current_scope->add_var(ast.dec.name.name, ast.type);
+                current_scope->op(op_alloc, t.width);
                 current_scope->op(op_store, *current_scope->lookup_var(ast.dec.name.name));
                 return true;
             }
@@ -946,6 +949,9 @@ namespace interpreter {
     {
         qDebug() << "Processing: ast::compound_statement";
         BOOST_ASSERT(current_scope);
+        if(ast.empty()) {
+            return false;
+        }
         for(ast::statement& s : ast) {
             if(!(*this)(s))
                 return false;
@@ -966,7 +972,7 @@ namespace interpreter {
         current_scope->op(op_jump_if, 0);
         const int skip = current_scope->code.size() - 1;
         std::vector<int> code;
-        scope* if_scope = new scope(code, current_scope->stack, current_scope->offset);
+        scope* if_scope = new scope(code, current_scope->stack, current_scope->offset, dyn_types);
         if_scope->parent.reset(current_scope);
         current_scope = if_scope;
         if(!(*this)(ast.then)) {
@@ -997,7 +1003,7 @@ namespace interpreter {
         const int exit = current_scope->code.size()-1;// mark its position
 
         std::vector<int> code;
-        scope* while_scope = new scope(code, current_scope->stack, current_scope->offset);
+        scope* while_scope = new scope(code, current_scope->stack, current_scope->offset, dyn_types);
         while_scope->parent.reset(current_scope);
         current_scope = while_scope;
 
@@ -1167,6 +1173,7 @@ namespace interpreter {
                              std::vector<variable>::iterator stack_ptr)
     {
         qDebug() << "code: ";
+        ast::Type tmp;
         std::stringstream ss;
         for(auto i : code)
             ss << " " << i;
@@ -1267,6 +1274,23 @@ namespace interpreter {
                 case op_or:
                     --stack_ptr;
                     stack_ptr[-1] = bool(stack_ptr[-1]) || bool(stack_ptr[0]);
+                    break;
+
+                case op_alloc:
+                    //--stack_ptr;
+                    if(dyn_types.size() > 0) {
+                        tmp = dyn_types.front();
+                        dyn_types.pop_front();
+                    }
+                    //pc++;
+                    frame_ptr[stack_offset].type = tmp;
+                    for(unsigned int i=stack_offset; i<stack_offset+tmp.width; i++) {
+                        frame_ptr[i] = 0;
+                    }
+                    stack_ptr++;
+                    *stack_ptr++ = stack_offset;//*pc++;
+                    stack_offset += tmp.width;
+                    pc++;
                     break;
 
                 case op_load:
