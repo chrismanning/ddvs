@@ -1,0 +1,54 @@
+int a;
+int b;
+int c;
+int d;
+int e;
+int f;
+int g;
+int h;
+
+a = 123;
+b = a + 321;
+
+int i;
+
+struct point {
+int x;
+int y;
+};
+
+struct polygon {
+struct point* vertex;
+int n;
+};
+
+struct polygon square;
+square.n = 4;
+while(square.n > i) {
+i++;
+square.vertex = new struct point;
+}
+
+int *ptr = new int;
+int* ptr;
+ptr = new int;
+ptr = new int;
+ptr = new int;
+ptr = new int;
+ptr = new int;
+
+int* ptr;
+i=0;
+while(i<4) {
+i++;
+ptr = new int;
+}
+
+int * cur;
+cur = new int;
+*cur = 45;
+cur = new int;
+*cur = 72;
+cur = new int;
+*cur = 549;
+
