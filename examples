@@ -7,36 +7,39 @@ int f;
 int g;
 int h;
 
+//arithmetic -- operator precedence
 a = 123;
 b = a + 321;
+c = b / 111;
+d = 4 * 9 + 6 / 2;
+d = 4 * (9 + 6) / 2;
+e = 56;
+f = e++;
 
-int i;
-
+//struct definition
 struct point {
 int x;
 int y;
-};
+}p1;
 
-struct polygon {
-struct point* vertex;
-int n;
-};
+//struct member access
+p1.x = 123;
+p1.y = 321;
 
-struct polygon square;
-square.n = 4;
-while(square.n > i) {
-i++;
-square.vertex = new struct point;
-}
+//struct pointer
+struct point *sptr = &p1;
 
-int *ptr = new int;
-int* ptr;
-ptr = new int;
-ptr = new int;
-ptr = new int;
-ptr = new int;
-ptr = new int;
+sptr->x = 90;
+sptr->y = 10;
 
+g = p1.x;
+h = p1.y + g;
+
+//dynamic allocation
+sptr = new struct point;
+
+int i;
+//while loop + allocation
 int* ptr;
 i=0;
 while(i<4) {
@@ -44,11 +47,33 @@ i++;
 ptr = new int;
 }
 
-int * cur;
-cur = new int;
-*cur = 45;
-cur = new int;
-*cur = 72;
-cur = new int;
-*cur = 549;
+//array-like data structure
+struct array {
+int current;
+int length;
+int * data;
+};
+
+struct array arr;
+arr.current = -1;
+arr.length = 9;
+i = 1;
+while(arr.length > i) {
+i++;
+arr.current++;
+arr.data = new int;
+}
+
+while(arr.current > 0) {
+arr.current--;
+arr.data--;
+}
+
+while(arr.current < 4) {
+arr.current++;
+arr.data++;
+}
+
+*arr.current = 945;
+
 
