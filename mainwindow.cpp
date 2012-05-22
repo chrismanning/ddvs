@@ -184,10 +184,9 @@ void MainWindow::updateVisualisation()
         if(!items.contains(name)) {
             Graphics::GraphicsWidget* item;
             if(t.pointer) {
-                auto link = new QGraphicsLineItem;
-                scene->addItem(link);
                 item = new Graphics::Pointer(std_name, i->var, t.type_str + "*",
-                                             interpreter.getGlobals(), items, link);
+                                             interpreter.getGlobals(), items);
+                scene->addItem(static_cast<Graphics::Pointer*>(item)->getLink());
             }
             else if(t == "struct") {
                 auto const& structs = interpreter.getStructs();
@@ -211,18 +210,34 @@ void MainWindow::updateVisualisation()
                 item = new Graphics::Variable(std_name, i->var, t.type_str);
             }
             items.insert(name, item);
-            qDebug() << items;
-            if(!(layout->count() % 6)) {
+            if(!(layout->count() % (int)(graphicsView->width()/100))) {
                 column = 0;
                 row++;
             }
+            item->setMinimumHeight(45);
+//            item->setPreferredHeight(70);
             layout->addItem(item, row, column);
             column++;
+        }
+        else {
+            auto item = items.value(name);
+//            if(!(layout->count() % (int)(graphicsView->width()/100))) {
+//                column = 0;
+//                row++;
+//            }
+//            layout->removeItem(item);
+//            layout->addItem(item, row, column);
+            item->setMinimumHeight(item->boundingRect().height());
+            if(QString::fromStdString(item->type_str).startsWith("struct")) {
+                qDebug() << "Updating struct graphic";
+                static_cast<Graphics::Struct*>(item)->updateString();
+            }
         }
         i += t.width;
     }
 //    for(auto const& var : interpreter.getGlobals()) {
 //    }
+    scene->setSceneRect(scene->itemsBoundingRect());
     scene->update(scene->sceneRect());
 }
 

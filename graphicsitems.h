@@ -38,6 +38,62 @@ protected:
     int textWidth;
 };
 
+class PointerLine : public QGraphicsItem
+{
+public:
+    PointerLine() : isSet(false)
+    {}
+    PointerLine(QPointF const& a, QPointF const& b) : a(a), b(b + QPointF(5,5)), isSet(true)
+    {}
+    void setPoints(QPointF const& a, QPointF const& b) {
+        this->a = a;
+        this->b = b + QPointF(5,5);
+        isSet = true;
+    }
+
+    void unSet() {
+        isSet = false;
+    }
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem */*item*/, QWidget */*widget*/)
+    {
+        if(isSet) {
+            QPen pen(QColor(100,100,100,200));
+            painter->setPen(pen);
+            QPainterPath path;
+            path.moveTo(a);
+            QPointF middle;
+            if(a.x() > b.x()) {
+                middle.setX(a.x() - b.x()/2);
+            }
+            else {
+                middle.setX(b.x() - a.x()/2);
+            }
+            if(a.y() > b.y()) {
+                middle.setY(a.y() - b.y()/2 - 10);
+            }
+            else {
+                middle.setY(b.y() - a.y()/2 - 10);
+            }
+            path.quadTo(middle, b);
+            painter->drawPath(path);
+            QPolygonF triangle;
+            triangle << b;
+            triangle << b-QPointF(0,3);
+            triangle << b-QPointF(3,0);
+            painter->drawPolygon(triangle);
+        }
+    }
+    QRectF boundingRect() const
+    {
+        return QRectF(a,b);
+    }
+
+private:
+    QPointF a,b;
+    bool isSet;
+};
+
 class Pointer : public Variable
 {
 public:
@@ -45,21 +101,23 @@ public:
             int const& value,
             std::string const type_str,
             std::map<std::string, int> const& vars,
-            QHash<QString, GraphicsWidget*> const& items,
-            QGraphicsLineItem* link)
+            QHash<QString, GraphicsWidget*> const& items)
         : Variable(name, value, type_str),
           vars(vars),
-          items(items),
-          link(link)
+          items(items)
     {}
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
+    PointerLine * getLink() {
+        return &link;
+    }
+
 protected:
 //    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
 private:
     std::string const findByValue(const int value);
     std::map<std::string, int> const& vars;
     QHash<QString, GraphicsWidget*> const& items;
-    QGraphicsLineItem* link;
+    PointerLine link;
 };
 
 struct member_container
@@ -102,6 +160,7 @@ public:
            std::list<member_container> members);
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
+    void updateString();
 protected:
     QSizeF sizeHint(Qt::SizeHint /*which*/, const QSizeF & /*constraint*/) const
     {
@@ -111,8 +170,10 @@ protected:
 private:
     QMap<QString, MemberContainer> members;
     std::string const name;
+    QString str;
     int textHeight;
     int textWidth;
+    QFontMetrics fm;
 };
 }
 

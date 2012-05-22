@@ -11,15 +11,17 @@ Variable::Variable(const std::string name, const int &value, const std::string t
 {
     setFlags(ItemIsSelectable | ItemSendsGeometryChanges);
     this->type_str = type_str;
+    //setPreferredSize(80,40);
+    //setMinimumSize(80,40);
 }
 
 void Variable::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget*)
 {
-    QPen pen(QColor(0,0,0));
+    QColor base_colour(0,0,0);
     if(option->state & QStyle::State_Selected) {
-        pen.setStyle(Qt::DotLine);
-        //pen.setWidth(2);
+        base_colour.setRgb(150,150,150);
     }
+    QPen pen(base_colour);
     QString str = QString::fromStdString(type_str) + " : " + QString::number(value);
     if(textHeight == 0 || textWidth == 0) {
         auto fm = painter->fontMetrics();
@@ -29,8 +31,6 @@ void Variable::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         if(QString::fromStdString(name).length() > str.length()) {
             textWidth = fm.width(QString::fromStdString(name));
         }
-        qDebug() << "height:" << textHeight;
-        qDebug() << "width:" << textWidth;
     }
     str += "\n" + QString::fromStdString(name);
     this->setToolTip(str);
@@ -65,14 +65,11 @@ void Pointer::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWi
         name.chop(1);
         name += QString::number(value);
     }
-    qDebug() << "pointer name:" << name;
     if(items.contains(name)) {
-        qDebug() << "Setting pointer line";
-        link->setLine(QLineF(this->pos(), items[name]->pos()));
-        link->show();
+        link.setPoints(pos(), items[name]->pos());
     }
     else {
-        link->hide();
+        link.unSet();
     }
 }
 
@@ -89,7 +86,7 @@ std::string const Pointer::findByValue(const int value)
 Struct::Struct(std::string const name,
        std::string const type_str,
        std::list<member_container> members)
-    : name(name), textHeight(0), textWidth(0)
+    : name(name), textHeight(0), textWidth(0), fm(QFont())
 {
     this->type_str = type_str;
     setFlags(ItemIsSelectable | ItemSendsGeometryChanges);
@@ -99,18 +96,34 @@ Struct::Struct(std::string const name,
                              (QString::fromStdString(mem.type_name),
                               mem.value));
     }
+    //setPreferredSize(80,45);
+    //setMinimumSize(80,45);
+    updateString();
+}
+
+void Struct::updateString()
+{
+    str = QString::fromStdString(type_str)
+            + "\n" + QString::fromStdString(name)
+            + "\nmembers:";
+    for(auto i = members.constBegin(); i != members.constEnd(); ++i) {
+        str += "\n" + i.value().type_name + " " + i.key()
+                + " : " + QString::number(i.value().value);
+    }
+    this->setToolTip(str);
 }
 
 QRectF Struct::boundingRect() const
 {
     int padding = 5;
-    int height = 40;
-    if(textHeight * (3 + members.size()) > height) {
-        height = textHeight * (3 + members.size());
+    int height = 45;
+    auto r = textHeight * (3 + members.size());
+    if(r > height) {
+        height = r;
     }
     int width = 80;
     if(textWidth > width) {
-        width = textWidth;
+        //width = textWidth;
     }
     QRectF rect(0, 0, width + (padding*2), height);
     return rect;
@@ -118,28 +131,25 @@ QRectF Struct::boundingRect() const
 
 void Struct::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget*)
 {
-    QPen pen(QColor(0,0,0));
+    QColor base_colour(0,0,0);
     if(option->state & QStyle::State_Selected) {
-        pen.setStyle(Qt::DotLine);
-        //pen.setWidth(2);
+        base_colour.setRgb(150,150,150);
     }
-    if(textHeight == 0 || textWidth == 0) {
-        auto fm = painter->fontMetrics();
+    QPen pen(base_colour);
+    if(textHeight == 0) {
+        fm = painter->fontMetrics();
         textHeight = fm.height();
+        textWidth = fm.width(QString::fromStdString(type_str)
+                             + "\n" + QString::fromStdString(name)
+                             + "\nmembers:\n");
         prepareGeometryChange();
     }
-    QString str = QString::fromStdString(type_str);
-    str += "\n" + QString::fromStdString(name) + "\nmembers:\n";
-    auto fm = painter->fontMetrics();
-    for(auto i = members.constBegin(); i != members.constEnd(); ++i) {
-        str += i.value().type_name + " " + i.key()
-                + " : " + QString::number(i.value().value) + "\n";
-    }
-    this->setToolTip(str);
+
     painter->setPen(pen);
     painter->setBrush(QColor(200, 200, 200));
     painter->drawRoundedRect(boundingRect(), 2.5, 2.5);
-    painter->drawText(boundingRect(), Qt::AlignCenter, str);
+    painter->drawText(boundingRect(), Qt::AlignHCenter, str);
+    setMinimumSize(boundingRect().size());
 }
 
 }
